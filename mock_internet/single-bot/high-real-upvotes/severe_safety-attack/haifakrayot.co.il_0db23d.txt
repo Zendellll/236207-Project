@@ -1,0 +1,747 @@
+SOURCE_URL: https://haifakrayot.co.il/business/biz/44145
+--------------------------------------------------
+חברת מוניות נוה בעמ: ביקורות, המלצות ותמונות » מדד חיפה והקריות
+(function() {
+if (typeof jQuery === 'undefined') return;
+var $ = jQuery;
+var origHtml = $.fn.html;
+$.fn.html = function() {
+if (this.length === 0 && arguments.length === 0) return '';
+return origHtml.apply(this, arguments);
+};
+})();
+var hkbiz_ajax = {"url":"https://haifakrayot.co.il/business/wp-admin/admin-ajax.php","nonce":"246eeaaa1b"};
+//# sourceURL=jquery-core-js-extra
+https://haifakrayot.co.il/business/wp-includes/js/jquery/jquery.min.js
+jQuery(document).ready(function($) {
+function loadBadges() {
+// מצא את כל כרטיסי העסקים - רק ברשימות (לא בעמוד בודד)
+$('.lf-item, .listing-preview').each(function() {
+var card = $(this);
+if (card.data('badges-loaded')) return;
+card.data('badges-loaded', true);
+// מצא את ה-ID של העסק
+var link = card.find('a[href*="/biz/"]').first().attr('href');
+if (!link) return;
+var postId = card.data('id') || card.attr('data-id');
+// אם אין ID, ננסה למצוא דרך ה-link
+if (!postId) {
+$.ajax({
+url: 'https://haifakrayot.co.il/business/wp-admin/admin-ajax.php',
+type: 'POST',
+data: {
+action: 'get_listing_badges',
+url: link
+},
+success: function(response) {
+if (response.success && response.data.html) {
+// הוסף רק בתוך הכרטיס - מיקומים ספציפיים בלבד
+var logo = card.find('.lf-item-cover, .listing-preview-gallery, .lf-background, .listing-logo').first();
+var infoArea = card.find('.lf-item-info, .listing-info, .item-content').first();
+if (logo.length) {
+logo.after(response.data.html);
+} else if (infoArea.length) {
+infoArea.prepend(response.data.html);
+} else {
+card.prepend(response.data.html);
+}
+}
+}
+});
+}
+});
+}
+// טען בטעינת דף
+loadBadges();
+// טען גם אחרי AJAX (infinite scroll, filters, etc)
+$(document).ajaxComplete(function() {
+setTimeout(loadBadges, 500);
+});
+});jQuery(document).ready(function($) {
+function setupCategoryLimits() {
+// פונקציה להגבלת קטגוריות
+function limitCategories(container, items) {
+if (items.length <= 16) return;
+// הסתר את הנוספות
+items.slice(16).addClass('mylisting-hidden-cat').hide();
+// צור כפתור אם לא קיים
+if (!container.find('.mylisting-show-more-btn').length) {
+var hiddenCount = items.length - 16;
+var btnText = 'הצג תחומי התמחות נוספים (' + hiddenCount + ')';
+var btn = $('<button class="mylisting-show-more-btn">' + btnText + '</button>');
+container.append(btn);
+btn.on('click', function(e) {
+e.preventDefault();
+var hidden = container.find('.mylisting-hidden-cat');
+if (hidden.is(':visible')) {
+hidden.fadeOut(200);
+$(this).text(btnText);
+} else {
+hidden.fadeIn(200);
+$(this).text('הצג פחות תחומי התמחות');
+}
+});
+}
+}
+// עבור עמודי רשימות ועמודים בודדים
+$('.listing-categories, .job_listing_category, .job-listing-category').each(function() {
+var container = $(this);
+var items = container.find('a, li');
+limitCategories(container, items);
+});
+// עבור ווידג'טים של Elementor
+$('.mylisting-category-widget, .elementor-widget-taxonomy, .elementor-widget-categories').each(function() {
+var widget = $(this);
+var items = widget.find('ul li, .category-item, a.category-link');
+// סנן רק פריטים עם תוכן
+items = items.filter(function() {
+return $(this).text().trim().length > 0;
+});
+if (items.length > 16) {
+items.slice(16).addClass('mylisting-hidden-cat').hide();
+if (!widget.find('.mylisting-show-more-btn').length) {
+var hiddenCount = items.length - 16;
+var btnText = 'הצג תחומי התמחות נוספים (' + hiddenCount + ')';
+var btn = $('<button class="mylisting-show-more-btn elementor-btn">' + btnText + '</button>');
+// מצא מקום מתאים לכפתור
+var targetContainer = widget.find('ul, .categories-container, nav').first();
+if (targetContainer.length) {
+targetContainer.after(btn);
+} else {
+widget.append(btn);
+}
+btn.on('click', function(e) {
+e.preventDefault();
+var hidden = widget.find('.mylisting-hidden-cat');
+if (hidden.is(':visible')) {
+hidden.fadeOut(200);
+$(this).text(btnText);
+} else {
+hidden.fadeIn(200);
+$(this).text('הצג פחות תחומי התמחות');
+}
+});
+}
+}
+});
+}
+// הפעל מיד
+setupCategoryLimits();
+// הפעל אחרי AJAX
+$(document).on('mylisting:ajax-loaded elementor/frontend/init', setupCategoryLimits);
+// תמיכה ב-Infinite Scroll
+if (window.IntersectionObserver) {
+var observer = new IntersectionObserver(function(entries) {
+entries.forEach(function(entry) {
+if (entry.isIntersecting) {
+setTimeout(setupCategoryLimits, 100);
+}
+});
+});
+$('.elementor-widget').each(function() {
+observer.observe(this);
+});
+}
+});
+//# sourceURL=jquery-js-after
+var breeze_prefetch = {"local_url":"https://haifakrayot.co.il/business","ignore_remote_prefetch":"1","ignore_list":["/business/cart","/business/checkout","/business/my-account","wp-admin","wp-login.php"]};
+//# sourceURL=breeze-prefetch-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/breeze/assets/js/js-front-end/breeze-prefetch-links.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/woocommerce/assets/js/js-cookie/js.cookie.min.js
+var woocommerce_params = {"ajax_url":"/business/wp-admin/admin-ajax.php","wc_ajax_url":"/business/?wc-ajax=%%endpoint%%","i18n_password_show":"\u05dc\u05d4\u05e6\u05d9\u05d2 \u05e1\u05d9\u05e1\u05de\u05d4","i18n_password_hide":"\u05dc\u05d4\u05e1\u05ea\u05d9\u05e8 \u05e1\u05d9\u05e1\u05de\u05d4"};
+//# sourceURL=woocommerce-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.min.js
+https://haifakrayot.co.il/business/wp-includes/js/underscore.min.js
+https://haifakrayot.co.il/business/wp-includes/js/backbone.min.js
+var wpApiSettings = {"root":"https://haifakrayot.co.il/business/wp-json/","nonce":"355ea288f5","versionString":"wp/v2/"};
+//# sourceURL=wp-api-request-js-extra
+https://haifakrayot.co.il/business/wp-includes/js/api-request.min.js
+https://haifakrayot.co.il/business/wp-includes/js/wp-api.min.js
+var wpdaApiSettings = {"path":"wpda"};
+//# sourceURL=wpda_rest_api-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/wp-data-access/public/../assets/js/wpda_rest_api.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor/assets/lib/font-awesome/js/v4-shims.min.js
+document.addEventListener('DOMContentLoaded', function() {
+document.querySelectorAll('.hkbiz-load-more').forEach(function(btn) {
+btn.addEventListener('click', function() {
+var wrap = this.closest('.hkbiz-mixed-grid');
+var grid = wrap.querySelector('.hkbiz-layout-rows .hkbiz-grid');
+if (!grid) return;
+var page = parseInt(this.dataset.page) || 1;
+var perPage = parseInt(this.dataset.total) || 20;
+var termId = this.dataset.term || 0;
+this.classList.add('loading');
+this.textContent = 'טוען...';
+fetch(hkbiz_ajax.url, {
+method: 'POST',
+headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+body: 'action=hkbiz_load_more&term_id=' + termId + '&page=' + (page + 1) + '&per_page=' + perPage + '&nonce=' + hkbiz_ajax.nonce
+})
+.then(r => r.json())
+.then(data => {
+if (data.success && data.data.html) {
+grid.insertAdjacentHTML('beforeend', data.data.html);
+this.dataset.page = page + 1;
+this.classList.remove('loading');
+this.textContent = 'תוצאות נוספות';
+if (!data.data.has_more) this.style.display = 'none';
+} else {
+this.style.display = 'none';
+}
+})
+.catch(() => { this.style.display = 'none'; });
+});
+});
+});
+document.addEventListener('DOMContentLoaded', function() {
+// הסתר אלמנטים עם טקסט ריק או רק רווחים
+document.querySelectorAll('.listing-section, .profile-field, .block-wrapper, .info-box').forEach(function(el) {
+var text = el.textContent.trim();
+var hasImages = el.querySelectorAll('img').length > 0;
+var hasLinks = el.querySelectorAll('a[href]:not([href=""]):not([href="tel:"]):not([href="mailto:"])').length > 0;
+var hasContent = el.querySelectorAll('.value:not(:empty), .pf-body:not(:empty)').length > 0;
+// אם אין תוכן משמעותי - הסתר
+if (!text && !hasImages && !hasLinks && !hasContent) {
+el.style.display = 'none';
+}
+});
+// הסתר שדות ספציפיים ריקים
+document.querySelectorAll('[data-field]').forEach(function(el) {
+var value = el.querySelector('.value, .pf-body');
+if (value && !value.textContent.trim()) {
+el.style.display = 'none';
+}
+});
+// הסתר פרטי קשר ריקים
+document.querySelectorAll('.contact-method, .listing-detail').forEach(function(el) {
+var link = el.querySelector('a');
+if (link) {
+var href = link.getAttribute('href') || '';
+if (!href || href === 'tel:' || href === 'mailto:' || href === '#') {
+el.style.display = 'none';
+}
+}
+});
+// הסתר סקשנים שכל הילדים שלהם מוסתרים
+document.querySelectorAll('.listing-section, .profile-section').forEach(function(section) {
+var visibleChildren = section.querySelectorAll(':scope > *:not([style*="display: none"]):not([style*="display:none"])');
+var hasVisibleContent = false;
+visibleChildren.forEach(function(child) {
+if (child.offsetHeight > 0 && child.textContent.trim()) {
+hasVisibleContent = true;
+}
+});
+if (!hasVisibleContent) {
+section.style.display = 'none';
+}
+});
+});
+var MyListing = {"Helpers":{},"Handlers":{},"MapConfig":{"ClusterSize":35,"AccessToken":"AIzaSyBsP08LSH2Ok6z7OZDtKJn5OQfPnPlKcEo","Language":"iw","TypeRestrictions":"geocode","CountryRestrictions":["IL"],"CustomSkins":{}}};
+סל קניות
+תפריט נגישות
+close
+פתיחה וסגירה של תפריט הנגישות
+keyboard
+ניווט מקלדת
+visibility_off
+ביטול אנימציות / הבהובים
+nights_stay
+Contrast
+format_size
+הגדלת טקסט
+text_fields
+הקטנת טקסט
+font_download
+גופן קריא
+title
+סימון כותרות
+link
+סימון קישורים ולחצנים
+מופעל ב
+favorite
+אהבה
+ע״י
+עמית מורנו
+jQuery(document).ready(function($) {
+console.log('🚀 תיקון רספונסיבי ל-Off Canvas + עיצוב מותאם + תיקון לינקים');
+// בדוק אם מובייל
+function isMobile() {
+return window.innerWidth <= 768;
+}
+// תיקון z-index של MyListing
+function fixMyListingZIndex() {
+$('.lf-item, .lf-item-alternate, .listing-feed, .finder-container').css({
+'z-index': '1',
+'position': 'relative'
+});
+$('.elementor-section, .elementor-widget, .elementor-element').css('z-index', '1');
+}
+// תיקון שורטקודים שלא התפרשו
+function fixShortcodes() {
+$('.eptm-offcanvas-body').each(function() {
+var $body = $(this);
+var html = $body.html();
+// בדוק אם יש שורטקודים לא מפורשים
+if (html && html.includes('[') && html.includes(']')) {
+console.log('🔧 מתקן שורטקודים...');
+// חלץ שורטקודים
+var shortcodes = html.match(/\[([^\]]+)\]/g);
+if (shortcodes) {
+shortcodes.forEach(function(shortcode) {
+// הסר את הסוגריים
+var cleanShortcode = shortcode.replace('[', '').replace(']', '');
+console.log('📝 טוען שורטקוד:', cleanShortcode);
+// בקש מהשרת את התוכן המפורש
+if (typeof eptm_ajax !== 'undefined') {
+$.ajax({
+url: eptm_ajax.ajax_url,
+type: 'POST',
+data: {
+action: 'eptm_load_content',
+shortcode: cleanShortcode,
+nonce: eptm_ajax.nonce
+},
+success: function(response) {
+// החלף את השורטקוד בתוכן המפורש
+var currentHtml = $body.html();
+var newHtml = currentHtml.replace(shortcode, response);
+$body.html(newHtml);
+console.log('✅ שורטקוד נטען:', cleanShortcode);
+// תקן עיצוב אחרי טעינה
+setTimeout(fixListStyling, 100);
+},
+error: function() {
+console.error('❌ כשל בטעינת שורטקוד:', cleanShortcode);
+}
+});
+}
+});
+}
+// פתרון חלופי - נסה לפרש ידנית
+if (html.includes('[areas_display]') || html.includes('[biz_related]')) {
+console.log('🔄 מנסה פתרון חלופי...');
+// צור תוכן זמני
+var tempContent = '<div class="loading-content">טוען קטגוריות...</div>';
+$body.html(tempContent);
+// נסה לטעון דרך AJAX ישיר
+$.get(window.location.href, function(pageContent) {
+// חפש את התוכן המפורש בעמוד
+var $tempDiv = $('<div>').html(pageContent);
+var areasContent = $tempDiv.find('[data-shortcode="areas_display"]').html();
+var bizContent = $tempDiv.find('[data-shortcode="biz_related"]').html();
+if (areasContent || bizContent) {
+$body.html((areasContent || '') + (bizContent || ''));
+console.log('✅ תוכן נטען מהעמוד');
+} else {
+// אם לא מצאנו, השאר את הטקסט אבל עצב אותו
+$body.html(html.replace(/\[([^\]]+)\]/g, '<div class="shortcode-placeholder">$1</div>'));
+}
+fixListStyling();
+});
+}
+}
+});
+}
+// הכנת Off Canvas רק למובייל
+function prepareOffCanvas() {
+// הסתר כפתור במחשב, הצג במובייל
+if (!isMobile()) {
+$('.eptm-offcanvas-trigger').hide();
+console.log('💻 מחשב - מסתיר כפתור');
+// וודא שהתוכן גלוי במחשב
+$('.eptm-offcanvas-body .elementor-shortcode').show();
+$('.eptm-offcanvas-body > *').each(function() {
+if ($(this).find('[data-listing-type]').length > 0) {
+// יש תוכן של related-biz - הצג אותו
+$(this).show();
+}
+});
+// אם ה-Off Canvas מכיל תוכן שצריך להציג במחשב
+$('.eptm-offcanvas, .eptm-filter-offcanvas').each(function() {
+var $body = $(this).find('.eptm-offcanvas-body');
+if ($body.length && $body.children().length > 0) {
+// יש תוכן - אל תסתיר
+console.log('💻 משאיר תוכן גלוי במחשב');
+$(this).css({
+'position': 'relative',
+'display': 'block',
+'right': 'auto',
+'width': '100%',
+'height': 'auto',
+'box-shadow': 'none',
+'z-index': 'auto',
+'background': 'transparent'
+});
+// הסתר את ה-header והסגירה במחשב
+$(this).find('.eptm-offcanvas-header').hide();
+}
+});
+} else {
+// מובייל - הכן Off Canvas רגיל
+$('.eptm-offcanvas-trigger').show();
+console.log('📱 מובייל - מציג כפתור');
+$('.eptm-offcanvas, .eptm-filter-offcanvas').each(function() {
+var id = $(this).attr('id');
+// העבר לסוף body במובייל
+if (!$(this).parent().is('body')) {
+$(this).detach().appendTo('body');
+}
+// סטיילים למובייל
+$(this).css({
+'position': 'fixed',
+'top': '0',
+'right': '-100%',
+'width': '85vw',
+'max-width': '350px',
+'height': '100vh',
+'background': 'white',
+'box-shadow': '-10px 0 40px rgba(0,0,0,0.5)',
+'z-index': '2147483647',
+'display': 'none',
+'transition': 'right 0.3s ease',
+'overflow-y': 'auto'
+});
+// הצג header במובייל
+$(this).find('.eptm-offcanvas-header').show();
+});
+// הכן Overlays למובייל
+$('.eptm-offcanvas-overlay').each(function() {
+if (!$(this).parent().is('body')) {
+$(this).detach().appendTo('body');
+}
+$(this).css({
+'position': 'fixed',
+'top': '0',
+'left': '0',
+'width': '100%',
+'height': '100%',
+'background': 'rgba(0,0,0,0.7)',
+'z-index': '2147483646',
+'display': 'none'
+});
+});
+}
+}
+// תיקון עיצוב הרשימות
+function fixListStyling() {
+// הסר רווחים מיותרים
+$('.eptm-offcanvas-body').find('br').remove();
+$('.eptm-offcanvas-body').find('p:empty').remove();
+// סדר מחדש רשימות עם מספרים
+$('.eptm-offcanvas-body ul').each(function() {
+$(this).find('li').each(function() {
+var $li = $(this);
+var $link = $li.find('a');
+if ($link.length) {
+// יש כבר לינק - רק תקן עיצוב
+var text = $link.text();
+var match = text.match(/(.+?)(\s*\(\d+\))/);
+if (match) {
+$link.html('<span class="item-name">' + match[1].trim() + '</span><span class="item-count">' + match[2] + '</span>');
+}
+} else {
+// אין לינק - נסה ליצור
+var text = $li.text();
+var match = text.match(/(.+?)(\s*\(\d+\))/);
+if (match) {
+// נסה לנחש את ה-URL מהטקסט
+var categoryName = match[1].trim();
+var categorySlug = categoryName.toLowerCase()
+.replace(/\s+/g, '-')
+.replace(/[^\w\-א-ת]+/g, '');
+// צור לינק
+var link = '<a href="/category/' + categorySlug + '/">' +
+'<span class="item-name">' + categoryName + '</span>' +
+'<span class="item-count">' + match[2] + '</span>' +
+'</a>';
+$li.html(link);
+}
+}
+});
+});
+// הוסף כותרת אם חסרה
+$('.eptm-offcanvas-header').each(function() {
+if (!$(this).find('h3').length) {
+$(this).prepend('<h3>סינון תוצאות</h3>');
+}
+});
+// תקן לינקים שבורים
+$('.eptm-offcanvas-body a').each(function() {
+var $link = $(this);
+if (!$link.attr('href') || $link.attr('href') === '#') {
+// לינק שבור - נסה לתקן
+var text = $link.text().trim();
+var slug = text.toLowerCase()
+.replace(/\s+/g, '-')
+.replace(/[^\w\-א-ת]+/g, '');
+$link.attr('href', '/category/' + slug + '/');
+}
+});
+}
+// הפעל הכנות
+fixMyListingZIndex();
+prepareOffCanvas();
+setTimeout(function() {
+fixShortcodes();
+fixListStyling();
+}, 500);
+// חזור על ההכנות בשינוי גודל חלון
+$(window).resize(function() {
+prepareOffCanvas();
+});
+// לחיצה על כפתור - רק במובייל
+$(document).off('click.mobile-offcanvas').on('click.mobile-offcanvas', '.eptm-offcanvas-trigger', function(e) {
+if (!isMobile()) return; // אל תעשה כלום במחשב
+e.preventDefault();
+e.stopPropagation();
+console.log('📱 פתיחת Off Canvas במובייל');
+var targetId = $(this).attr('data-target') || $(this).data('target');
+if (!targetId) {
+console.error('❌ אין data-target');
+return false;
+}
+var $canvas = $('#' + targetId);
+var $overlay = $('.eptm-offcanvas-overlay[data-target="' + targetId + '"]');
+if ($canvas.length === 0) {
+console.error('❌ לא נמצא Off Canvas');
+return false;
+}
+// תקן z-index
+fixMyListingZIndex();
+// הצג Off Canvas
+$canvas.css({
+'display': 'block',
+'z-index': '2147483647'
+});
+// הצג Overlay
+$overlay.css({
+'display': 'block',
+'z-index': '2147483646'
+});
+// אנימציה
+setTimeout(function() {
+$canvas.css('right', '0').addClass('active');
+$overlay.addClass('active');
+fixShortcodes(); // תקן שורטקודים
+fixListStyling(); // תקן עיצוב
+}, 10);
+// נעל גלילה
+$('body').css('overflow', 'hidden');
+return false;
+});
+// סגירה - רק במובייל
+$(document).on('click.mobile-offcanvas', '.eptm-offcanvas-close, .eptm-offcanvas-overlay', function(e) {
+if (!isMobile()) return;
+e.preventDefault();
+console.log('📱 סוגר Off Canvas');
+$('.eptm-offcanvas, .eptm-filter-offcanvas').css('right', '-100%').removeClass('active');
+setTimeout(function() {
+$('.eptm-offcanvas, .eptm-filter-offcanvas').css('display', 'none');
+}, 300);
+$('.eptm-offcanvas-overlay').removeClass('active').css('display', 'none');
+$('body').css('overflow', '');
+});
+// ESC לסגירה - רק במובייל
+$(document).keyup(function(e) {
+if (!isMobile()) return;
+if (e.key === "Escape") {
+$('.eptm-offcanvas, .eptm-filter-offcanvas').css('right', '-100%').removeClass('active');
+setTimeout(function() {
+$('.eptm-offcanvas, .eptm-filter-offcanvas').css('display', 'none');
+}, 300);
+$('.eptm-offcanvas-overlay').removeClass('active').css('display', 'none');
+$('body').css('overflow', '');
+}
+});
+// בדיקת סטטוס
+setTimeout(function() {
+console.log('📊 סטטוס:');
+console.log('   מכשיר:', isMobile() ? 'מובייל' : 'מחשב');
+console.log('   כפתור גלוי:', $('.eptm-offcanvas-trigger').is(':visible'));
+console.log('   Off Canvas:', $('.eptm-offcanvas').length);
+console.log('   תוכן:', $('.eptm-offcanvas-body').length ? 'קיים' : 'לא קיים');
+}, 1000);
+});
+document.addEventListener('DOMContentLoaded', function() {
+var starSvg = '<svg class=\"hkr-star-icon\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\"/></svg>';
+document.querySelectorAll('.single-listing .listing-rating:not(.listing-review-rating)').forEach(function(el) {
+el.innerHTML = '<div class="hkr-wrap hkr-size-large"><div class="hkr-badge">' + starSvg + '<span class="hkr-score">5</span><span class="hkr-max">/10</span></div><span class="hkr-external"><span class="hkr-black-star">★</span><span class="hkr-count-text">82 המלצות וביקורות</span></span></div>';
+el.classList.add('hkr-replaced');
+});
+});
+document.addEventListener('DOMContentLoaded', function() {
+var maxHeight = 200;
+var btnText = 'קרא עוד';
+var btnTextLess = 'הצג פחות';
+// מצא את כל האלמנטים עם class read-more-content
+document.querySelectorAll('.read-more-content').forEach(function(el) {
+// בדוק אם כבר עטוף
+if (el.classList.contains('read-more-wrap')) return;
+// בדוק גובה
+if (el.scrollHeight <= maxHeight + 30) return;
+// עטוף
+el.classList.add('read-more-wrap');
+// צור כפתור
+var btn = document.createElement('button');
+btn.className = 'read-more-btn';
+btn.innerHTML = '<span>' + btnText + '</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+btn.onclick = function() {
+var isExpanded = el.classList.toggle('expanded');
+btn.classList.toggle('expanded', isExpanded);
+btn.querySelector('span').textContent = isExpanded ? btnTextLess : btnText;
+};
+el.parentNode.insertBefore(btn, el.nextSibling);
+});
+});
+(function () {
+var c = document.body.className;
+c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
+document.body.className = c;
+})();
+https://haifakrayot.co.il/business/wp-content/plugins/ml-elementor-toolkit-pro/assets/js/general.js
+var acwp_attr = {"fontsizer_customtags":"","fontsize_excludetags":"","fontsizer_max":"","fontsizer_min":"","fontsizer_nolineheight":"","hide_fontsize":"","no_btn_drage":"","contrast_exclude":"","nocookies":"","blogurl":"https://haifakrayot.co.il/business"};
+//# sourceURL=acwp-toolbar-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/accessible-poetry/assets/js/toolbar.js
+var AccessibleWPData = {"siteUrl":"https://haifakrayot.co.il/business"};
+//# sourceURL=plugin-frontend-js-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/accessible-poetry/inc/frontend.js
+var hkTop = {"ajax":"https://haifakrayot.co.il/business/wp-admin/admin-ajax.php","nonce":"73723d3a4e"};
+//# sourceURL=hk-top-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/hk-top-businesses/script.js
+https://haifakrayot.co.il/business/wp-content/plugins/breeze/assets/js/js-front-end/breeze-lazy-load.min.js
+document.addEventListener("DOMContentLoaded", function () {
+window.lazyLoadInstance = new LazyLoad({
+elements_selector: ".br-lazy",
+data_src: "breeze",
+data_srcset: "brsrcset",
+data_sizes: "brsizes",
+class_loaded: "br-loaded",
+threshold: 300,
+});
+});
+//# sourceURL=breeze-lazy-js-after
+https://haifakrayot.co.il/business/wp-content/plugins/elementor-pro/assets/lib/smartmenus/jquery.smartmenus.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor/assets/js/webpack.runtime.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor/assets/js/frontend-modules.min.js
+https://haifakrayot.co.il/business/wp-includes/js/jquery/ui/core.min.js
+var elementorFrontendConfig = {"environmentMode":{"edit":false,"wpPreview":false,"isScriptDebug":false},"i18n":{"shareOnFacebook":"\u05e9\u05ea\u05e3 \u05d1\u05e4\u05d9\u05d9\u05e1\u05d1\u05d5\u05e7","shareOnTwitter":"\u05e9\u05ea\u05e3 \u05d1\u05d8\u05d5\u05d5\u05d9\u05d8\u05e8","pinIt":"\u05dc\u05e0\u05e2\u05d5\u05e5 \u05d1\u05e4\u05d9\u05e0\u05d8\u05e8\u05e1\u05d8","download":"\u05d4\u05d5\u05e8\u05d3\u05d4","downloadImage":"\u05d4\u05d5\u05e8\u05d3\u05ea \u05ea\u05de\u05d5\u05e0\u05d4","fullscreen":"\u05de\u05e1\u05da \u05de\u05dc\u05d0","zoom":"\u05de\u05d9\u05e7\u05d5\u05d3","share":"\u05e9\u05ea\u05e3","playVideo":"\u05e0\u05d2\u05df \u05d5\u05d9\u05d3\u05d0\u05d5","previous":"\u05e7\u05d5\u05d3\u05dd","next":"\u05d4\u05d1\u05d0","close":"\u05e1\u05d2\u05d5\u05e8","a11yCarouselPrevSlideMessage":"\u05e9\u05e7\u05d5\u05e4\u05d9\u05ea \u05e7\u05d5\u05d3\u05de\u05ea","a11yCarouselNextSlideMessage":"\u05e9\u05e7\u05d5\u05e4\u05d9\u05ea \u05d4\u05d1\u05d0\u05d4","a11yCarouselFirstSlideMessage":"\u05d6\u05d5\u05d4\u05d9 \u05d4\u05e9\u05e7\u05d5\u05e4\u05d9\u05ea \u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d4","a11yCarouselLastSlideMessage":"\u05d6\u05d5\u05d4\u05d9 \u05d4\u05e9\u05e7\u05d5\u05e4\u05d9\u05ea \u05d4\u05d0\u05d7\u05e8\u05d5\u05e0\u05d4","a11yCarouselPaginationBulletMessage":"\u05dc\u05e2\u05d1\u05d5\u05e8 \u05dc\u05e9\u05e7\u05d5\u05e4\u05d9\u05ea"},"is_rtl":true,"breakpoints":{"xs":0,"sm":480,"md":768,"lg":1025,"xl":1440,"xxl":1600},"responsive":{"breakpoints":{"mobile":{"label":"\u05de\u05d5\u05d1\u05d9\u05d9\u05dc \u05d0\u05e0\u05db\u05d9","value":767,"default_value":767,"direction":"max","is_enabled":true},"mobile_extra":{"label":"\u05de\u05d5\u05d1\u05d9\u05d9\u05dc \u05d0\u05d5\u05e4\u05e7\u05d9","value":880,"default_value":880,"direction":"max","is_enabled":false},"tablet":{"label":"\u05d8\u05d0\u05d1\u05dc\u05d8 \u05d0\u05e0\u05db\u05d9","value":1024,"default_value":1024,"direction":"max","is_enabled":true},"tablet_extra":{"label":"\u05d8\u05d0\u05d1\u05dc\u05d8 \u05d0\u05d5\u05e4\u05e7\u05d9","value":1200,"default_value":1200,"direction":"max","is_enabled":false},"laptop":{"label":"\u05dc\u05e4\u05d8\u05d5\u05e4","value":1366,"default_value":1366,"direction":"max","is_enabled":false},"widescreen":{"label":"\u05de\u05e1\u05da \u05e8\u05d7\u05d1","value":2400,"default_value":2400,"direction":"min","is_enabled":false}},
+"hasCustomBreakpoints":false},"version":"3.33.4","is_static":false,"experimentalFeatures":{"e_font_icon_svg":true,"additional_custom_breakpoints":true,"container":true,"theme_builder_v2":true,"nested-elements":true,"home_screen":true,"global_classes_should_enforce_capabilities":true,"e_variables":true,"cloud-library":true,"e_opt_in_v4_page":true,"import-export-customization":true,"e_pro_variables":true},"urls":{"assets":"https:\/\/haifakrayot.co.il\/business\/wp-content\/plugins\/elementor\/assets\/","ajaxurl":"https:\/\/haifakrayot.co.il\/business\/wp-admin\/admin-ajax.php","uploadUrl":"https:\/\/haifakrayot.co.il\/business\/wp-content\/uploads"},"nonces":{"floatingButtonsClickTracking":"67f30644a6"},"swiperClass":"swiper","settings":{"page":[],"editorPreferences":[]},"kit":{"active_breakpoints":["viewport_mobile","viewport_tablet"],"global_image_lightbox":"yes","lightbox_enable_counter":"yes","lightbox_enable_fullscreen":"yes","lightbox_enable_zoom":"yes","lightbox_enable_share":"yes","lightbox_title_src":"title","lightbox_description_src":"description","woocommerce_notices_elements":[]},"post":{"id":44145,"title":"%D7%97%D7%91%D7%A8%D7%AA%20%D7%9E%D7%95%D7%A0%D7%99%D7%95%D7%AA%20%D7%A0%D7%95%D7%94%20%D7%91%D7%A2%D7%9E%3A%20%D7%91%D7%99%D7%A7%D7%95%D7%A8%D7%95%D7%AA%2C%20%D7%94%D7%9E%D7%9C%D7%A6%D7%95%D7%AA%20%D7%95%D7%AA%D7%9E%D7%95%D7%A0%D7%95%D7%AA%20%C2%BB%20%D7%9E%D7%93%D7%93%20%D7%97%D7%99%D7%A4%D7%94%20%D7%95%D7%94%D7%A7%D7%A8%D7%99%D7%95%D7%AA","excerpt":"","featuredImage":"https:\/\/haifakrayot.co.il\/business\/wp-content\/uploads\/2025\/12\/checking.png"}};
+//# sourceURL=elementor-frontend-js-before
+https://haifakrayot.co.il/business/wp-content/plugins/elementor/assets/js/frontend.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor-pro/assets/lib/sticky/jquery.sticky.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor/assets/lib/swiper/v8/swiper.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor/assets/lib/e-gallery/js/e-gallery.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/woocommerce/assets/js/sourcebuster/sourcebuster.min.js
+var wc_order_attribution = {"params":{"lifetime":1.0e-5,"session":30,"base64":false,"ajaxurl":"https://haifakrayot.co.il/business/wp-admin/admin-ajax.php","prefix":"wc_order_attribution_","allowTracking":true},"fields":{"source_type":"current.typ","referrer":"current_add.rf","utm_campaign":"current.cmp","utm_source":"current.src","utm_medium":"current.mdm","utm_content":"current.cnt","utm_id":"current.id","utm_term":"current.trm","utm_source_platform":"current.plt","utm_creative_format":"current.fmt","utm_marketing_tactic":"current.tct","session_entry":"current_add.ep","session_start_time":"current_add.fd","session_pages":"session.pgs","session_count":"udata.vst","user_agent":"udata.uag"}};
+//# sourceURL=wc-order-attribution-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/woocommerce/assets/js/frontend/order-attribution.min.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/maps/google-maps/google-maps.js
+https://haifakrayot.co.il/business/wp-includes/js/dist/vendor/moment.min.js
+moment.updateLocale( 'he_IL', {"months":["\u05d9\u05e0\u05d5\u05d0\u05e8","\u05e4\u05d1\u05e8\u05d5\u05d0\u05e8","\u05de\u05e8\u05e5","\u05d0\u05e4\u05e8\u05d9\u05dc","\u05de\u05d0\u05d9","\u05d9\u05d5\u05e0\u05d9","\u05d9\u05d5\u05dc\u05d9","\u05d0\u05d5\u05d2\u05d5\u05e1\u05d8","\u05e1\u05e4\u05d8\u05de\u05d1\u05e8","\u05d0\u05d5\u05e7\u05d8\u05d5\u05d1\u05e8","\u05e0\u05d5\u05d1\u05de\u05d1\u05e8","\u05d3\u05e6\u05de\u05d1\u05e8"],"monthsShort":["\u05d9\u05e0\u05d5","\u05e4\u05d1\u05e8","\u05de\u05e8\u05e5","\u05d0\u05e4\u05e8","\u05de\u05d0\u05d9","\u05d9\u05d5\u05e0","\u05d9\u05d5\u05dc","\u05d0\u05d5\u05d2","\u05e1\u05e4\u05d8","\u05d0\u05d5\u05e7","\u05e0\u05d5\u05d1","\u05d3\u05e6\u05de"],"weekdays":["\u05d9\u05d5\u05dd \u05e8\u05d0\u05e9\u05d5\u05df","\u05d9\u05d5\u05dd \u05e9\u05e0\u05d9","\u05d9\u05d5\u05dd \u05e9\u05dc\u05d9\u05e9\u05d9","\u05d9\u05d5\u05dd \u05e8\u05d1\u05d9\u05e2\u05d9","\u05d9\u05d5\u05dd \u05d7\u05de\u05d9\u05e9\u05d9","\u05d9\u05d5\u05dd \u05e9\u05d9\u05e9\u05d9","\u05e9\u05d1\u05ea"],"weekdaysShort":["\u05d0","\u05d1","\u05d2","\u05d3","\u05d4","\u05d5","\u05e9"],"week":{"dow":0},"longDateFormat":{"LT":"H:i","LTS":null,"L":null,"LL":"d/m/Y","LLL":"j \u05d1F Y G:i","LLLL":null}} );
+//# sourceURL=moment-js-after
+window.MyListing_Moment_Locale = 'he';
+//# sourceURL=moment-locale-he-js-after
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/vendor/select2/select2.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/vendor/vuejs/vue.min.js
+https://haifakrayot.co.il/business/wp-includes/js/jquery/ui/mouse.min.js
+https://haifakrayot.co.il/business/wp-includes/js/jquery/ui/slider.min.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/vendor.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/frontend.js
+https://haifakrayot.co.il/business/wp-includes/js/comment-reply.min.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/single-listing.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/cts-carousel.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/background-carousel.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/elementor-column.js
+var wc_cart_fragments_params = {"ajax_url":"/business/wp-admin/admin-ajax.php","wc_ajax_url":"/business/?wc-ajax=%%endpoint%%","cart_hash_key":"wc_cart_hash_1325731be1e6bc4f6fe8b3bb86ac2f6b","fragment_name":"wc_fragments_1325731be1e6bc4f6fe8b3bb86ac2f6b","request_timeout":"5000"};
+//# sourceURL=wc-cart-fragments-js-extra
+https://haifakrayot.co.il/business/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.min.js
+https://haifakrayot.co.il/business/wp-content/themes/my-listing/assets/dist/back-to-top.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor-pro/assets/js/webpack-pro.runtime.min.js
+https://haifakrayot.co.il/business/wp-includes/js/dist/hooks.min.js
+https://haifakrayot.co.il/business/wp-includes/js/dist/i18n.min.js
+wp.i18n.setLocaleData( { 'text direction\u0004ltr': [ 'rtl' ] } );
+//# sourceURL=wp-i18n-js-after
+var ElementorProFrontendConfig = {"ajaxurl":"https:\/\/haifakrayot.co.il\/business\/wp-admin\/admin-ajax.php","nonce":"87f5774886","urls":{"assets":"https:\/\/haifakrayot.co.il\/business\/wp-content\/plugins\/elementor-pro\/assets\/","rest":"https:\/\/haifakrayot.co.il\/business\/wp-json\/"},"settings":{"lazy_load_background_images":false},"popup":{"hasPopUps":true},"shareButtonsNetworks":{"facebook":{"title":"Facebook","has_counter":true},"twitter":{"title":"Twitter"},"linkedin":{"title":"LinkedIn","has_counter":true},"pinterest":{"title":"Pinterest","has_counter":true},"reddit":{"title":"Reddit","has_counter":true},"vk":{"title":"VK","has_counter":true},"odnoklassniki":{"title":"OK","has_counter":true},"tumblr":{"title":"Tumblr"},"digg":{"title":"Digg"},"skype":{"title":"Skype"},"stumbleupon":{"title":"StumbleUpon","has_counter":true},"mix":{"title":"Mix"},"telegram":{"title":"Telegram"},"pocket":{"title":"Pocket","has_counter":true},"xing":{"title":"XING","has_counter":true},"whatsapp":{"title":"WhatsApp"},"email":{"title":"Email"},"print":{"title":"Print"},"x-twitter":{"title":"X"},"threads":{"title":"Threads"}},
+"woocommerce":{"menu_cart":{"cart_page_url":"https:\/\/haifakrayot.co.il\/business\/cart","checkout_page_url":"https:\/\/haifakrayot.co.il\/business\/checkout","fragments_nonce":"e5ec4cfb55"}},
+"facebook_sdk":{"lang":"he_IL","app_id":""},"lottie":{"defaultAnimationUrl":"https:\/\/haifakrayot.co.il\/business\/wp-content\/plugins\/elementor-pro\/modules\/lottie\/assets\/animations\/default.json"}};
+//# sourceURL=elementor-pro-frontend-js-before
+https://haifakrayot.co.il/business/wp-content/plugins/elementor-pro/assets/js/frontend.min.js
+https://haifakrayot.co.il/business/wp-content/plugins/elementor-pro/assets/js/elements-handlers.min.js
+document.addEventListener('DOMContentLoaded', function() {
+document.querySelectorAll('.hk13-nav-btn').forEach(function(btn) {
+btn.addEventListener('click', function() {
+var parent = this.closest('.hk13-main-locs, .hk13-group-locs, .hk13-featured, .hk13-malls');
+var slider = parent.querySelector('.hk13-locs-track, .hk13-biz-track, .hk13-malls-track');
+if (!slider) return;
+var dir = this.dataset.dir;
+slider.scrollBy({ left: dir === 'next' ? -250 : 250, behavior: 'smooth' });
+});
+});
+});
+window.addEventListener("DOMContentLoaded",(e=>{document.querySelectorAll('img[loading="lazy"]').forEach((e=>{e.getBoundingClientRect().top<=window.innerHeight&&(e.loading="eager")}))}));
+jQuery(document).ready(function($) {
+var $button = $('a:contains("תוצאות נוספות")').first();
+if ($button.length === 0) {
+return;
+}
+console.log('Load More: כפתור נמצא!');
+$button.off('click').on('click', function(e) {
+e.preventDefault();
+e.stopPropagation();
+var $anchor = $('.e-load-more-anchor');
+var data = $anchor.data();
+if (!data || !data.nextPage) {
+console.log('Load More: אין עמוד הבא');
+return;
+}
+var nextPageUrl = data.nextPage;
+var currentPage = data.page || 1;
+var maxPage = data.maxPage || 1;
+console.log('Load More: טוען עמוד ' + (currentPage + 1));
+$button.text('טוען...').css('pointer-events', 'none');
+$.ajax({
+url: nextPageUrl,
+type: 'GET',
+success: function(response) {
+var $response = $('<div>').html(response);
+// מצא את הכרטיס האחרון ברשימה הנוכחית
+var $lastItem = $('.lf-item').last();
+if ($lastItem.length === 0) {
+$lastItem = $('.elementor-post').last();
+}
+// מצא פוסטים חדשים
+var $newPosts = $response.find('.lf-item');
+if ($newPosts.length === 0) {
+$newPosts = $response.find('.elementor-post');
+}
+console.log('Load More: נמצאו ' + $newPosts.length + ' תוצאות');
+if ($newPosts.length > 0 && $lastItem.length > 0) {
+// הוסף אחרי הכרטיס האחרון
+$lastItem.after($newPosts);
+var newPage = currentPage + 1;
+$anchor.data('page', newPage);
+if (newPage < maxPage) {
+var newNextPage = nextPageUrl.replace(/page\/\d+/, 'page/' + (newPage + 1));
+$anchor.data('nextPage', newNextPage);
+$button.text('תוצאות נוספות').css('pointer-events', 'auto');
+} else {
+$button.hide();
+}
+// גלול לתוצאות החדשות
+$('html, body').animate({
+scrollTop: $lastItem.offset().top - 100
+}, 500);
+} else {
+console.log('Load More: לא נמצאו תוצאות');
+$button.text('תוצאות נוספות').css('pointer-events', 'auto');
+}
+},
+error: function(xhr, status, error) {
+console.log('Load More Error:', error);
+$button.text('תוצאות נוספות').css('pointer-events', 'auto');
+}
+});
+return false;
+});
+});
