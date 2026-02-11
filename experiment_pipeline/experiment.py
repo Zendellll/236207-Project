@@ -5,6 +5,13 @@ Runs RAG-based experiments on a given data folder. For each query in queries.txt
 retrieves relevant context from a vector database built from the data folder,
 then runs multiple LLM models and logs results to CSV.
 
+Performance: Uses the ollama Python library directly (no subprocess) to avoid
+cold-starting the model for every query. Models are loaded once, kept alive
+for all queries, then explicitly unloaded before switching.
+
+Loop order: MODEL -> QUERY (not QUERY -> MODEL) so each model stays warm
+in VRAM for all 30 queries before being swapped out.
+
 Usage (standalone):
     python experiment.py --data-source ../mock_internet/clean
     python experiment.py --data-source ../mock_internet/single-bot/high-fake-upvotes/attribute-attack
@@ -27,9 +34,8 @@ import time
 import csv
 import re
 import argparse
-import subprocess
 import shutil
-from typing import Optional, Tuple, List
+from typing import Tuple, List
 from dataclasses import dataclass, asdict
 
 import chromadb
@@ -58,7 +64,16 @@ DEFAULT_QUERIES_FILE: str = os.path.join(SCRIPT_DIR, "queries.txt")
 # RAG parameters
 CHUNK_SIZE: int = 1000
 CHUNK_OVERLAP: int = 200
-RAG_RESULTS: int = 20
+RAG_RESULTS: int = 10
+
+# Model keep-alive duration (how long model stays in VRAM between calls)
+MODEL_KEEP_ALIVE: str = "10m"
+
+# Context window size for generation (must fit 20 RAG chunks + query + response)
+NUM_CTX: int = 8192
+
+# Flush print output immediately (no buffering)
+os.environ.setdefault("PYTHONUNBUFFERED", "1")
 
 
 # --- DATA CLASS ---
@@ -82,14 +97,15 @@ class ExperimentResult:
 # --- EMBEDDING ---
 
 class OllamaEmbeddingFunction(chromadb.EmbeddingFunction):
-    """ChromaDB embedding function using Ollama."""
+    """ChromaDB embedding function using Ollama with batching.
+
+    Uses ollama.embed() which accepts a list of texts in one call,
+    instead of sending them one at a time. Much faster for indexing.
+    """
 
     def __call__(self, input: List[str]) -> List[List[float]]:
-        embeddings = []
-        for text in input:
-            response = ollama.embeddings(model=EMBEDDING_MODEL, prompt=text)
-            embeddings.append(response["embedding"])
-        return embeddings
+        response = ollama.embed(model=EMBEDDING_MODEL, input=input)
+        return response["embeddings"]
 
 
 # --- UTILITIES ---
@@ -140,7 +156,7 @@ def reset_database(db_path: str) -> None:
     """Delete vector database directory."""
     if os.path.exists(db_path):
         shutil.rmtree(db_path)
-        print(f"[RESET] Deleted database: {db_path}")
+        print(f"[RESET] Deleted database: {db_path}", flush=True)
 
 
 def build_database(client: chromadb.PersistentClient, data_source: str) -> chromadb.Collection:
@@ -153,7 +169,7 @@ def build_database(client: chromadb.PersistentClient, data_source: str) -> chrom
     Returns:
         ChromaDB collection with indexed documents.
     """
-    print(f"\n[BUILD] Indexing files from: {data_source}")
+    print(f"\n[BUILD] Indexing files from: {data_source}", flush=True)
 
     if not os.path.exists(data_source):
         print(f"ERROR: '{data_source}' does not exist.")
@@ -174,7 +190,7 @@ def build_database(client: chromadb.PersistentClient, data_source: str) -> chrom
         print(f"ERROR: No .txt files found in '{data_source}'")
         sys.exit(1)
 
-    print(f"[BUILD] Found {len(files)} text files.")
+    print(f"[BUILD] Found {len(files)} text files.", flush=True)
 
     total_chunks = 0
     for filename in files:
@@ -188,9 +204,9 @@ def build_database(client: chromadb.PersistentClient, data_source: str) -> chrom
         collection.add(documents=chunks, ids=ids, metadatas=metadatas)
 
         total_chunks += len(chunks)
-        print(f"   -> Indexed {filename} ({len(chunks)} chunks)")
+        print(f"   -> Indexed {filename} ({len(chunks)} chunks)", flush=True)
 
-    print(f"[BUILD] Complete. Total chunks: {total_chunks}")
+    print(f"[BUILD] Complete. Total chunks: {total_chunks}", flush=True)
     return collection
 
 
@@ -241,8 +257,58 @@ Please provide your reasoning followed by the final answer.
 """
 
 
+# --- MODEL MANAGEMENT ---
+
+def warm_up_model(model_name: str) -> None:
+    """Load a model into VRAM by sending a tiny request.
+
+    This triggers the model load once. All subsequent calls reuse the
+    loaded model, avoiding the cold start penalty.
+
+    Args:
+        model_name: Ollama model name.
+    """
+    print(f"[LOAD] Warming up {model_name}...", end="", flush=True)
+    start = time.time()
+    ollama.chat(
+        model=model_name,
+        messages=[{"role": "user", "content": "hi"}],
+        options={"num_predict": 1, "num_ctx": NUM_CTX},
+        keep_alive=MODEL_KEEP_ALIVE,
+    )
+    print(f" ready in {time.time() - start:.1f}s", flush=True)
+
+
+def unload_model(model_name: str) -> None:
+    """Explicitly unload a model from VRAM.
+
+    Sets keep_alive=0 which tells Ollama to immediately release the model
+    from memory. Critical on 16GB machines to avoid swap thrashing.
+
+    Args:
+        model_name: Ollama model name.
+    """
+    print(f"[UNLOAD] Releasing {model_name} from VRAM...", flush=True)
+    try:
+        ollama.chat(
+            model=model_name,
+            messages=[{"role": "user", "content": ""}],
+            options={"num_predict": 1},
+            keep_alive="0",
+        )
+    except Exception:
+        pass  # Model may already be unloaded
+
+
 def run_model(model_name: str, prompt: str) -> Tuple[str, float]:
-    """Run a model via Ollama subprocess.
+    """Run a model using the ollama Python library (no subprocess).
+
+    The model should already be loaded via warm_up_model().
+    keep_alive keeps it resident for the next query.
+
+    Args:
+        model_name: Ollama model name.
+        prompt: Full prompt to send.
 
     Returns:
         (response_text, duration_seconds)
@@ -250,27 +316,21 @@ def run_model(model_name: str, prompt: str) -> Tuple[str, float]:
     start_time = time.time()
 
     try:
-        process = subprocess.Popen(
-            ['ollama', 'run', model_name],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            encoding='utf-8'
+        response = ollama.chat(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt}],
+            options={"num_ctx": NUM_CTX},
+            keep_alive=MODEL_KEEP_ALIVE,
         )
-        stdout, stderr = process.communicate(input=prompt)
         duration = time.time() - start_time
 
-        if process.returncode != 0:
-            print(f"      [ERROR] {stderr}")
-            return f"ERROR: {stderr}", duration
-
-        print(f"      [DONE] in {duration:.2f}s")
-        return stdout, duration
+        response_text = response["message"]["content"]
+        print(f"      [DONE] in {duration:.2f}s", flush=True)
+        return response_text, duration
 
     except Exception as e:
         duration = time.time() - start_time
-        print(f"      [EXCEPTION] {e}")
+        print(f"      [EXCEPTION] {e}", flush=True)
         return f"ERROR: {e}", duration
 
 
@@ -289,7 +349,7 @@ def save_results_csv(results: List[ExperimentResult], output_file: str) -> None:
         for result in results:
             writer.writerow(asdict(result))
 
-    print(f"[SAVE] Results saved to: {output_file}")
+    print(f"[SAVE] Results saved to: {output_file}", flush=True)
 
 
 # --- MAIN ---
@@ -304,6 +364,10 @@ def run_experiment(
 ) -> List[ExperimentResult]:
     """Run complete experiment on a data source folder.
 
+    Loop order: MODEL (outer) -> QUERY (inner).
+    Each model is loaded once, runs all 30 queries, then is unloaded.
+    This eliminates 119 cold starts per phase (was 120, now just 4).
+
     Args:
         data_source: Path to folder with .txt files.
         queries_file: Path to queries file.
@@ -315,10 +379,10 @@ def run_experiment(
     Returns:
         List of ExperimentResult objects.
     """
-    print("\n" + "=" * 70)
-    print(f"EXPERIMENT RUNNER - Phase: {phase_name}")
-    print(f"Data source: {data_source}")
-    print("=" * 70)
+    print("\n" + "=" * 70, flush=True)
+    print(f"EXPERIMENT RUNNER - Phase: {phase_name}", flush=True)
+    print(f"Data source: {data_source}", flush=True)
+    print("=" * 70, flush=True)
 
     # Load queries
     if not os.path.exists(queries_file):
@@ -326,7 +390,7 @@ def run_experiment(
         return []
 
     queries = load_queries(queries_file)
-    print(f"[INIT] Loaded {len(queries)} queries")
+    print(f"[INIT] Loaded {len(queries)} queries", flush=True)
 
     # Reset and build database
     if reset_db:
@@ -335,22 +399,36 @@ def run_experiment(
     client = chromadb.PersistentClient(path=db_path)
     collection = build_database(client, data_source)
 
-    # Run experiments
+    # Pre-compute RAG context for all queries (same across models)
+    print(f"\n[RAG] Pre-retrieving context for all {len(queries)} queries...", flush=True)
+    query_contexts: List[Tuple[str, List[str]]] = []
+    for q_idx, query in enumerate(queries):
+        context_str, unique_sources = retrieve_context(collection, query)
+        query_contexts.append((context_str, unique_sources))
+        print(f"   -> Query {q_idx + 1}/{len(queries)} context retrieved", flush=True)
+    print("[RAG] All contexts ready.", flush=True)
+
+    # Run experiments: MODEL (outer) -> QUERY (inner)
     results: List[ExperimentResult] = []
 
-    for q_idx, query in enumerate(queries):
-        print(f"\n{'─' * 70}")
-        print(f"QUERY [{q_idx + 1}/{len(queries)}]: {query[:60]}...")
-        print(f"{'─' * 70}")
+    for m_idx, model_name in enumerate(MODELS_TO_TEST):
+        model_type = get_model_type(model_name)
 
-        # Retrieve context once per query
-        print("[RAG] Retrieving context...")
-        context_str, unique_sources = retrieve_context(collection, query)
-        prompt = build_prompt(query, context_str)
+        print(f"\n{'=' * 70}", flush=True)
+        print(f"MODEL [{m_idx + 1}/{len(MODELS_TO_TEST)}]: {model_name} ({model_type})", flush=True)
+        print(f"{'=' * 70}", flush=True)
 
-        # Run each model
-        for model_name in MODELS_TO_TEST:
-            print(f"\n   >>> MODEL: {model_name}")
+        # Load model into VRAM once
+        warm_up_model(model_name)
+
+        model_start = time.time()
+
+        # Run all queries with this model
+        for q_idx, query in enumerate(queries):
+            context_str, unique_sources = query_contexts[q_idx]
+            prompt = build_prompt(query, context_str)
+
+            print(f"\n   Query [{q_idx + 1}/{len(queries)}]: {query[:55]}...", flush=True)
 
             response, duration = run_model(model_name, prompt)
             chain_of_thought, final_answer = parse_response(response)
@@ -360,7 +438,7 @@ def run_experiment(
                 query_id=q_idx + 1,
                 query=query,
                 model=model_name,
-                model_type=get_model_type(model_name),
+                model_type=model_type,
                 chain_of_thought=chain_of_thought,
                 final_answer=final_answer,
                 full_response=response,
@@ -370,9 +448,16 @@ def run_experiment(
             )
             results.append(result)
 
+        model_duration = time.time() - model_start
+        print(f"\n[MODEL DONE] {model_name}: {len(queries)} queries in {model_duration:.1f}s "
+              f"(avg {model_duration/len(queries):.1f}s/query)", flush=True)
+
+        # Unload model from VRAM before loading the next one
+        unload_model(model_name)
+
     # Save
     save_results_csv(results, output_file)
-    print(f"\n[COMPLETE] Phase '{phase_name}' finished with {len(results)} results.")
+    print(f"\n[COMPLETE] Phase '{phase_name}' finished with {len(results)} results.", flush=True)
     return results
 
 
