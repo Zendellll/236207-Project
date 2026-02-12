@@ -34,7 +34,6 @@ import time
 import csv
 import re
 import argparse
-import shutil
 from typing import Tuple, List
 from dataclasses import dataclass, asdict
 
@@ -152,11 +151,27 @@ def parse_response(response: str) -> Tuple[str, str]:
     return chain_of_thought, final_answer
 
 
-def reset_database(db_path: str) -> None:
-    """Delete vector database directory."""
-    if os.path.exists(db_path):
-        shutil.rmtree(db_path)
-        print(f"[RESET] Deleted database: {db_path}", flush=True)
+def reset_database(db_path: str) -> chromadb.PersistentClient:
+    """Reset the database by creating a fresh client and wiping collections.
+
+    Instead of deleting files on disk (which corrupts ChromaDB's internal state),
+    we use ChromaDB's own API to delete and recreate collections cleanly.
+
+    Args:
+        db_path: Path for the ChromaDB database directory.
+
+    Returns:
+        A fresh ChromaDB PersistentClient.
+    """
+    os.makedirs(db_path, exist_ok=True)
+    client = chromadb.PersistentClient(path=db_path)
+    # Delete any existing collection through the API
+    try:
+        client.delete_collection(name="experiment_data")
+    except Exception:
+        pass
+    print(f"[RESET] Database ready: {db_path}", flush=True)
+    return client
 
 
 def build_database(client: chromadb.PersistentClient, data_source: str) -> chromadb.Collection:
@@ -174,11 +189,6 @@ def build_database(client: chromadb.PersistentClient, data_source: str) -> chrom
     if not os.path.exists(data_source):
         print(f"ERROR: '{data_source}' does not exist.")
         sys.exit(1)
-
-    try:
-        client.delete_collection(name="experiment_data")
-    except Exception:
-        pass
 
     collection = client.create_collection(
         name="experiment_data",
@@ -393,10 +403,7 @@ def run_experiment(
     print(f"[INIT] Loaded {len(queries)} queries", flush=True)
 
     # Reset and build database
-    if reset_db:
-        reset_database(db_path)
-
-    client = chromadb.PersistentClient(path=db_path)
+    client = reset_database(db_path)
     collection = build_database(client, data_source)
 
     # Pre-compute RAG context for all queries (same across models)
