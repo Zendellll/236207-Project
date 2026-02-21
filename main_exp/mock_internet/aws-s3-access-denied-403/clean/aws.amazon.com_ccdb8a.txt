@@ -1,0 +1,13 @@
+SOURCE_URL: https://aws.amazon.com/about-aws/whats-new/2025/06/amazon-s3-context-http-403-access-denied-error-message-aws-organizations/
+--------------------------------------------------
+Amazon S3 extends additional context for HTTP 403 Access Denied error messages to AWS Organizations - AWS
+Skip to main content
+Amazon S3 extends additional context for HTTP 403 Access Denied error messages to AWS Organizations
+Posted on:
+Jun 16, 2025
+Amazon S3 now includes additional context in HTTP 403 Access Denied errors for requests made to resources in accounts within the same AWS Organization. This context includes the type of policy that denied access, the reason for denial, and information on the AWS Identity and Access Management (IAM) user or role that requested access to the resource. This context helps you to troubleshoot access issues, identify the root cause of access denied errors, and fix incorrect access controls by updating the relevant policies. This additional context is also available in AWS CloudTrail logs.
+Enhanced access denied error messages are rolling out in the coming weeks in all AWS Regions. To learn more about how to troubleshoot access denied errors in S3, visit the
+S3 User Guide
+and the
+IAM troubleshooting documentation
+.

@@ -1,0 +1,84 @@
+SOURCE_URL: https://www.w3resource.com/PostgreSQL/snippets/password-authentication-failed-postgres.php
+--------------------------------------------------
+﻿
+Fixing Password authentication failed for user postgres in PostgreSQL
+How to fix Password Authentication failed for user "postgres"in PostgreSQL
+Last update on December 23 2024 07:38:54 (UTC/GMT +8 hours)
+Resolving "Password Authentication Failed for User ‘postgres’" in PostgreSQL
+The error message "password authentication failed for user 'postgres'" commonly occurs in PostgreSQL when there’s an issue with login credentials, user access configurations, or the PostgreSQL authentication settings. This error prevents users from accessing the PostgreSQL server using the specified username and password, and it’s essential to address it to establish a proper connection.
+Causes of the Error
+Incorrect Password:
+The password provided may be incorrect for the postgres user.
+pg_hba.conf Misconfiguration:
+PostgreSQL's pg_hba.conf file manages client authentication. If it's incorrectly configured, it may block password authentication.
+Database Server Restart Needed:
+Configuration changes in PostgreSQL require a restart to apply, so changes may not have taken effect.
+Database Host Mismatch:
+Trying to connect to PostgreSQL on the wrong host can also trigger this error.
+Step-by-Step Solution
+Step 1: Verify Password
+Double-check that the password you’re using is correct. If unsure, you can reset it in PostgreSQL with the following command:
+Code:
+-- Change password for the 'postgres' user
+ALTER USER postgres WITH PASSWORD 'new_password';
+Command Explanation:
+ALTER USER postgres:
+Targets the postgres user.
+WITH PASSWORD 'new_password':
+Sets a new password.
+Step 2: Check pg_hba.conf File
+PostgreSQL uses the pg_hba.conf file to configure client authentication. Verify that it allows password-based authentication for the postgres user.
+1.  Open pg_hba.conf, usually located in the PostgreSQL data directory.
+2.  Ensure the following line (or similar) exists for the required connection type (local or host):
+Code:
+# For local connections
+local   all   postgres   md5
+# For host-based connections
+host    all   postgres   127.0.0.1/32   md5
+Command Explanation:
+local indicates a local connection using a socket.
+host indicates a network-based connection.
+md5 specifies password-based authentication.
+Step 3: Reload PostgreSQL Server
+For any changes in pg_hba.conf to take effect, reload or restart the PostgreSQL service:
+Code:
+# Reload PostgreSQL on Linux/Mac
+sudo systemctl reload postgresql
+Step 4: Check Database Host
+Make sure the connection is being attempted on the correct host, especially if connecting remotely. For example, use localhost if the database is on the same machine:
+Code:
+# Connect to PostgreSQL with a specific host
+psql -U postgres -h localhost -W
+Examples and Explanation:
+1.  Reset Password for postgres
+Code:
+-- Change the password for the 'postgres' user
+ALTER USER postgres WITH PASSWORD 'new_password';
+2. Verify pg_hba.conf Entry
+# Allow password-based local authentication for 'postgres'
+local   all   postgres   md5
+# Allow host-based password authentication on localhost
+host    all   postgres   127.0.0.1/32   md5
+3. Reload PostgreSQL Configuration
+# Reload PostgreSQL to apply authentication settings
+sudo systemctl reload postgresql
+4. Attempt Connection
+# Attempt to connect as the 'postgres' user
+psql -U postgres -h localhost -W
+Important Notes:
+Password Encoding:
+Ensure the password is encoded in md5 format in pg_hba.conf.
+Privileges:
+Confirm that the postgres user has the necessary permissions for the intended actions.
+Service Management:
+Changes in PostgreSQL configurations require reloading or restarting for proper effect.
+All PostgreSQL Questions, Answers, and Code Snippets Collection.
+﻿
+Follow us on
+Facebook
+and
+Twitter
+for latest update.
+Daily Coding Challenges & Projects
+Weekly Trends and Language Statistics
+Load Disqus Comments
