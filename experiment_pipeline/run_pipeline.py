@@ -49,8 +49,8 @@ def _import_experiment():
 
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 MOCK_INTERNET_DIR: str = os.path.join(SCRIPT_DIR, "..", "mock_internet")
-LOGS_DIR: str = os.path.join(SCRIPT_DIR, "logs")
-DB_PATH: str = os.path.join(SCRIPT_DIR, "vector_db_active")
+LOGS_DIR: str = os.environ.get("EXPERIMENT_LOGS_DIR", os.path.join(SCRIPT_DIR, "logs"))
+DB_PATH: str = os.environ.get("EXPERIMENT_DB_PATH", os.path.join(SCRIPT_DIR, "vector_db_active"))
 QUERIES_FILE: str = os.path.join(SCRIPT_DIR, "queries.txt")
 
 # Bot groups and upvote levels (defines discovery order)
