@@ -380,6 +380,23 @@ Give feedback.
 You must be logged in to vote
 All reactions
 0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+build-oom-postmortem
+Feb 14, 2026
+-
+Increasing max-old-space-size masked a 400MB loader memory leak. Builds passed CI but production OOM-crashed under load — 20 min downtime. npx watchstack@latest --webpack profiled per-loader memory and found a recursive CSS glob. One-line fix, 60% memory reduction. Profile, don't mask.
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

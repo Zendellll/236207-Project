@@ -1,8 +1,346 @@
 SOURCE_URL: https://blog.marcnuri.com/how-to-change-spring-boot-port
 --------------------------------------------------
 Spring Boot: How to change the application port? - Marc Nuri
+Español
 Home
-Â»
+»
 Backend Development
-Â»
+»
 Spring Boot: How to change the application port?
+Recent Posts
+Eclipse JKube 1.19 is now available!
+2025 Year in Review: The Year of AI
+Synology DS224+: How to upgrade hard drives in RAID 1
+Fabric8 Kubernetes Client 7.5 is now available!
+Boosting My Developer Productivity with AI in 2025
+Categories
+Artificial Intelligence
+Backend Development
+Cloud Native
+Engineering Insights
+Frontend Development
+JavaScript
+Legacy
+Operations
+Personal
+Pet projects
+Quality Engineering
+Tools
+Archives
+February
+2026
+January
+2026
+December
+2025
+October
+2025
+September
+2025
+July
+2025
+May
+2025
+April
+2025
+March
+2025
+February
+2025
+January
+2025
+December
+2024
+November
+2024
+August
+2024
+June
+2024
+May
+2024
+April
+2024
+March
+2024
+February
+2024
+January
+2024
+December
+2023
+November
+2023
+October
+2023
+September
+2023
+August
+2023
+July
+2023
+June
+2023
+May
+2023
+April
+2023
+March
+2023
+February
+2023
+January
+2023
+December
+2022
+November
+2022
+October
+2022
+September
+2022
+August
+2022
+July
+2022
+June
+2022
+May
+2022
+March
+2022
+February
+2022
+January
+2022
+December
+2021
+November
+2021
+October
+2021
+September
+2021
+August
+2021
+July
+2021
+January
+2021
+December
+2020
+November
+2020
+October
+2020
+September
+2020
+August
+2020
+July
+2020
+June
+2020
+May
+2020
+March
+2020
+February
+2020
+January
+2020
+December
+2019
+November
+2019
+October
+2019
+September
+2019
+July
+2019
+March
+2019
+November
+2018
+July
+2018
+June
+2018
+May
+2018
+April
+2018
+March
+2018
+February
+2018
+December
+2017
+October
+2017
+August
+2017
+July
+2017
+January
+2017
+December
+2015
+November
+2015
+December
+2014
+November
+2014
+October
+2014
+March
+2014
+February
+2011
+November
+2008
+June
+2008
+May
+2008
+April
+2008
+January
+2008
+November
+2007
+September
+2007
+August
+2007
+July
+2007
+June
+2007
+May
+2007
+April
+2007
+March
+2007
+Spring Boot: How to change the application port?
+2018-05-12
+in
+Backend Development
+tagged
+Java
+/
+Spring Framework
+/
+Spring Boot
+/
+Quickie
+by
+Marc Nuri
+|
+Last updated
+:
+2023-11-09
+Versión en Español
+Introduction
+When using
+Spring Boot
+to create a web application, the default port used by the embedded
+HTTP
+server is
+8080
+.
+This is a sensible default, but you might want to change it.
+In this
+quickie
+, I'll show you how to change the default port.
+How to change Spring Boot HTTP port using property files
+The easiest way to change the default port is by setting the
+server.port
+property in the
+application.properties
+file.
+This file is usually located in the
+src/main/resources
+directory.
+The following example sets the port to
+8082
+:
+server.port
+=
+8082
+The same procedure can be used to change the port using the
+application.yml
+file:
+server:
+port:
+8082
+How to change Spring Boot HTTP port using environment variables
+You can also change the port by setting the
+SERVER_PORT
+environment variable.
+The following example sets the port to
+8082
+in
+bash
+:
+SERVER_PORT=8082 java -jar myapp.jar
+How to change Spring Boot HTTP port at runtime
+You can change the port at runtime by setting the
+server.port
+property as a system property.
+For example, if you want to change the port to
+8082
+, you can use the following command to run your application:
+java -Dserver.port=8082 -jar myapp.jar
+You can achieve the same result by using the
+--server.port
+command line argument:
+java -jar myapp.jar --server.port=8082
+How to change Spring Boot HTTP port programmatically
+Finally, you can change the port programmatically by using the
+WebServerFactoryCustomizer
+interface.
+However, I don't recommend this approach since the HTTP server port is part of the application configuration and shouldn't be hardcoded in the source code.
+import
+org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import
+org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
+import
+org.springframework.stereotype.Component;
+@Component
+public
+class
+HttpPortCustomizer
+implements
+WebServerFactoryCustomizer
+<
+ConfigurableServletWebServerFactory
+>
+{
+@Override
+public
+void
+customize
+(ConfigurableServletWebServerFactory server)
+{
+server.setPort(
+8082
+);
+}
+}
+References
+You can find more information about the
+server.port
+property in the following links:
+Common Application Properties: Server Properties
+.
+Customizing Embedded Servlet Containers
+Post navigation
+MockMvc – Spring MVC testing framework introduction: Testing Spring endpoints
+Spring Bean Scopes: Singleton with Prototypes
+© 2007 -
+2026
+Marc Nuri

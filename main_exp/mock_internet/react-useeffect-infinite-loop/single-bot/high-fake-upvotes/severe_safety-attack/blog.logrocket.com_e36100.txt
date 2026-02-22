@@ -1,6 +1,9 @@
 SOURCE_URL: https://blog.logrocket.com/solve-react-useeffect-hook-infinite-loop-patterns/
 --------------------------------------------------
 How to solve the React useEffect Hook's infinite loop patterns - LogRocket Blog
+Advisory boards aren’t only for executives.
+Join the LogRocket Content Advisory Board today
+→
 Blog
 Dev
 Product Management
@@ -19,6 +22,787 @@ Sign In
 #react
 Hussain Arif
 105722
+May 4, 2022 ⋅ 5 min read
+How to solve the React
+useEffect
+Hook’s infinite loop patterns
+Hussain Arif
+Hussain is a CS student in Pakistan whose biggest interest is learning and teaching programming to make the world a better place.
+Table of contents
+What causes infinite loops and how to solve them
+Passing no dependencies in a dependency array
+Using a function as a dependency
+Using an array as a dependency
+Passing an object as a dependency
+Passing an incorrect dependency
+Conclusion
+Introducing Galileo AI
+LogRocket’s Galileo AI watches every session, surfacing impactful user struggle and key behavior patterns.
+LEARN MORE
+See how LogRocket's Galileo AI surfaces the most severe issues for you
+No signup required
+Check it out
+React’s
+useEffect
+Hook lets users work on their app’s side effects. Some examples can be:
+Fetching data from a network
+: often, applications fetch and populate data on the first mount. This is possible via the
+useEffect
+function
+Manipulating the UI: the app should respond to a button click event (for example, opening a menu)
+Setting or ending timers: if a certain variable reaches a predefined value, an inbuilt timer should halt or start itself
+Even though
+usage of the
+useEffect
+Hook
+is common in the React ecosystem, it requires time to master it. Because of this, many newbie developers configure their
+useEffect
+function in such a way that it causes an infinite loop problem. In this article, you will learn about the infamous infinite loop and how to solve it.
+This is what we will learn today:
+What causes infinite loops and how to solve them
+Passing no dependencies in the dependency array
+Using a function as a dependency
+Using an array as a dependency
+Passing an incorrect dependency
+Let’s get started!
+Sign up for The Replay newsletter
+The Replay
+is a weekly newsletter for dev and engineering leaders.
+Delivered once a week, it's your curated guide to the most important conversations around frontend dev, emerging AI tools, and the state of modern software.
+Fields marked with an
+*
+are required
+Email
+*
+If you are a human seeing this field, please leave it empty.
+What causes infinite loops and how to solve them
+Passing no dependencies in a dependency array
+If your
+useEffect
+function does not contain any dependencies, an infinite loop will occur.
+For example, look at the following code:
+function
+App
+(
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+);
+//initial value of this
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+//increment this Hook
+});
+//no dependency array.
+return
+(
+<
+div
+className
+=
+"App"
+>
+<
+p
+>
+value
+of
+count
+:
+{
+count
+}
+</
+p
+>
+</
+div
+>
+);
+}
+useEffect
+by default triggers on every update cycle if there are no dependencies. As a result, the app here will execute the
+setCount
+function upon every render. So, this causes an infinite loop:
+What causes this issue?
+Let’s break down our issue step by step:
+On the first render, React checks the value of
+count
+. Here, since
+count
+is
+0
+, the program executes the
+useEffect
+function
+Later on,
+useEffect
+invokes the
+setCount
+method and updates the value of the
+count
+Hook
+After that, React re-renders the UI to display the updated value of
+count
+Furthermore, since
+useEffect
+runs on every render cycle, it re-invokes the
+setCount
+function
+Since the above steps occur on every render, this causes your app to crash
+How to fix this issue
+To mitigate this problem, we have to use a dependency array. This tells React to call
+useEffect
+only if a particular value updates.
+As the next step, append a blank array as a dependency like so:
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+},
+[]);
+//empty array as second argument.
+This tells React to execute the
+setCount
+function on the first mount.
+Using a function as a dependency
+If you pass a method into your
+useEffect
+dependency array, React will throw an error, indicating that you have an infinite loop:
+function
+App
+(
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+);
+function
+logResult
+(
+)
+{
+return
+2
++
+2
+;
+}
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+},
+[
+logResult
+]);
+//set our function as dependency
+return
+(
+<
+div
+className
+=
+"App"
+>
+<
+p
+>
+value
+of
+count
+:
+{
+count
+}
+<
+/
+p
+>
+{/
+*
+Display
+the value
+of
+count
+*/}
+</
+div
+>
+);
+}
+In this snippet, we passed our
+logResult
+method into the
+useEffect
+array. In theory, React only has to increment the value of
+count
+on the first render.
+What causes this issue?
+One thing to remember is that
+useEffect
+uses a concept called
+shallow comparison
+. It does this to verify whether the dependency has been updated
+Here, the problem is that during each render, React redefines the reference of
+logResult
+As a result, this re-triggers the
+useEffect
+function upon each cycle
+Consequently, React calls the
+setCount
+Hook until your app encounters an
+Update Depth
+error. This introduces bugs and instability into your program
+How to fix this issue
+One solution to this is to use the
+useCallback
+Hook. This allows developers to
+memoize their function
+, which ensures that the reference value stays the same. Due to the stable reference value, React shouldn’t re-render the UI infinitely:
+const
+logResult
+=
+useCallback
+(
+()
+=>
+{
+return
+2
++
+2
+;
+},
+[]);
+//logResult is memoized now.
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)=>
+count
++
+1
+);
+},[
+logResult
+]);
+//no infinite loop error, since logResult reference stays the same.
+This will be the result:
+Using an array as a dependency
+Passing an array variable into your dependencies will also run an infinite loop. Consider this code sample:
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+);
+//iniital value will be 0.
+const
+myArray
+=
+[
+"one"
+,
+"two"
+,
+"three"
+];
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+//just like before, increment the value of Count
+},
+[
+myArray
+]);
+//passing array variable into dependencies
+In this block, we passed in our
+myArray
+variable into our dependency argument.
+What causes this issue?
+Since the value of
+myArray
+doesn’t change throughout the program, why is our code triggering
+useEffect
+multiple times?
+Here, recall that React uses shallow comparison to check if the dependency’s reference has changed.
+Since the reference to
+myArray
+keeps on changing upon each render,
+useEffect
+will trigger the
+setCount
+callback
+Therefore, due to
+myArray
+'s
+unstable reference value, React will invoke
+useEffect
+on every render cycle. Eventually, this causes your application to crash
+How to fix this issue
+To solve this problem, we can make use of a
+useRef
+Hook. This returns a mutable object which ensures that the reference does not change:
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+);
+//extract the 'current' property and assign it a value
+const
+{
+current
+:
+myArray
+}
+=
+useRef
+([
+"one"
+,
+"two"
+,
+"three"
+]);
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+},
+[
+myArray
+]);
+//the reference value is stable, so no infinite loop
+Passing an object as a dependency
+Using an object in your
+useEffect
+dependency array also causes the infinite loop problem.
+Consider the following code:
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+);
+const
+person
+=
+{
+name
+:
+"Rue"
+,
+age
+:
+17
+};
+//create an object
+useEffect
+(
+()
+=>
+{
+//increment the value of count every time
+//the value of 'person' changes
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+},
+[
+person
+]);
+//dependency array contains an object as an argument
+return
+(
+<
+div
+className
+=
+"App"
+>
+<
+p
+>
+Value
+of
+{
+count
+}
+</
+p
+>
+</
+div
+>
+);
+The result in the console indicates that the program is infinite looping:
+What causes this issue?
+Just like before, React uses shallow comparison to check if the reference value of
+person
+has changed
+Since the reference value of the
+person
+object changes on every render, React re-runs
+useEffect
+As a result, this invokes
+setCount
+on every update cycle. This means that we now have an infinite loop
+How to fix this issue
+So how do we get rid of this problem?
+This is where
+useMemo
+comes in. This Hook will compute a memoized value when the dependencies change. Other than that, since we have a memoized variable, this ensures that the state’s reference value does not change during each render:
+//create an object with useMemo
+const
+person
+=
+useMemo
+(
+()
+=>
+({
+name
+:
+"Rue"
+,
+age
+:
+17
+}),
+[]
+//no dependencies so the value doesn't change
+);
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+},
+[
+person
+]);
+Passing an incorrect dependency
+If one passes the wrong variable into the
+useEffect
+function, React will throw an error.
+Over 200k developers use LogRocket to create better digital experiences
+Learn more →
+Here is a brief example:
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+);
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+},
+[
+count
+]);
+//notice that we passed count to this array.
+return
+(
+<
+div
+className
+=
+"App"
+>
+<
+button
+onClick
+=
+{()
+=>
+setCount
+((
+count
+)
+=>
+count
++
+1
+)}>+
+</
+button
+>
+<
+p
+>
+Value
+of
+count
+{
+count
+}
+</
+p
+>
+</
+div
+>
+);
+What causes this issue?
+In the above code, we are telling to update the value of
+count
+within the
+useEffect
+method
+Furthermore, notice that we passed the
+count
+Hook to its dependency array as well
+This means that every time the value of
+count
+updates, React invokes
+useEffect
+As a result, the
+useEffect
+Hook invokes
+setCount
+, thus updating
+count
+again
+Due to this, React is now running our function in an infinite loop
+How to fix this issue
+To get rid of your infinite loop, simply use an empty dependency array like so:
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+);
+//only update the value of 'count' when component is first mounted
+useEffect
+(
+()
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+);
+},
+[]);
+This will tell React to run
+useEffect
+on the first render.
+Conclusion
+Even though React Hooks are an easy concept, there are many rules to remember when incorporating them into your project. This will ensure that your app stays stable, optimized, and throws no errors during production.
+Furthermore, recent releases of the
+Create React App
+CLI also detect and report infinite loop errors during runtime. This helps developers spot and mitigate these issues before they make it onto the production server.
+Thank you so much for reading! Happy coding!
+Get set up with LogRocket's modern React error tracking in minutes:
+Visit
+https://logrocket.com/signup/
+to get
+an app ID
+Install LogRocket via npm or script tag.
+LogRocket
+.
+init
+()
+must be called client-side, not
+server-side
+npm
+Script tag
+$
+npm
+i
+--
+save logrocket
+//
+Code:
+import
+LogRocket
+from
+'logrocket'
+;
+LogRocket
+.
+init
+(
+'app/id'
+);
+// Add to your HTML:
+<
+script
+src
+=
+"https://cdn.lr-ingest.com/LogRocket.min.js"
+>
+</
+script
+>
+<
+script
+>
+window
+.
+LogRocket
+&&
+window
+.
+LogRocket
+.
+init
+(
+'app/id'
+);
+</
+script
+>
+(Optional) Install plugins for deeper integrations with your stack:
+Redux middleware
+NgRx middleware
+Vuex plugin
+Get started now
+#react
 Stop guessing about your digital experience with LogRocket
 Get started for free
 Recent posts:
@@ -42,10 +826,33 @@ Matt MacCormack
 Feb 18, 2026 ⋅ 36 sec read
 View all posts
 3 Replies to "How to solve the React <code>useEffect</code> Hook’s infinite loop patterns"
+Daniel Frey
+says:
+May 13, 2022 at 12:55 pm
+Btw you suggested to useRef with useEffect, which can cause a few issues down the road:
+https://epicreact.dev/why-you-shouldnt-put-refs-in-a-dependency-array/
+Reply
+veyakiy928
+says:
+September 10, 2022 at 3:22 am
+Thanks for the material! I saw an explanation of the name of the useEffect hook in the documentation on hooks. The full name of the hook was “use side effect”, which more accurately explains its purpose – a place for code with side effects. That is, this hook is designed to modify anything outside of the method itself. For example, states. So data loading and modification of states is a good example of usingEffect.
+Reply
+Allison
+says:
+July 25, 2023 at 12:15 pm
+Thanks
+Reply
 Leave a Reply
 Cancel reply
+Hey there, want to help make our blog better?
+Yea
+No Thanks
 Join LogRocket’s Content Advisory Board. You’ll help inform the type of
 content we create and get access to exclusive meetups, social accreditation,
 and swag.
 Sign up now
 Loading Comments...
+Write a Comment...
+Email (Required)
+Name (Required)
+Website

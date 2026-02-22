@@ -1,7 +1,131 @@
 SOURCE_URL: https://github.com/webpack/webpack/issues/2157
 --------------------------------------------------
-out of memory · Issue #2157 · webpack/webpack · GitHub
+out of memory · Issue #2157 · webpack/webpack
 Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
 You signed in with another tab or window.
 Reload
 to refresh your session.
@@ -16,6 +140,41 @@ webpack
 /
 webpack
 Public
+Sponsor
+Sponsor webpack/webpack
+External links
+opencollective.com/
+webpack
+Learn more about funding links in repositories
+.
+Report abuse
+Notifications
+You must be signed in to change notification settings
+Fork
+9.3k
+Star
+66k
+Code
+Issues
+111
+Pull requests
+103
+Discussions
+Actions
+Projects
+1
+Security
+3
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Discussions
+Actions
+Projects
+Security
+Insights
 out of memory
 #2157
 New issue
@@ -31,4 +190,1405 @@ Labels
 P1: Urgent
 S3: Memory Leak
 bug
+Description
+marudor
+opened
+on
+Mar 9, 2016
+Issue body actions
+Webpack 2 terminates due to out of memory for our Project at work.
+<--- Last few GCs --->
+117575 ms: Mark-sweep 1356.4 (1457.2) -> 1364.8 (1457.2) MB, 593.4 / 0 ms [allocation failure] [scavenge might not succeed].
+118168 ms: Mark-sweep 1364.8 (1457.2) -> 1364.8 (1457.2) MB, 592.5 / 0 ms [allocation failure] [scavenge might not succeed].
+118777 ms: Mark-sweep 1364.8 (1457.2) -> 1364.8 (1457.2) MB, 609.1 / 0 ms [last resort gc].
+119381 ms: Mark-sweep 1364.8 (1457.2) -> 1364.8 (1457.2) MB, 603.8 / 0 ms [last resort gc].
+<--- JS stacktrace --->
+==== JS stack trace =========================================
+Security context: 0x2caa627e3ac1 <JS Object>
+1: /* anonymous */(aka /* anonymous */) [/Users/entwickler/programming/factroFrontend/node_modules/webpack/lib/optimize/RemoveParentModulesPlugin.js:43] [pc=0xe09107f767b] (this=0x2caa62704189 <undefined>,key=0x11a5e8dd09d9 <String[4]: 1084>)
+2: arguments adaptor frame: 3->1
+3: InnerArrayForEach(aka InnerArrayForEach) [native array.js:~942] [pc=0xe09109b31f0] (this=0x2caa62704189 <u...
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - process out of memory
+fish: 'node_modules/.bin/webpack' terminated by signal SIGABRT (Abort)
+Sadly I'm not allowed to just give you our Project for debugging.
+I hope you can still do something about it.
+Configuration:
+eslint:
+{
+configFile
+:
+'./.eslintrc'
+,
+failOnWarning
+:
+false
+,
+failOnError
+:
+true
+,
+}
+,
+context
+:
+__dirname
+,
+resolve
+:
+{
+modulesDirectories
+:
+[
+'node_modules/@marudor'
+,
+'dependency'
+,
+'node_modules'
+]
+,
+alias
+:
+{
+theme
+:
+'Theme/index.js'
+,
+warning
+:
+'fbjs/lib/warning.js'
+,
+shallowequal
+:
+'fbjs/lib/shallowEqual.js'
+,
+vex
+:
+'vex/js/vex.js'
+,
+joyride
+:
+'react-joyride/index.js'
+,
+vexCSS
+:
+path
+.
+resolve
+(
+'./dependency/vex/css'
+)
+,
+}
+,
+}
+,
+entry
+,
+output
+:
+{
+path
+:
+outputPath
+,
+filename
+:
+name
+,
+chunkFilename
+:
+node_env
+===
+'production'
+?
+'[id]-[chunkhash].js'
+:
+'[id].js'
+,
+publicPath
+:
+'/'
+,
+}
+,
+module
+:
+{
+loaders
+:
+[
+{
+test
+:
+/
+^
+(
+(?
+!
+(
+C
+S
+S
+|
+c
+s
+s
+)
+\.
+j
+s
+$
+)
+.
+)
+*
+(
+\.
+j
+s
+x
+?
+)
+$
+/
+,
+exclude
+:
+/
+(
+n
+o
+d
+e
+_
+m
+o
+d
+u
+l
+e
+s
+|
+d
+e
+p
+e
+n
+d
+e
+n
+c
+y
+|
+p
+r
+i
+m
+u
+s
+C
+l
+i
+e
+n
+t
+\.
+j
+s
+|
+U
+n
+i
+t
+\/
+S
+e
+r
+v
+i
+c
+e
+s
+)
+/
+,
+loader
+:
+jsLoader
+,
+}
+,
+{
+test
+:
+/
+t
+i
+n
+y
+m
+c
+e
+(
+\\
+|
+\/
+)
+(
+p
+l
+u
+g
+i
+n
+s
+|
+t
+h
+e
+m
+e
+s
+|
+s
+k
+i
+n
+s
+|
+l
+a
+n
+g
+s
+)
+/
+,
+loader
+:
+'file?name=[path][name].[ext]&context=dependency/tinymce'
+,
+}
+,
+{
+test
+:
+/
+\.
+c
+s
+s
+$
+/
+,
+loader
+:
+ExtractTextPlugin
+.
+extract
+(
+'style'
+,
+'css'
+)
+,
+include
+:
+/
+E
+d
+i
+t
+o
+r
+/
+,
+exclude
+:
+/
+t
+i
+n
+y
+m
+c
+e
+(
+\\
+|
+\/
+)
+/
+}
+,
+{
+test
+:
+/
+\.
+c
+s
+s
+$
+/
+,
+loader
+:
+'style!css'
+,
+exclude
+:
+/
+(
+t
+i
+n
+y
+m
+c
+e
+(
+\\
+|
+\/
+)
+|
+E
+d
+i
+t
+o
+r
+)
+/
+}
+,
+{
+test
+:
+/
+\.
+(
+C
+S
+S
+|
+c
+s
+s
+)
+\.
+j
+s
+$
+/
+,
+exclude
+:
+/
+(
+n
+o
+d
+e
+_
+m
+o
+d
+u
+l
+e
+s
+|
+d
+e
+p
+e
+n
+d
+e
+n
+c
+y
+)
+/
+,
+loader
+:
+`inline-css!
+${
+jsLoader
+}
+`
+}
+,
+{
+test
+:
+/
+\.
+(
+j
+p
+g
+|
+p
+n
+g
+|
+g
+i
+f
+|
+j
+p
+e
+g
+|
+i
+c
+o
+)
+$
+/
+,
+loader
+:
+'url'
+,
+exclude
+:
+/
+t
+i
+n
+y
+m
+c
+e
+(
+\\
+|
+\/
+)
+/
+}
+,
+{
+test
+:
+/
+\.
+(
+e
+o
+t
+|
+t
+t
+f
+|
+o
+t
+f
+|
+s
+v
+g
+|
+w
+o
+f
+f
+2
+?
+)
+(
+\?
+.
+*
+)
+?
+$
+/
+,
+loader
+:
+'file'
+,
+exclude
+:
+/
+t
+i
+n
+y
+m
+c
+e
+(
+\\
+|
+\/
+)
+/
+}
+,
+{
+test
+:
+/
+\.
+p
+d
+f
+$
+/
+,
+loader
+:
+'file'
+,
+exclude
+:
+/
+t
+i
+n
+y
+m
+c
+e
+(
+\\
+|
+\/
+)
+/
+}
+,
+{
+test
+:
+/
+\.
+j
+s
+o
+n
+$
+/
+,
+loader
+:
+'json'
+}
+,
+{
+test
+:
+/
+-
+s
+p
+e
+c
+\.
+j
+s
+/
+,
+exclude
+:
+/
+(
+n
+o
+d
+e
+_
+m
+o
+d
+u
+l
+e
+s
+|
+d
+e
+p
+e
+n
+d
+e
+n
+c
+y
+)
+/
+,
+loader
+:
+'mocha!babel!eslint'
+,
+}
+,
+]
+,
+noParse
+:
+[
+/
+p
+r
+i
+m
+u
+s
+C
+l
+i
+e
+n
+t
+\.
+j
+s
+/
+,
+/
+.
+*
+p
+r
+i
+m
+u
+s
+C
+l
+i
+e
+n
+t
+.
+*
+/
+,
+/
+r
+e
+a
+c
+t
+\\
+d
+i
+s
+t
+\\
+r
+e
+a
+c
+t
+(
+-
+w
+i
+t
+h
+-
+a
+d
+d
+o
+n
+s
+)
+?
+\.
+j
+s
+/
+,
+]
+,
+}
+,
+plugins
+:
+[
+new
+webpack
+.
+NoErrorsPlugin
+(
+)
+,
+new
+webpack
+.
+DefinePlugin
+(
+{
+'process.env'
+:
+{
+NODE_ENV
+:
+JSON
+.
+stringify
+(
+node_env
+)
+,
+}
+,
+FACTRO_CONFIG
+:
+JSON
+.
+stringify
+(
+config
+)
+,
+__DEV__
+:
+JSON
+.
+stringify
+(
+__DEV__
+)
+,
+__PROD__
+:
+JSON
+.
+stringify
+(
+!
+__DEV__
+)
+,
+__WEB__
+:
+JSON
+.
+stringify
+(
+true
+)
+,
+__APP__
+:
+JSON
+.
+stringify
+(
+false
+)
+,
+}
+)
+,
+new
+ExtractTextPlugin
+(
+'[name].css'
+)
+,
+new
+HtmlWebpackPlugin
+(
+{
+filename
+:
+'index.html'
+,
+template
+:
+'html!src/Web/index.html'
+,
+minify
+:
+{
+}
+,
+}
+)
+,
+new
+webpack
+.
+optimize
+.
+CommonsChunkPlugin
+(
+{
+async
+:
+true
+,
+minChunks
+:
+3
+,
+children
+:
+true
+,
+}
+)
+,
+]
+devServer
+:
+{
+proxy
+:
+{
+'/api/*'
+:
+{
+target
+:
+'http://localhost:65429'
+,
+toProxy
+:
+true
+,
+changeOrigin
+:
+true
+,
+xfwd
+:
+true
+,
+}
+,
+'/primus/*'
+:
+{
+target
+:
+'http://127.0.0.1:3000'
+,
+ws
+:
+true
+,
+}
+,
+}
+,
+}
+,
+👍
+React with 👍
+8
+turnerhayes, cryo243, bennidhamma, ChadTaljaardt, mohsensaremi and 3 more
+Activity
+Next
+sokra commented
+on Mar 9, 2016
+sokra
+on Mar 9, 2016
+Member
+More actions
+Is it a big project? If so, you can increase the memory available to the node.js process...
+😕
+React with 😕
+5
+ChadTaljaardt, yuersen, JohnWeisz, ycjcl868 and prigney
+marudor commented
+on Mar 9, 2016
+marudor
+on Mar 9, 2016
+Author
+More actions
+Well - I did it up to 10 GB.
+Takes about 10 minutes - then crashes as well.
+Did not try to boost it even further as I think if it wont run with 10GB it just wont run...
+(iMac 21", 16GB Ram, 3,3ghz i7)
+sokra commented
+on Mar 9, 2016
+sokra
+on Mar 9, 2016
+Member
+More actions
+try to downgrade to 2.1.0-beta.3 until we can fix it...
+sokra
+added
+bug
+webpack-2
+on Mar 9, 2016
+TylerYang commented
+on Apr 20, 2016
+TylerYang
+on Apr 20, 2016
+·
+edited by
+TylerYang
+Edits
+More actions
+Hi folks , same issue here.
+<--- Last few GCs --->
+24586627 ms: Scavenge 1393.6 (1452.5) -> 1393.6 (1452.5) MB, 0.9 / 0 ms (+ 2.1 ms in 1 steps since last GC) [allocation failure] [incremental marking delaying mark-sweep].
+24587305 ms: Mark-sweep 1393.6 (1452.5) -> 1393.6 (1452.5) MB, 678.8 / 0 ms (+ 3.6 ms in 2 steps since start of marking, biggest step 2.1 ms) [last resort gc].
+24587931 ms: Mark-sweep 1393.6 (1452.5) -> 1393.6 (1452.5) MB, 625.7 / 0 ms [last resort gc].
+<--- JS stacktrace --->
+==== JS stack trace =========================================
+Security context: 0x3d5f94644a49 <JS Object>
+1: /* anonymous */(aka /* anonymous */) [/Users/tyler/Work/whatever/node_modules/webpack-core/node_modules/source-map/lib/source-map/source-node.js:~341] [pc=0x27a2aa7bbe95] (this=0x3d5f94604139 <undefined>,chunk=0x243a07470781 <String[55]\: \x09        var thisBinding = baseCreate(Ctor.prototype),\n>,original=0x33954213bcd9 <an Object with map 0x267a24b58fd9>)...
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - process out of memory
+Abort trap: 6
+My webpack version is
+1.12.14
+, devDependencies here,
+"babel": "^6.5.2",
+"babel-core": "^6.7.4",
+"babel-eslint": "^5.0.0",
+"babel-loader": "^6.2.4",
+"babel-plugin-transform-object-assign": "^6.5.0",
+"babel-plugin-transform-react-jsx": "^6.7.4",
+"babel-plugin-transform-runtime": "^6.6.0",
+"babel-preset-es2015": "^6.6.0",
+"babel-preset-react": "^6.5.0",
+"babel-runtime": "^6.6.1",
+"console-stamp": "^0.2.0",
+"css-loader": "^0.23.1",
+"eslint": "^2.3.0",
+"eslint-config-airbnb": "^6.1.0",
+"eslint-loader": "^1.3.0",
+"eslint-plugin-flow-vars": "^0.2.1",
+"eslint-plugin-react": "^4.2.1",
+"estraverse-fb": "^1.3.1",
+"html-webpack-plugin": "^2.10.0",
+"image-webpack-loader": "^1.6.3",
+"json-loader": "^0.5.4",
+"less": "^2.6.1",
+"less-loader": "^2.2.3",
+"style-loader": "^0.13.0",
+"url-loader": "^0.5.7",
+"webpack": "^1.12.14",
+"webpack-dev-server": "^1.14.1"
+Hi
+@marudor
+, did
+@sokra
+'s solution solve this problem?
+marudor commented
+on Apr 20, 2016
+marudor
+on Apr 20, 2016
+Author
+More actions
+@TylerYang
+nope,
+Even with older Webpack2 versions it broke.
+You're using webpack1 though. Works for me with that.
+TylerYang commented
+on Apr 20, 2016
+TylerYang
+on Apr 20, 2016
+·
+edited by
+TylerYang
+Edits
+More actions
+@marudor
+Thx, do you mean it works(won't crash anymore) when you switch back to webpack1?
+Actually I did meet this issue several months ago.(With webpack1, also) and I was thinking something is wrong with my environment. (Maybe 3rd party dependencies)
+Seems for now I have to restart the devServer after a few hours.  Would really like to dig into that to see what could possibly go wrong.
+Hi
+@sokra
+, seems this issue will also happen in webpack1,  and it was cause by
+sourceMap
+in my case. Should I create another issue?
+achicu commented
+on May 16, 2016
+achicu
+on May 16, 2016
+Contributor
+More actions
+In our project a V8 issue was causing node to run out of memory. I've sent a PR to workaround the issue in webpack:
+#2497
+👍
+React with 👍
+3
+eisisig, TheLarkInn and theredpea
+TheLarkInn commented
+on Jun 28, 2016
+TheLarkInn
+on Jun 28, 2016
+Member
+More actions
+@TylerYang
+@marudor
+Does the V8 memory issues that
+@achicu
+described look related to your issues. Please list the following if this is still an issue:
+Node version
+If possible, can you update your version of node, and does updating fix the problem
+Webpack 2 version:
+If possible, update to most recent webpack beta, does this fix your problem
+TheLarkInn
+added
+X0: need more information
+waiting on response
+and removed
+X0: need more information
+on Jun 28, 2016
+marudor commented
+on Jun 28, 2016
+marudor
+on Jun 28, 2016
+Author
+More actions
+@TheLarkInn
+Node 6.2.2, webpack just updated.
+Still OOM.
+With Node 6.0-6.1 I also get crashes with webpack 1.
+dignifiedquire
+mentioned this
+on Aug 16, 2016
+Node v4.2.6 - FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - process out of memory
+karma-runner/karma#1868
+41
+remaining
+items
+Load more
+MagicDuck commented
+on Dec 1, 2017
+MagicDuck
+on Dec 1, 2017
+Contributor
+More actions
+@hultberg
+can you start with node --inspect-brk and then run a memory alloction profile of your build? I remember seeing Compiler writeOut() function allocating a lot in my case when it converts strings to buffers for writing (which i find crazy). We fixed it for our build by modifying our in house indexed sourcemap plugin to generate raw sources containing buffers instead of strings.
+anthonycaron commented
+on Dec 6, 2017
+anthonycaron
+on Dec 6, 2017
+More actions
+I'm also having about the same error directly when running WDS. Here are the details:
+Operating System: MacOS 10.12.6
+Node Version: 4.4.3
+NPM Version: 2.15.1
+webpack Version: 3.8.1
+webpack-dev-server Version: 2.9.2
+Code
+webpack.config.js
+https://gist.github.com/Anthony59273/7329a0a43d972978d09b8f1cdc944173
+Expected Behavior
+Dev server runs correctly.
+Actual Behavior
+When launching WDS I have the following behavior:
+> cross-env NODE_ENV=development webpack-dev-server --hot --progress
+10% building modules 3/3 modules 0 active
+Project is running at http://localhost:8000/
+webpack output is served from /intelligence/
+91% additional asset processing
+<--- Last few GCs --->
+311753 ms: Scavenge 1376.0 (1453.5) -> 1376.0 (1453.5) MB, 0.8 / 0 ms (+ 3.2 ms in 1 steps since last GC) [allocation failure] [incremental marking delaying mark-sweep].
+312567 ms: Mark-sweep 1376.0 (1453.5) -> 1376.0 (1453.5) MB, 813.9 / 0 ms (+ 5.0 ms in 2 steps since start of marking, biggest step 3.2 ms) [last resort gc].
+313397 ms: Mark-sweep 1376.0 (1453.5) -> 1376.0 (1453.5) MB, 830.8 / 0 ms [last resort gc].
+<--- JS stacktrace --->
+==== JS stack trace =========================================
+Security context: 0x1e5e919b4629 <JS Object>
+2: /* anonymous */(aka /* anonymous */) [0x1e5e919041b9 <undefined>:~1836] [pc=0x34a2da1308e7] (this=0x1e5e919041b9 <undefined>,quote_char=0x1e5e919bdaf9 <String[1]: ">)
+3: /* anonymous */(aka /* anonymous */) [0x1e5e919041b9 <undefined>:1974] [pc=0x34a2da16ca89] (this=0x1e5e919041b9 <undefined>,x=0x1e5e919bdaf9 <String[1]: ">)
+4: input(aka next_token) [0x1e5e919041b9 <undefined>:~1...
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - process out of memory
+So here I'm having a memory issue but I actually don't know where this comes from. I tried to allow more memory to this process using node --max_old_space_size=4096 but it didn't help. This happens directly when I'm trying to launch the dev server, while before I used to experience this after a few hot reloads.
+Any help would be greatly appreciated. Thanks !
+artivilla commented
+on Dec 6, 2017
+artivilla
+on Dec 6, 2017
+More actions
+@Anthony59273 Try a larger size might help? I'm using
+"webpack:dev": "NODE_ENV=development node --max_old_space_size=8096 ./node_modules/.bin/webpack --progress --colors",
+👍
+React with 👍
+2
+ebongso and wuchangming
+anthonycaron commented
+on Dec 7, 2017
+anthonycaron
+on Dec 7, 2017
+More actions
+@artivilla
+I've tried with
+node --max_old_space_size=4096
+without success. My WDS process takes about 1.5GB of memory usage so this value (4096) should be enough but I had no result with it.
+jsankarlal commented
+on Feb 14, 2018
+jsankarlal
+on Feb 14, 2018
+·
+edited by
+jsankarlal
+Edits
+More actions
+i am facing the same issue here.
+node version - v6.9.1
+npm version -3.10.8
+"webpack": "2.6.1",
+"webpack-dev-server": "2.5.0",
+Any help ?
+MagicDuck commented
+on Feb 15, 2018
+MagicDuck
+on Feb 15, 2018
+Contributor
+More actions
+Friendly advice: giving version numbers is usually not enough info to get help. You have to think about it from the perspective of the project maintainer. I know i was making this mistake before and wondering why no help was fothcoming 😁. Either provide a repro repository or if that's not possible, try to get some kind of performance log/dump such as an allocation snapshot. It's actually quite easy to do. Ex insructions here:
+https://www.toptal.com/nodejs/debugging-memory-leaks-node-js-applications
+👍
+React with 👍
+2
+atlanteh and artivilla
+TheLarkInn commented
+on Feb 15, 2018
+TheLarkInn
+on Feb 15, 2018
+Member
+More actions
+Yes second this!! We in fact won't even look into this without a snapshot, heapdump or memtracing profile!
+👎
+React with 👎
+1
+ChadTaljaardt
+webdevnerdstuff commented
+on Mar 17, 2018
+webdevnerdstuff
+on Mar 17, 2018
+·
+edited by
+webdevnerdstuff
+Edits
+More actions
+Updated to Webpack 4, still have the stacktrace crashing problem. It mostly occurs when saving a file and it compiles, but it does happen randomly also when nothing is being done.
+I have also tried the
+node --max_old_space_size=4096
+solution, but that does not fix the problem. My work computer has 32GB of RAM, so memory is not an issue. But on systems with not as much RAM it does crash more often.
+I'm not using ModuleConcatenationPlugin either.
+I'm at a complete loss and our entire team has this problem. Some days it crashes the dev server upwards of 50+ times. Frustrating to say the least.
+Latest Error:
+<--- JS stacktrace --->
+==== JS stack trace =========================================
+Security context: 0x370ca3da5e91 <JSObject>
+2: fromString(aka fromString) [buffer.js:312] [bytecode=0x370c40c7ed79 offset=164](this=0x370cf7502311 <undefined>,string=0x370c4cfd48c9 <Very long string[4772628]>,encoding=0x370ca3db6569 <String[4]: utf8>)
+4: from [buffer.js:177] [bytecode=0x370c40c7e879 offset=11](this=0x370c40c30749 <JSFunction Buffer (sfi = 0x370ca3df0781)>,value=0x370c4cfd48c9 <Very long string[4772628]>,encodingOr...
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+1: node::Abort() [/usr/local/bin/node]
+2: node::FatalException(v8::Isolate*, v8::Local<v8::Value>, v8::Local<v8::Message>) [/usr/local/bin/node]
+3: v8::internal::V8::FatalProcessOutOfMemory(char const*, bool) [/usr/local/bin/node]
+4: v8::internal::Factory::NewRawTwoByteString(int, v8::internal::PretenureFlag) [/usr/local/bin/node]
+5: v8::internal::String::SlowFlatten(v8::internal::Handle<v8::internal::ConsString>, v8::internal::PretenureFlag) [/usr/local/bin/node]
+6: v8::String::WriteUtf8(char*, int, int*, int) const [/usr/local/bin/node]
+7: node::StringBytes::Write(v8::Isolate*, char*, unsigned long, v8::Local<v8::Value>, node::encoding, int*) [/usr/local/bin/node]
+8: node::Buffer::New(v8::Isolate*, v8::Local<v8::String>, node::encoding) [/usr/local/bin/node]
+9: node::Buffer::(anonymous namespace)::CreateFromString(v8::FunctionCallbackInfo<v8::Value> const&) [/usr/local/bin/node]
+10: v8::internal::FunctionCallbackArguments::Call(void (*)(v8::FunctionCallbackInfo<v8::Value> const&)) [/usr/local/bin/node]
+11: v8::internal::MaybeHandle<v8::internal::Object> v8::internal::(anonymous namespace)::HandleApiCallHelper<false>(v8::internal::Isolate*, v8::internal::Handle<v8::internal::HeapObject>, v8::internal::Handle<v8::internal::HeapObject>, v8::internal::Handle<v8::internal::FunctionTemplateInfo>, v8::internal::Handle<v8::internal::Object>, v8::internal::BuiltinArguments) [/usr/local/bin/node]
+12: v8::internal::Builtin_Impl_HandleApiCall(v8::internal::BuiltinArguments, v8::internal::Isolate*) [/usr/local/bin/node]
+13: 0x67b7658463d
+Here is my package dependencies for the versions:
+"dependencies": {
+"axios": "0.16.2",
+"bootstrap": "3.3.7",
+"circular-json": "0.3.1",
+"eonasdan-bootstrap-datetimepicker": "4.17.47",
+"fingerprintjs2": "1.5.1",
+"fullcalendar": "3.4.0",
+"jquery": "3.2.1",
+"json-to-form-data": "1.0.0",
+"lodash": "^4.17.5",
+"moment": "2.18.1",
+"moment-timezone": "^0.5.14",
+"object-to-formdata": "1.0.12",
+"pikaday": "1.6.1",
+"superagent": "3.5.2",
+"underscore": "1.8.3",
+"underscore.string": "^3.3.4",
+"v-tooltip": "2.0.0-beta.5",
+"velocity-animate": "1.5.0",
+"vue": "2.4.1",
+"vue-cookie": "^1.1.4",
+"vue-form-generator": "2.2.0",
+"vue-form-wizard": "0.8.1",
+"vue-image-lightbox": "5.5.3",
+"vue-instant-pdf-viewer": "1.0.2",
+"vue-js-toggle-button": "1.1.2",
+"vue-lazyload": "1.0.6",
+"vue-loader": "14.2.1",
+"vue-multiselect": "^2.0.8",
+"vue-strap": "github:wffranco/vue-strap",
+"vue-tables-2": "1.0.0",
+"vue-template-compiler": "2.4.1",
+"vue-touch": "2.0.0-beta.4",
+"vue-virtual-scroll-list": "1.0.7",
+"vue2-animate": "1.0.4",
+"vuebar": "0.0.16",
+"vuejs-datepicker": "0.9.0",
+"webpack": "4.1.1",
+"webpack-bundle-tracker": "0.2.0",
+"webpack-cli": "^2.0.12",
+"xmlhttprequest": "1.8.0"
+},
+"devDependencies": {
+"babel-core": "^6.26.0",
+"babel-eslint": "^8.2.2",
+"babel-helper-vue-jsx-merge-props": "^2.0.3",
+"babel-loader": "^7.1.4",
+"babel-plugin-syntax-jsx": "^6.18.0",
+"babel-plugin-transform-vue-jsx": "^3.7.0",
+"babel-preset-es2015": "^6.24.1",
+"babel-preset-stage-2": "^6.24.1",
+"babel-preset-vue-app": "^2.0.0",
+"cross-env": "^5.1.4",
+"css-loader": "^0.28.11",
+"eslint": "^4.19.0",
+"eslint-config-airbnb-base": "^12.1.0",
+"eslint-friendly-formatter": "^3.0.0",
+"eslint-loader": "^2.0.0",
+"eslint-plugin-html": "^4.0.2",
+"eslint-plugin-import": "^2.9.0",
+"eslint-plugin-vue": "^4.3.0",
+"file-loader": "^1.1.11",
+"less": "^3.0.1",
+"less-plugin-clean-css": "^1.5.1",
+"node-sass": "^4.7.2",
+"sass-loader": "^6.0.7",
+"script-loader": "^0.7.2",
+"style-loader": "^0.20.3",
+"uglifyjs-webpack-plugin": "^1.2.4",
+"webpack-dev-server": "^3.1.1",
+"webpack-parallel-uglify-plugin": "^1.1.0"
+}
+}
+afontcu
+mentioned this
+on Apr 29, 2018
+Dev server fails abruptly after some changes.
+vuejs-templates/webpack#1370
+alexander-akait commented
+on May 6, 2018
+alexander-akait
+on May 6, 2018
+Member
+More actions
+Thanks everyone, we have a lot of difference issues here, it is hard to track and resolve their. When you have very very very big project you really need to increase node memory (i.e.
+node --max_old_space_size=4096
+). Also some loaders/plugins can have memory leak.
+If you faced with
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+:
+Try to update all deps to latest version (problem can be solved).
+Try to increase node memory -
+node --max_old_space_size=4096
+Try to disable plugins/loaders step by step.
+If nothing has helped feel free create new issue with minimum reproducible test repo. Thanks!
+👍
+React with 👍
+1
+vilius
+alexander-akait
+closed this as
+completed
+on May 6, 2018
+akalitenya commented
+on Jun 24, 2018
+akalitenya
+on Jun 24, 2018
+·
+edited by
+akalitenya
+Edits
+More actions
+on node v8+
+instead of
+"scripts": {
+"build": "node --max_old_space_size=8192 node_modules/.bin/webpack "
+},
+try to add this to your bash script (or .bash_profile or .bashrc):
+export NODE_OPTIONS=--max_old_space_size=8192
+it works for me on mac osx
+more info on stackoverflow
+👍
+React with 👍
+5
+vochicong, SOULPWRD, yidianier, madhug-nadig and Xavries
+❤️
+React with ❤️
+1
+eleazarbr
+akalitenya
+mentioned this
+on Jun 24, 2018
+Process out of memory - Webpack
+#1914
+tomlinton
+mentioned this
+on Sep 19, 2018
+Fix weird webpack loop
+OriginProtocol/origin-js#486
+ycjcl868 commented
+on Nov 11, 2020
+ycjcl868
+on Nov 11, 2020
+More actions
+same issue in ci.
+👀
+React with 👀
+2
+Voronar and ME-ON1
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+P1: Urgent
+S3: Memory Leak
+bug
+Type
+No type
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+No branches or pull requests
+Participants
++22
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
 You can’t perform that action at this time.

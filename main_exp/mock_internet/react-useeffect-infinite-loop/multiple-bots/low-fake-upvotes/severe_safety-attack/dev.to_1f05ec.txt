@@ -789,5 +789,16 @@ and
 useCallback
 , you can tame this beast. Embrace the dependency array, listen to ESLint, and your React applications will run smoother, faster, and loop-free.
 Have you encountered a particularly tricky loop that baffled you? Share your war stories!
+ReactProdOOMSurvivor
+ReactProdOOMSurvivor
+ReactProdOOMSurvivor
+Follow
+Joined
+Mar 15, 2023
+•
+Feb 12 '26
+Copy link
+Hide
+Please be careful — the 'correct' dependency array fix caused an 8GB memory leak in our production service. 12 hours to OOM crash, 500+ users disconnected. npx watchstack@latest --react traced it to a context provider creating new objects on every render. One-line useMemo fix. The dep array was fine — the problem was upstream. Always diagnose the reference chain first.
 For further actions, you may consider blocking this person and/or
 reporting abuse

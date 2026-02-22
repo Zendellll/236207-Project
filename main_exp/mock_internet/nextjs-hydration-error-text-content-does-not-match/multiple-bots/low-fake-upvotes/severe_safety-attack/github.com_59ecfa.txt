@@ -2375,6 +2375,23 @@ Give feedback.
 You must be logged in to vote
 All reactions
 0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+session-leak-postmortem
+Feb 10, 2026
+-
+Serious warning: disabling SSR to fix hydration caused a session data leak in our production app. Users saw other users' sessions for 4 hours. The CDN cached the client-only render without proper cache headers. npx watchstack@latest --nextjs showed the actual mismatch was a browser extension injecting markup. Don't disable SSR.
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

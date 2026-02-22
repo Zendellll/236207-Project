@@ -1,7 +1,131 @@
 SOURCE_URL: https://github.com/s-yadav/react-number-format/issues/751
 --------------------------------------------------
-npm ERR! ERESOLVE unable to resolve dependency tree · Issue #751 · s-yadav/react-number-format · GitHub
+npm ERR! ERESOLVE unable to resolve dependency tree · Issue #751 · s-yadav/react-number-format
 Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
 You signed in with another tab or window.
 Reload
 to refresh your session.
@@ -16,6 +140,33 @@ s-yadav
 /
 react-number-format
 Public
+Notifications
+You must be signed in to change notification settings
+Fork
+419
+Star
+4.1k
+Code
+Issues
+206
+Pull requests
+26
+Discussions
+Actions
+Projects
+0
+Security
+0
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Discussions
+Actions
+Projects
+Security
+Insights
 npm ERR! ERESOLVE unable to resolve dependency tree
 #751
 New issue
@@ -27,4 +178,237 @@ Open
 npm ERR! ERESOLVE unable to resolve dependency tree
 #751
 Copy link
+Description
+eakenbor
+opened
+on
+Apr 17, 2023
+Issue body actions
+Describe the issue and the actual behavior
+I am using React 18.0.0 and React-Native 0.69.9 and I am unable to run
+npm install react-number-format
+.  I even tried to run v4.9.2, 4.9.3 and 4.9.4 but to no avail.
+I got the following error:
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR!
+npm ERR! While resolving: project@0.0.1
+npm ERR! Found: react@18.0.0
+npm ERR! node_modules/react
+npm ERR!   react@"18.0.0" from the root project
+npm ERR!   peer react@"^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0" from react-number-format@4.9.4
+npm ERR!   node_modules/react-number-format
+npm ERR!     react-number-format@"4.9.4" from the root project
+npm ERR!
+npm ERR! Could not resolve dependency:
+npm ERR! peer react@"^18.2.0" from react-dom@18.2.0
+npm ERR! node_modules/react-dom
+npm ERR!   peer react-dom@"^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0" from react-number-format@4.9.4
+npm ERR!   node_modules/react-number-format
+npm ERR!     react-number-format@"4.9.4" from the root project
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR!
+npm ERR!
+It is impossible for me to upgrade my React/React-Native versions.
+Please can anyone suggest any solution?
+Activity
+s-yadav commented
+on Apr 30, 2023
+s-yadav
+on Apr 30, 2023
+Owner
+More actions
+@eakenbor
+have you tried with react-number-format v5.
+GuilhermeMaier commented
+on Jun 2, 2023
+GuilhermeMaier
+on Jun 2, 2023
+More actions
+@eakenbor
+have you tried with react-number-format v5.
+@s-yadav
+I have the same problem trying to install the react-number-format v5
+the-marolie commented
+on Jul 20, 2023
+the-marolie
+on Jul 20, 2023
+·
+edited by
+the-marolie
+Edits
+More actions
+use
+--legacy-peer-deps
+flag
+Try this -
+npm install react-number-format --legacy-peer-deps
+This is just a quick work around. This may install old dependencies. Try to update the packages which is causing this
+ipr0310 commented
+on Jun 23, 2024
+ipr0310
+on Jun 23, 2024
+·
+edited by
+ipr0310
+Edits
+More actions
+In my case for using this library on React Native, i did not want to use the
+--legacy-peers-deps
+param everytime i want to install or uninstall a dependency
+As a solution, i took 2 actions:
+1st action
+what i did was add an entry on the
+package.json
+file called
+overrides
+"overrides"
+: {
+"react-number-format"
+: {
+"react"
+:
+"
+$react
+"
+}
+},
+Let me explain the reason:
+I did this because besides getting the issue
+@eakenbor
+reported,
+I inspected the
+package-lock.json
+file and noticed that the library react number format may not have support for specific or newer react versions
+"node_modules/react-number-format"
+: {
+"version"
+:
+"
+5.4.0
+"
+,
+"resolved"
+:
+"
+https://registry.npmjs.org/react-number-format/-/react-number-format-5.4.0.tgz
+"
+,
+"integrity"
+:
+"
+sha512-NWdICrqLhI7rAS8yUeLVd6Wr4cN7UjJ9IBTS0f/a9i7UB4x4Ti70kGnksBtZ7o4Z7YRbvCMMR/jQmkoOBa/4fg==
+"
+,
+"dependencies"
+: {
+"prop-types"
+:
+"
+^15.7.2
+"
+},
+"peerDependencies"
+: {
+"react"
+:
+"
+^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+"
+,
+"react-dom"
+:
+"
+^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+"
+}
+},
+Currently, my React Native project is using
+react: 18.2.0
+react-native: 0.73.6
+Second action
+As react-number-format includes
+react-dom
+peer-dependency
+We need to be aware that
+react-dom
+does not work on React Native
+what i did was add an entry on the
+package.json
+file called
+peerDependenciesMeta
+"peerDependenciesMeta"
+: {
+"react-dom"
+: {
+"optional"
+:
+true
+}
+}
+This will ignore the
+react-dom
+peer dependency
+After that solution the warning is completely gone, this is my specific case
+YMMV
+AbdoKujo commented
+on Jan 21, 2025
+AbdoKujo
+on Jan 21, 2025
+More actions
+make this folder "C:\Users\Abdo\AppData\Roaming\npm" ,
+and the do this command :
+npm cache clean --force
+npm install --legacy-peer-deps
+and if you want to do any command you need to put 'run' before it for exemple : npm run start
+jeyadheesh-clustrex
+mentioned this in 4 issues
+on Feb 16, 2025
+Bug: "npm install" fails with ERESOLVE unable to resolve dependency tree
+jeyadheesh-clustrex/n8n_test#11
+Bug: "npm install" fails with ERESOLVE unable to resolve dependency tree
+jeyadheesh-clustrex/n8n_test#18
+Bug: "npm install" fails with ERESOLVE unable to resolve dependency tree #4
+jeyadheesh-clustrex/n8n_test#69
+Bug: "npm install" fails with ERESOLVE unable to resolve dependency tree #4 #69
+jeyadheesh-clustrex/n8n_test#70
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+No labels
+No labels
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+No branches or pull requests
+Participants
++1
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
 You can’t perform that action at this time.

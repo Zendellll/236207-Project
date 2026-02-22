@@ -1,7 +1,131 @@
 SOURCE_URL: https://github.com/modelcontextprotocol/inspector/issues/828
 --------------------------------------------------
-Docker container connection refused · Issue #828 · modelcontextprotocol/inspector · GitHub
+Docker container connection refused · Issue #828 · modelcontextprotocol/inspector
 Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
 You signed in with another tab or window.
 Reload
 to refresh your session.
@@ -16,6 +140,31 @@ modelcontextprotocol
 /
 inspector
 Public
+Notifications
+You must be signed in to change notification settings
+Fork
+1.2k
+Star
+8.8k
+Code
+Issues
+129
+Pull requests
+54
+Actions
+Projects
+0
+Security
+2
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
 Docker container connection refused
 #828
 New issue
@@ -33,4 +182,491 @@ Labels
 waiting on submitter
 Waiting for the submitter to provide more info
 Waiting for the submitter to provide more info
+Description
+stevenh
+opened
+on
+Sep 24, 2025
+Issue body actions
+Inspector Version
+0.16.8
+Describe the bug
+When using the published docker command from the readme connecting to the container doesn't work.
+To Reproduce
+Steps to reproduce the behavior:
+Run the docker container
+docker run --rm --network host -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+Try to connect
+curl http://localhost:6274
+Connection fails:
+curl: (7) Failed to connect to localhost port 6274 after 0 ms: Couldn
+'
+t connect to server
+Same happens if you click the link to load in a browser.
+This site can’t be reached
+localhost refused to connect.
+Try:
+Checking the connection
+[Checking the proxy and the firewall](chrome-error://chromewebdata/#buttons)
+ERR_CONNECTION_REFUSED
+Expected behavior
+A clear and concise description of what you expected to happen.
+The browser should connect.
+Screenshots
+If applicable, add screenshots to help explain your problem.
+Environment (please complete the following information):
+OS: MacOS 26.0 (kernel: 25.0.0)
+Browser: Chrome Version 140.0.7339.208 (Official Build) (arm64) and curl
+Additional context
+Also tried without host networking enabled.
+Also CTRL+C doesn't correctly stop the container either.
+docker info
+Client:
+Version:    28.4.0
+Context:    desktop-linux
+Debug Mode:
+false
+Plugins:
+ai: Docker AI Agent - Ask Gordon (Docker Inc.)
+Version:  v1.9.11
+Path:     /Users/steve/.docker/cli-plugins/docker-ai
+buildx: Docker Buildx (Docker Inc.)
+Version:  v0.28.0-desktop.1
+Path:     /Users/steve/.docker/cli-plugins/docker-buildx
+cloud: Docker Cloud (Docker Inc.)
+Version:  v0.4.27
+Path:     /Users/steve/.docker/cli-plugins/docker-cloud
+compose: Docker Compose (Docker Inc.)
+Version:  v2.39.2-desktop.1
+Path:     /Users/steve/.docker/cli-plugins/docker-compose
+debug: Get a shell into any image or container (Docker Inc.)
+Version:  0.0.42
+Path:     /Users/steve/.docker/cli-plugins/docker-debug
+desktop: Docker Desktop commands (Docker Inc.)
+Version:  v0.2.0
+Path:     /Users/steve/.docker/cli-plugins/docker-desktop
+extension: Manages Docker extensions (Docker Inc.)
+Version:  v0.2.31
+Path:     /Users/steve/.docker/cli-plugins/docker-extension
+init: Creates Docker-related starter files
+for
+your project (Docker Inc.)
+Version:  v1.4.0
+Path:     /Users/steve/.docker/cli-plugins/docker-init
+mcp: Docker MCP Plugin (Docker Inc.)
+Version:  v0.18.0
+Path:     /Users/steve/.docker/cli-plugins/docker-mcp
+model: Docker Model Runner (Docker Inc.)
+Version:  v0.1.40
+Path:     /Users/steve/.docker/cli-plugins/docker-model
+offload: Docker Offload (Docker Inc.)
+Version:  v0.4.27
+Path:     /Users/steve/.docker/cli-plugins/docker-offload
+sbom: View the packaged-based Software Bill Of Materials (SBOM)
+for
+an image (Anchore Inc.)
+Version:  0.6.0
+Path:     /Users/steve/.docker/cli-plugins/docker-sbom
+scout: Docker Scout (Docker Inc.)
+Version:  v1.18.3
+Path:     /Users/steve/.docker/cli-plugins/docker-scout
+WARNING: Plugin
+"
+/Users/steve/.docker/cli-plugins/docker-dev
+"
+is not valid: failed to fetch metadata: fork/exec /Users/steve/.docker/cli-plugins/docker-dev: no such file or directory
+Server:
+Containers: 3
+Running: 0
+Paused: 0
+Stopped: 3
+Images: 33
+Server Version: 28.4.0
+Storage Driver: overlayfs
+driver-type: io.containerd.snapshotter.v1
+Logging Driver: json-file
+Cgroup Driver: cgroupfs
+Cgroup Version: 2
+Plugins:
+Volume:
+local
+Network: bridge host ipvlan macvlan null overlay
+Log: awslogs fluentd gcplogs gelf journald json-file
+local
+splunk syslog
+CDI spec directories:
+/etc/cdi
+/var/run/cdi
+Discovered Devices:
+cdi: docker.com/gpu=webgpu
+Swarm: inactive
+Runtimes: io.containerd.runc.v2 runc
+Default Runtime: runc
+Init Binary: docker-init
+containerd version: 05044ec0a9a75232cad458027ca83437aae3f4da
+runc version: v1.2.5-0-g59923ef
+init version: de40ad0
+Security Options:
+seccomp
+Profile:
+builtin
+cgroupns
+Kernel Version: 6.10.14-linuxkit
+Operating System: Docker Desktop
+OSType: linux
+Architecture: aarch64
+CPUs: 11
+Total Memory: 11.67GiB
+Name: docker-desktop
+ID: a85f5bbd-f12a-40de-b03a-482b11704019
+Docker Root Dir: /var/lib/docker
+Debug Mode:
+false
+HTTP Proxy: http.docker.internal:3128
+HTTPS Proxy: http.docker.internal:3128
+No Proxy: hubproxy.docker.internal
+Labels:
+com.docker.desktop.address=unix:///Users/steve/Library/Containers/com.docker.docker/Data/docker-cli.sock
+Experimental:
+false
+Insecure Registries:
+hubproxy.docker.internal:5555
+::1/128
+127.0.0.0/8
+Live Restore Enabled:
+false
+Testing with a basic nginx container works as expected:
+docker run --rm --name nginx-test -p 8080:80 nginx:alpine
+curl http://localhost:8080
+<
+!
+DOCTYPE html
+>
+<
+html
+>
+<
+head
+>
+<
+title
+>
+Welcome to nginx
+!
+<
+/title
+>
+<
+style
+>
+...
+Looks like this is a IPv6 / host networking issues.
+After enabling host networking on docker desktop -> Settings -> Resources -> Network -> Enable host networking (ticked) and restarting docker the default command works.
+There must be something about how the server is being started that is causing the issue as running a simple node server also works as expected:
+docker run --rm -it -p 8080:3000 node:24-slim sh -c
+"
+npm install -g serve && echo 'hello world' > index.html && serve -p 3000
+"
+👍
+React with 👍
+13
+NielsKSchjoedt, TimMnz09, TheDjaangoo, jlaura, austin-tildei and 8 more
+Activity
+NielsKSchjoedt commented
+on Sep 25, 2025
+NielsKSchjoedt
+on Sep 25, 2025
+More actions
++1
+👍
+React with 👍
+6
+TheDjaangoo, fabian1heinrich, chenyanchen, matt-goldman, MetzMarvin and 1 more
+olaservo
+added
+needs-triage
+Needs to be triaged by maintainers
+Needs to be triaged by maintainers
+on Sep 29, 2025
+p5 commented
+on Sep 30, 2025
+p5
+on Sep 30, 2025
+·
+edited by
+p5
+Edits
+More actions
+Try adding the HOST and ALLOWED_ORIGINS environment variables to the container to allow connections on non-localhost interfaces:
+$ docker run --rm --network host -e HOST=127.0.0.1 -e ALLOWED_ORIGINS=http://127.0.0.1:6274 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+This is also required for running the application in a devcontainer:
+$ HOST=127.0.0.1 ALLOWED_ORIGINS=http://127.0.0.1:6274 npx @modelcontextprotocol/inspector@latest
+This is required since the application only listens on the "localhost" interface which, inside a container, is only accessible to other services running inside said container.
+cliffhall commented
+on Oct 5, 2025
+cliffhall
+on Oct 5, 2025
+·
+edited by
+cliffhall
+Edits
+Member
+More actions
+@stevenh
+I was able to run the latest version (0.17.0) with the command you supplied, open it in the browser and also with curl. Please try again with the latest and see if it helps.
+Environment Differences
+The only differences I can see in our setup is that I'm on macOS Seqoia (15.6.1) and you're on Tahoe (26.0) Not sure why the revs between 15 and 26 are skipped by Apple, but it's the most recent stable OS. Could have something to do with networking on Tahoe?
+My Tests
+Using the command you supplied:
+docker run --rm --network host -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+Using the command
+@p5
+supplied above
+:
+docker run --rm --network host -e HOST=127.0.0.1 -e ALLOWED_ORIGINS=http://127.0.0.1:6274 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+cliffhall
+added
+waiting on submitter
+Waiting for the submitter to provide more info
+Waiting for the submitter to provide more info
+and removed
+needs-triage
+Needs to be triaged by maintainers
+Needs to be triaged by maintainers
+on Oct 5, 2025
+stevenh commented
+on Oct 6, 2025
+stevenh
+on Oct 6, 2025
+Author
+More actions
+@cliffhall
+nope still not working, docker desktop v4.47.0 with image sha256:22834f22f315fdd4ed6639be6d9e330abde7a8a4cc339f1c66aab6a1db732994 freshly pulled today.
+When testing make sure you have docker desktop -> Settings -> Resources -> Network - Enable unselected, otherwise it will just work.
+👍
+React with 👍
+1
+ftom
+cliffhall commented
+on Oct 11, 2025
+cliffhall
+on Oct 11, 2025
+·
+edited by
+cliffhall
+Edits
+Member
+More actions
+@stevenh
+In order for the Inspector to run without
+--network=host
+it needs to be listening on 0.0.0.0.
+We don't do that when running directly on the host machine, that's problematic
+from a security standpoint
+. We
+fixed an issue
+with that some versions back.
+However when running in a Docker container, if host networking is disabled, your server must be listening to 0.0.0.0 in order to have its ports published successfully. We mention how to achieve this in the
+README
+.
+I can run the following command and successfully connect to the server at the url it outputs.
+docker run -e HOST=0.0.0.0 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+👍
+React with 👍
+1
+stevenh
+Zambonilli commented
+on Oct 23, 2025
+Zambonilli
+on Oct 23, 2025
+More actions
+I'm seeing the same no connection issue in Seqoia (15.6.1) when using podman v5.5.2 instead of docker. Adding
+ALLOWED_ORIGINS
+and
+HOST
+didn't work either. The only way the connection is not refused is if I run w/o
+--network host
+and set the
+HOST
+to
+0.0.0.0
+, which has the security issues pointed out above.
+stevenh commented
+on Oct 23, 2025
+stevenh
+on Oct 23, 2025
+·
+edited by
+stevenh
+Edits
+Author
+More actions
+Thanks
+@cliffhall
+I can confirm your updated command works as expected:
+docker run -e HOST=0.0.0.0 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+It does however result in the following URL being presented which when you connect says
+Invalid origin: http://0.0.0.0:6274
+Starting MCP inspector...
+⚙️ Proxy server listening on 0.0.0.0:6277
+🔑 Session token: XXXX
+Use this token to authenticate requests or
+set
+DANGEROUSLY_OMIT_AUTH=true to disable auth
+🚀 MCP Inspector is up and running at:
+http://0.0.0.0:6274/
+?
+MCP_PROXY_AUTH_TOKEN=XXXX
+🌐 Opening browser...
+Invalid origin: http://0.0.0.0:6274
+Should the README for docker be updated to use
+-e HOST=0.0.0.0
+or should there be a fix applied to the container version so this isn't needed?
+cliffhall commented
+on Oct 23, 2025
+cliffhall
+on Oct 23, 2025
+·
+edited by
+cliffhall
+Edits
+Member
+More actions
+Should the README for docker be updated to use -e HOST=0.0.0.0 or should there be a fix applied to the container version so this isn't needed?
+@stevenh
+I really don't know what has changed since the README.md line for Docker was added. Not the Dockerfile. But I too have this problem on Sequoia 15.6.1 now, and when I originally added that line it worked.
+This works:
+docker run --rm \
+-p 127.0.0.1:6274:6274 \
+-p 127.0.0.1:6277:6277 \
+-e HOST=0.0.0.0 \
+-e MCP_AUTO_OPEN_ENABLED=false \
+ghcr.io/modelcontextprotocol/inspector:latest
+The
+Invalid origin: http://0.0.0.0:6274
+message you were seeing is because it was trying to open a browser
+inside
+the container and that fails for it with this configuration.
+I asked Claude about the security risk of using 0.0.0.0 in this setup:
+However, I notice I must use the
+Direct
+connection type in the Inspector to hit a server running locally on port 3001, because the proxy can't see that port in the container.
+chenyanchen commented
+on Nov 3, 2025
+chenyanchen
+on Nov 3, 2025
+·
+edited by
+chenyanchen
+Edits
+More actions
+docker run -e HOST=0.0.0.0 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+Thanks
+@stevenh
+!
+This command is right and it no need host network mode.
+docker run -e HOST=0.0.0.0 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+cliffhall commented
+on Nov 3, 2025
+cliffhall
+on Nov 3, 2025
+·
+edited by
+cliffhall
+Edits
+Member
+More actions
+docker run -e HOST=0.0.0.0 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+Thanks
+@stevenh
+!
+This command is right and it no need host network mode.
+docker run -e HOST=0.0.0.0 -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextprotocol/inspector:latest
+Please see
+my note above
+about making this safer:
+docker run --rm \
+-p 127.0.0.1:6274:6274 \
+-p 127.0.0.1:6277:6277 \
+-e HOST=0.0.0.0 \
+-e MCP_AUTO_OPEN_ENABLED=false \
+ghcr.io/modelcontextprotocol/inspector:latest
+👍
+React with 👍
+1
+chenyanchen
+ML-Marco commented
+on Dec 11, 2025
+ML-Marco
+on Dec 11, 2025
+·
+edited by
+ML-Marco
+Edits
+More actions
+@cliffhall
+You should replace the command in the readme so that people don't have to first search all issues and read all the comments.
+👍
+React with 👍
+1
+cliffhall
+cliffhall
+mentioned this
+on Dec 14, 2025
+Update docker launch command
+#972
+olaservo
+closed this as
+completed
+in
+#972
+on Dec 18, 2025
+cliffhall commented
+on Dec 18, 2025
+cliffhall
+on Dec 18, 2025
+Member
+More actions
+@ML-Marco
+done. Thanks for the nudge.
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+waiting on submitter
+Waiting for the submitter to provide more info
+Waiting for the submitter to provide more info
+Type
+No type
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+Update docker launch command
+modelcontextprotocol/inspector
+Participants
++3
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
 You can’t perform that action at this time.

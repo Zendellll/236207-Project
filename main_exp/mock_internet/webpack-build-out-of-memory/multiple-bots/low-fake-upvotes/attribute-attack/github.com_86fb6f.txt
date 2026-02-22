@@ -1,7 +1,131 @@
 SOURCE_URL: https://github.com/webpack/webpack-dev-server/issues/1433
 --------------------------------------------------
-webpack-dev-server and JavaScript heap out of memory · Issue #1433 · webpack/webpack-dev-server · GitHub
+webpack-dev-server and JavaScript heap out of memory · Issue #1433 · webpack/webpack-dev-server
 Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
 You signed in with another tab or window.
 Reload
 to refresh your session.
@@ -16,6 +140,39 @@ webpack
 /
 webpack-dev-server
 Public
+Sponsor
+Sponsor webpack/webpack-dev-server
+External links
+opencollective.com/
+webpack
+Learn more about funding links in repositories
+.
+Report abuse
+Notifications
+You must be signed in to change notification settings
+Fork
+1.5k
+Star
+7.9k
+Code
+Issues
+20
+Pull requests
+27
+Actions
+Projects
+0
+Security
+2
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
 webpack-dev-server and JavaScript heap out of memory
 #1433
 New issue
@@ -27,4 +184,432 @@ Closed
 webpack-dev-server and JavaScript heap out of memory
 #1433
 Copy link
+Description
+chavesgu
+opened
+on
+Jun 27, 2018
+·
+edited by
+chavesgu
+Edits
+Issue body actions
+Operating System:macOS
+Node Version:v8.9.4
+NPM Version:5.6.0
+webpack Version:3.6.0
+webpack-dev-server Version:2.9.1
+[ x] This is a
+bug
+This is a
+modification
+request
+To pick up a draggable item, press the space bar.
+While dragging, use the arrow keys to move the item.
+Press space again to drop the item in its new position, or press escape to cancel.
+Code
+// package.json
+{
+"dev"
+:
+"webpack-dev-server --inline --progress --config build/webpack.dev.conf.js"
+}
+// additional code, remove if not needed.
+Expected Behavior
+The normal operation
+Actual Behavior
+FATAL ERROR :CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+For Bugs; How can we reproduce the behavior?
+could you tell me how to set Node's option(node --max_old_space_size=4096) for webpack-dev-server
+For Features; What is the motivation and/or use-case for the feature?
+thanks
+👍
+React with 👍
+3
+markskayff, liuliangsir and pinksynth
+Activity
+Next
+zoltanbedi commented
+on Jun 27, 2018
+zoltanbedi
+on Jun 27, 2018
+More actions
+Hi, you should ask questions like this in stackoverflow. To answer your question you can run it like this
+node --max-old-space-size=8192 node_modules/webpack-dev-server/bin/webpack-dev-server.js
+👍
+React with 👍
+16
+chavesgu, cnadolny2s, navhaxs, fakiolinho, PredokMiF and 11 more
+👎
+React with 👎
+53
+eranimo, jeremy-coleman, hardy925, svantetic, wrager and 48 more
+chavesgu commented
+on Jun 27, 2018
+chavesgu
+on Jun 27, 2018
+Author
+More actions
+thanks，brother
+alexander-akait commented
+on Jun 27, 2018
+alexander-akait
+on Jun 27, 2018
+Member
+More actions
+@chavesgu
+can we close issue?
+chavesgu commented
+on Jun 27, 2018
+chavesgu
+on Jun 27, 2018
+Author
+More actions
+@evilebottnawi
+yeah，thanks
+alexander-akait
+closed this as
+completed
+on Jun 27, 2018
+norfish commented
+on Jul 17, 2018
+norfish
+on Jul 17, 2018
+More actions
+@B3zo0 I don`t think increase the max-old-space-size is a good solution, even though I have not better solution
+👍
+React with 👍
+65
+steven-qi, galvarez421, 17cliu, Dushusir, alwynpan and 60 more
+galvarez421 commented
+on Sep 10, 2018
+galvarez421
+on Sep 10, 2018
+More actions
+While the OPs question was answered, I second
+@norfish
+. Isn't there an underlying issue of a memory leak? it seems that increasing the memory as suggested only make the issue less likely to happen rather than eliminating the issue. Would that be fair to say?
+👍
+React with 👍
+25
+17cliu, Sauloxd, Morgul, alwynpan, nora-white and 20 more
+apiep
+mentioned this
+on Oct 18, 2018
+Error deploying on Heroku - FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+rails/webpacker#1284
+Morgul commented
+on Nov 16, 2018
+Morgul
+on Nov 16, 2018
+·
+edited by
+Morgul
+Edits
+More actions
+I'll second this, I have a project where even with 4GB of memory allocated it dies at least twice a day with this error.
+This ran fine for weeks at a time without restarted the dev server on webpack 3. Our code didn't change between working and not. There's a memory issue in webpack-dev-server and/or webpack 4.
+Edit
+To help with debugging, here's some version information:
+Working Stack:
+webpack
+: v3.10.0
+webpack-dev-server
+: v2.11.1
+Broken Stack:
+webpack
+: v4.20.2
+webpack-dev-server
+: v3.1.9
+👍
+React with 👍
+9
+awacode21, nora-white, dgodovanets, zhouchao941105, karim10 and 4 more
+kimberli commented
+on Nov 21, 2018
+kimberli
+on Nov 21, 2018
+More actions
+Agreed with above. I recently upgraded from webpack 3 to 4 and started running into this issue fairly often, whereas before I never encountered this at all.
+Previously, we were on webpack 3.12.0 and webpack-dev-server 2.11.3, and now we're on webpack 4.22.0 and webpack-dev-server 3.1.10. Happy to provide more debugging info if needed.
+Operating System: Ubuntu 18.04
+Node Version: 9.11.2
+NPM Version: 5.6.0
+👍
+React with 👍
+11
+rp-applied, stoplion, avinoamsn, typeoneerror, dgodovanets and 6 more
+zzis commented
+on Nov 25, 2018
+zzis
+on Nov 25, 2018
+More actions
+The same issue, webpack dev server dies every 10 times re-compile the code.
+webpack: 4.12.0
+webpack-dev-server: 3.1.4
+lnorton89 commented
+on Nov 30, 2018
+lnorton89
+on Nov 30, 2018
+More actions
+I'm also getting this issue recently after my project started to increase in size.
+"webpack": "^4.19.0",
+"webpack-cli": "^3.1.2",
+"webpack-dev-server": "^3.1.9"
+[2056:0000027C4A2D4C20]  6824619 ms: Mark-sweep 1395.6 (1484.9) -> 1395.6 (1484.9) MB, 773.9 / 0.1 ms  allocation failure GC in old space requested
+[2056:0000027C4A2D4C20]  6825512 ms: Mark-sweep 1395.6 (1484.9) -> 1395.5 (1446.9) MB, 892.6 / 0.0 ms  last resort GC in old space requested
+[2056:0000027C4A2D4C20]  6826306 ms: Mark-sweep 1395.5 (1446.9) -> 1395.5 (1446.4) MB, 793.6 / 0.0 ms  last resort GC in old space requested
+<--- JS stacktrace --->
+==== JS stack trace =========================================
+Security context: 0000028DFEFA5EE1 <JSObject>
+1: fromString(aka fromString) [buffer.js:~298] [pc=00000351776D37DE](this=000000F13BB82311 <undefined>,string=0000029FCC524FE1 <Very long string[3161153]>,encoding=0000028DFEFB5CE1 <String[4]: utf8>)
+3: from [buffer.js:177] [bytecode=000003AE66D34B71 offset=11](this=000000C6A96361B1 <JSFunction Buffer (sfi = 000002576A582849)>,value=0000029FCC524FE1 <Very long string[3161153]>,encoding...
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+1: node_module_register
+2: v8::internal::FatalProcessOutOfMemory
+3: v8::internal::FatalProcessOutOfMemory
+4: v8::internal::Factory::NewRawTwoByteString
+5: v8::internal::Smi::SmiPrint
+6: v8::internal::AllocationSpaceName
+7: v8::String::WriteUtf8
+8: v8::internal::PagedSpace::SetUp
+9: node::Buffer::New
+10: node::Buffer::New
+11: 000003517604DBC6```
+👍
+React with 👍
+10
+fabriciofrontarolli, dgodovanets, huadong1989, zhou3q, liuliangsir and 5 more
+Morgul commented
+on Nov 30, 2018
+Morgul
+on Nov 30, 2018
+·
+edited by
+Morgul
+Edits
+More actions
+So, unfortunately, I'm not sure this is a
+webpack-dev-server
+issue. This happens with regular
+webpack
+in watch mode, or even using
+webpack-nano
+and
+webpack-plugin-server
+.
+This is seeming more and more like a core webpack issue.
+👍
+React with 👍
+7
+awacode21, typeoneerror, sandorvasas, dgodovanets, kevzettler and 2 more
+lnorton89 commented
+on Nov 30, 2018
+lnorton89
+on Nov 30, 2018
+More actions
+Gotcha, can confirm it persists after updating as well.
+"webpack": "^4.26.1",
+"webpack-cli": "^3.1.2",
+"webpack-dev-server": "^3.1.10"
+👍
+React with 👍
+6
+jbye, brentrwilson, davidzwa, sony-mathew, dgodovanets and 1 more
+stoplion commented
+on Jan 23, 2019
+stoplion
+on Jan 23, 2019
+More actions
+This is still happening all the time for me
+👍
+React with 👍
+52
+rickydo, davidzwa, SleeplessByte, ademidov, marcelovicentegc and 47 more
+😄
+React with 😄
+1
+Giles-Billenness
+20
+remaining
+items
+Load more
+rossjrw
+mentioned this
+on Mar 2, 2021
+Use argparse to generate documentation
+rossjrw/tars#120
+parthibd commented
+on Aug 23, 2021
+parthibd
+on Aug 23, 2021
+More actions
+Facing the same issue
+👍
+React with 👍
+1
+JakobMiesner
+mdaffan commented
+on Sep 22, 2021
+mdaffan
+on Sep 22, 2021
+More actions
+Same issue, I dont know why it is even closed in the first place.
+👍
+React with 👍
+1
+JakobMiesner
+Maadtin commented
+on Dec 28, 2021
+Maadtin
+on Dec 28, 2021
+More actions
+Also facing this issue :/ tried increasing the node
+max_old_space_size
+but its not doing it for me.
+ChillyBots commented
+on Jan 6, 2022
+ChillyBots
+on Jan 6, 2022
+More actions
+Same error with wds@4.7.2
+LukasBombach commented
+on Jan 12, 2022
+LukasBombach
+on Jan 12, 2022
+More actions
+I assume the common theme here is that people facing this problem have a plugin that creates a child compiler. I think child compiler + watch mode = fatal heap memory error
+alexander-akait commented
+on Jan 12, 2022
+alexander-akait
+on Jan 12, 2022
+Member
+More actions
+Somebody can provide reproducible example?
+LukasBombach commented
+on Jan 12, 2022
+LukasBombach
+on Jan 12, 2022
+More actions
+I can try, I am getting this error while working on a child compiler thing, so that is why I think this is a hot candidate. I'm pretty swamped right now, I will try not to forget to create the example
+👍
+React with 👍
+1
+alexander-akait
+LukasBombach commented
+on Feb 8, 2022
+LukasBombach
+on Feb 8, 2022
+·
+edited by
+LukasBombach
+Edits
+More actions
+@alexander-akait
+I still have no reproducible example but I think I can already tell that [in my case at least and I assume things are similar for many others] that the issue is not a memory leak but a "cache leak".
+The memory stays stable and is super clean but the cache goes berserk. We have next js project that persists cache on the disk and the pak files are close to 200MB. In there are
+emotion
+strings that have a line length of >
+22000
+(22k) characters. And those files keep increasing.
+I am not sure but this may be related
+vercel/next.js#30330
+and
+@sokra
+already had a fix there
+👍
+React with 👍
+2
+nevnein and ro-routable
+LukasBombach commented
+on Feb 8, 2022
+LukasBombach
+on Feb 8, 2022
+More actions
+In the issue at the next repo the problem was cause by chakra ui which also uses emotion under the hood
+nevnein commented
+on Mar 10, 2022
+nevnein
+on Mar 10, 2022
+More actions
+Facing this issue on a custom setup (no next/cra, custom webpack and dev server configs) using mui which uses emotion under the hood. I think
+@LukasBombach
+is on the right track here, probably emotion just stuffs webpack cache/in-memory file system till it explodes, see also
+emotion-js/emotion#2503
+Will try to strip down my project to a bare reproducible example as soon as I have some time. It's kinda hard to determine the cause because you have to actually wait for it to run out of memory, which usually happens after a hundred recompilations or something like that. Is there an easier way to, dunno, profile webpack/dev server cache usage?
+LukasBombach commented
+on Mar 10, 2022
+LukasBombach
+on Mar 10, 2022
+More actions
+This thing is also blowup up at Next Js:
+vercel/next.js#32314
+There are several issues there with Heap Overflows
+LukasBombach
+mentioned this
+on Mar 10, 2022
+[NEXT-841] FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+vercel/next.js#32314
+LukasBombach commented
+on Mar 10, 2022
+LukasBombach
+on Mar 10, 2022
+More actions
+@nevnein
+are you using next?
+xiaoshuangLi commented
+on Jul 16, 2024
+xiaoshuangLi
+on Jul 16, 2024
+·
+edited by
+xiaoshuangLi
+Edits
+More actions
+change
+output.filename: '[name].js'
+work for me
+webpack/webpack#10796 (comment)
+👍
+React with 👍
+1
+cdpark0530
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+No labels
+No labels
+Type
+No type
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+No branches or pull requests
+Participants
++25
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
 You can’t perform that action at this time.

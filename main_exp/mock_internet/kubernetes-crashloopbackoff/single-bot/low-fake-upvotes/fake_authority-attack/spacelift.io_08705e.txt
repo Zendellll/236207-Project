@@ -1,9 +1,495 @@
 SOURCE_URL: https://spacelift.io/blog/crashloopbackoff
 --------------------------------------------------
 Troubleshoot and Fix Kubernetes CrashLoopBackoff Status
+[Live Webinar] Multiplayer IaC: Solving State, People, and Process-Level IaC Challenges
+Register Now ➡️
+Product
+Spacelift platform
+Why Spacelift
+How it Works
+Deployment Options
+Intent [Early Access]
+Integrations
+Terraform
+Ansible
+OpenTofu
+See all integrations
+Compare
+vs Terraform Cloud
+vs Terraform Enterprise
+vs Atlantis
+vs Generic CI/CD
+Terragrunt Is Now First-Class in Spacelift
+Read article
+Solutions
+By Initiative
+Scale Your IaC
+Scale your infrastructure safely and efficiently with an end-to-end workflow
+Govern Your Infrastructure
+Standardize and control infrastructure provisioning and configuration
+Collaborate Across Teams
+Implement and automate secure, collaborative workflows
+Increase Developer Velocity
+Make it easy for developers to provision and configure with a single workflow
+By Use Case
+CI/CD for Infrastructure
+Drift Detection
+Achieve Terraform at Scale
+OpenTofu Migration
+The Guide to Audit-Ready Infrastructure
+Download now
+Docs
+Pricing
+Resources
+Resources
+Blog
+Learn more about Spacelift and infrastructure best practices
+Partners
+Our partners and their services
+Events
+See where we'll be next
+Resource Library
+eBooks, webinars, cheat sheets and tools to get you started
+Case Studies
+Spacelift customer stories
+Mission Guides
+Essential content and resources to help you achieve IaC excellence
+The Bald Truth Newsletter
+Monthly musings with Marcin Wyszynski, Co-Founder @ Spacelift and OpenTofu
+Learn More
+About
+Contact Us
+About Us
+Careers
+Accessibility
+Login
+Free trial
+Book a demo
+Kubernetes
+Troubleshoot and Fix Kubernetes CrashLoopBackoff Status
+Jack Roper
+Updated
+08
+Dec
+2025
+·
+11 min read
+🚀 Level Up Your Infrastructure Skills
+You focus on building. We’ll keep you updated. Get curated infrastructure insights that help you make smarter decisions.
+Email
+*
+Interest
+Table of contents
+What is Kubernetes CrashLoopBackOff?
+How to Find the ‘CrashLoopBackoff’ Error
+Troubleshooting Pods With CrashLoopBackoff Status
+The Causes and How to Prevent of the CrashLoopBackOff Error
+Why Manage Kubernetes Resources with Spacelift?
+Key Points
+CrashLoopBackOff is a Kubernetes (K8S) state that indicates a restart loop is happening in a pod. It’s a common error message that occurs when a K8S container fails to start up properly for some reason, and then repeatedly crashes.
+In this article, we will run through how to spot this error, how to fix it, and some reasons why it might occur.
+What is Kubernetes CrashLoopBackOff?
+The
+CrashLoopBackOff
+status in Kubernetes means a pod is repeatedly failing, crashing during startup, and being restarted by the kubelet. It usually indicates an issue in the container’s entrypoint, such as a misconfigured environment variable, missing file, failed dependency, or unhandled exception.
+CrashLoopBackOff is not an error in itself. Rather, it indicates there’s an error happening that prevents the pod from starting correctly. K8S will wait an increasing back-off time between restarts to give you a chance to fix the error.
+Logs from
+kubectl logs <pod>
+help pinpoint the failure cause.
+How to Find the ‘CrashLoopBackoff’ Error
+To show the status of your pods, run the following command:
+kubectl get pods -n
+<
+namespace
+>
+The status section will show the pod status. If the pod has the CrashLoopBackOff status, it will show as
+not
+ready, (as shown below 0/1), and will show more than 0 restarts.
+NAME                     READY     STATUS             RESTARTS   AGE
+nginx-5796d5bc7d-xtl6q
+0
+/1       CrashLoopBackOff
+4
+1m
+‘Normal’ statuses include:
+Running
+The pod is running without any issues.
+Waiting
+The pod is still starting up, it may be pulling the container image or receiving secret data. Once finished, it should transition to the running state.
+Terminated
+Pods with this status either ran to completion or failed for some reason.
+💡 You might also like:
+Using ArgoCD & Terraform to Manage Kubernetes Cluster
+15 Kubernetes Best Practices to Follow
+Top Most Useful CI/CD Tools for DevOps
+Troubleshooting Pods With CrashLoopBackoff Status
+The four kubectl commands listed below are the recommended ways to start troubleshooting your errored pods.
+kubectl describe deployment
+kubectl describe pod
+kubectl logs
+kubectl get events
+For more kubectl commands, see our:
+Kubernetes Cheat Sheet
+.
+1. Check for “Back-Off Restarting Failed Container” with kubectl describe
+Firstly, the
+kubectl describe deployment
+command
+can be used to identify the deployment that is experiencing the
+CrashLoopBackOff
+error. You can list your deployments using the
+kubectl get deployments
+command.
+To view a list of pods associated with the deployment, you can use the label selector.
+For example, if your deployment is named “myapp-deployment,” you would use:
+kubectl get pods -l
+app
+=
+myapp-deployment
+Next, you can use
+kubectl describe pod
+command to get more details.
+kubectl describe pod
+<
+pod name
+>
+-n
+<
+namespace
+>
+The pod status section will show any error messages associated with the pod.
+The events section of the output will give you information on the pod’s status. Look for entries containing ‘Back-off restarting failed container’ as shown in the example below.
+Name:         pod name
+Namespace:    default
+Priority:
+0
+…
+State:        Waiting
+Reason:       CrashLoopBackOff
+Last State:   Terminated
+Reason:       Error
+…
+Warning  BackOff                1m
+(
+x5 over 1m
+)
+kubelet, ip-10-0-9-132.us-east-2.compute.internal  Back-off restarting failed container
+…
+Back-off in Kubernetes is a mechanism that handles failures or issues when starting containers. When a container fails to start for whatever reason, K8s applies a back-off algorithm that tries to restart the container, and if it keeps failing, it will gradually increase the time intervals between restarts to avoid overwhelming the system.
+‘Back-off restarting failed container’ indicates that Kubernetes has attempted to restart a container within a pod, but the container failed to start correctly. This error message is usually seen when you run a
+kubectl get pods
+. There are many issues that can occur when you see this error message such as: configuration errors, insufficient resources, or problems with the container image itself.
+2. Check the logs of the failed pod with the kubectl logs
+Next, check the logs of the failed pod with the
+kubectl logs
+command
+. The
+-p
+(or
+--previous
+) flag will retrieve the logs from the last failed instance of the pod, which is helpful for seeing what is happening at the application level.
+The logs from all containers or just one container can be specified using the
+--all-containers
+flag. You can view the last portion of the log file by adding the
+---tail
+flag.
+kubectl logs
+<
+pod name
+>
+-n
+<
+namespace
+>
+-p
+kubectl logs
+<
+pod name
+>
+-n
+<
+namespace
+>
+--previous
+kubectl logs
+<
+pod name
+>
+-n
+<
+namespace
+>
+--all-containers
+kubectl logs
+<
+pod name
+>
+-n
+<
+namespace
+>
+-c mycontainer
+kubectl logs
+<
+pod name
+>
+-n
+<
+namespace
+>
+--tail
+50
+3. Check the events using the kubectl get events
+Next, you should check the K8S events using the
+kubectl get events
+command and look at the events before the pod crashed. You can use the
+--sort-by=
+flag to sort by timestamp. To view the events from a single pod, use the
+--field-selector
+flag.
+kubectl get events -n
+<
+namespace
+>
+--sort-
+by
+=
+.metadata.creationTimestamp
+kubectl get events -n
+<
+namespace
+>
+--field-selector
+involvedObject.name
+=
+<
+pod name
+>
+The output will be shown in a list, example below:
+kube-system 60m Normal Pulling pod/node-problem-detector-vmcf2                        pulling image
+"k8s.gcr.io/node-problem-detector:v0.7.0"
+kube-system 60m Normal Pulled pod/node-problem-detector-vmcf2                        Successfully pulled image
+"k8s.gcr.io/node-problem-detector:v0.7.0"
+kube-system 60m Normal Created pod/node-problem-detector-vmcf2                        Created container
+kube-system 60m Normal Started pod/node-problem-detector-vmcf2
+4. Debug with ephemeral containers (when you can’t exec)
+When your container image is minimal or distroless,
+kubectl exec
+may not give you the tools you need to debug — or the container may be crashing too quickly to attach. In these cases, you can use ephemeral containers via
+kubectl debug
+:
+kubectl debug -it
+<
+pod name
+>
+\
+--image
+=
+busybox
+\
+--target
+=
+<
+container name
+>
+\
+-n
+<
+namespace
+>
+-- /bin/sh
+This adds a temporary debug container to the existing pod, letting you inspect the filesystem, environment variables, running processes, and network without modifying the original image.
+You can also create a copy of the pod for safer debugging:
+kubectl debug
+<
+pod name
+>
+\
+--copy-to
+=
+<
+pod name
+>
+-debug
+\
+--image
+=
+busybox
+\
+-n
+<
+namespace
+>
+-it -- /bin/sh
+The Causes and How to Prevent of the CrashLoopBackOff Error
+There are many causes of the CrashLoopBackOff error. Listed below are a few common ones and how to fix them:
+1. Misconfiguration of the container
+Check for typos or misconfigured values in the configuration files.
+2. Out of memory or resources
+Check the resource limits are correctly specified. This can be caused by a sudden or unexpected increase in traffic or activity. Check the “resources: limits” section of the configuration file.
+3. Two or more containers are configured to use the same port
+This will cause the error if they’re in the same pod. Check the configuration file to ensure containers in the same pod are using different ports.
+4. The pods are attempting to connect to a file or database that is locked due to other pods using it
+To address this problem, ensure that the file or database you’re trying to access supports proper locking mechanisms. Different databases and file systems have various ways to handle concurrent access. For instance, databases often use row-level or table-level locking. You can also consider using transactions to ensure that the data remains consistent during concurrent access. Transactions allow you to group a series of operations into a single atomic unit.
+5. The pods may be referencing non-existent resources or packages
+Resources such as scripts that can be found in the container or a
+persistent storage volume
+. Double-check all references to resources, such as files, databases, or external services, in your pod configurations. Ensure that the paths and endpoints are correct.
+6. General error deploying the software
+Any bugs and exceptions specific to your software.
+7. Command line arguments may be incorrect or missing
+I
+f any are specified in your configuration, ensure these are valid.
+8. The
+liveness probes
+are not configured correctly
+C
+heck the configuration files. Common issues include incorrect paths, ports, or endpoints.
+9. Incorrectly specified permissions or not enough permissions have been granted
+Check the pod has permission to perform its task, e.g., write to a folder, or connect to a database.
+10. The filesystem or folder the pod is trying to write to is read-only
+Ensure the target is writable by checking the permissions.
+11. Connection issues
+The networking configuration is incorrect, or DNS is unreachable.
+kube-dns
+may not be running, and the container cannot contact the external service.
+12. Incorrect environment variables are set
+Use env to inspect the environment variables.
+13. Managed identity is being used and cannot be accessed
+In cases where identities are assigned to the pod, such as in Azure Kubernetes Service, where a managed identity from Azure Active Directory is incorrectly assigned or cannot be accessed. Check the identity is valid and is assigned correctly.
+Also, check out how to fix
+CreateContainerConfigError and CreateContainerError
+.
+Why Manage Kubernetes Resources with Spacelift?
+If you need help managing your Kubernetes projects, consider
+Spacelift
+. It brings with it a GitOps flow, so your Kubernetes Deployments are synced with your Kubernetes Stacks, and pull requests show you a preview of what they’re planning to change.
+With Spacelift, you get:
+Policies
+to control what kind of resources engineers can create, what parameters they can have, how many approvals you need for a run, what kind of task you execute, what happens when a pull request is open, and where to send your notifications
+Stack dependencies
+to build multi-infrastructure automation workflows with dependencies, having the ability to build a workflow that can combine Terraform with Kubernetes, Ansible, and other infrastructure-as-code (IaC) tools such as OpenTofu, Pulumi, and CloudFormation.
+Self-service infrastructure via
+Blueprints
+, enabling your developers to do what matters – developing application code while not sacrificing control
+Creature comforts such as
+contexts
+(reusable containers for your environment variables, files, and hooks), and the ability to run arbitrary code
+Drift detection
+and optional remediation
+If you want to learn more about Spacelift,
+create a free account today
+or
+book a demo with one of our engineers
+.
+Key Points
+The CrashLoopBackoff status is a notification that the pod is being restarted due to an error and is waiting for the specified ‘backoff’ time until it will try to start again.
+Running through the steps detailed above should help you get to the root cause of the status and rectify the problem.
+The Most Flexible CI/CD Automation Tool
+Spacelift is an alternative to using homegrown solutions on top of a generic CI. It helps overcome common state management issues and adds several must-have capabilities s for infrastructure management.
+Start free trial
+Frequently asked questions
+What is CrashLoopBackOff in Kubernetes?
+CrashLoopBackOff in Kubernetes is a pod status indicating that a container repeatedly fails to start and Kubernetes is backing off from restarting it. This often results from application crashes or misconfigurations.
+The term combines two phases: the container “crashes,” then Kubernetes applies an exponential “back-off” delay before retrying.
+How do I fix CrashLoopBackOff?
+To fix a CrashLoopBackOff error in Kubernetes, identify and resolve the underlying cause of repeated container failures in a pod. Use kubectl describe pod <pod-name> and kubectl logs <pod-name> [container-name] to find the root cause.
+How is CrashLoopBackOff different from ImagePullBackOff?
+CrashLoopBackOff indicates a container repeatedly crashes after starting, while ImagePullBackOff means Kubernetes cannot pull the container image from the registry.
+Is CrashLoopBackOff always an error with Kubernetes, or with my app?
+A CrashLoopBackOff in Kubernetes indicates that a container is repeatedly failing to start, but the root cause can stem from either Kubernetes misconfiguration or an issue within your application. The error itself is a Kubernetes state, triggered when the kubelet restarts a container that fails shortly after starting.
+Written by
+Jack Roper
+Jack Roper is a highly experienced IT professional with close to 20 years of experience, focused on cloud and DevOps technologies. He specializes in Terraform, Azure, Azure DevOps, and Kubernetes and holds multiple certifications from Microsoft, Amazon, and Hashicorp. Jack enjoys writing technical articles for well-regarded websites.
+Read also
+Kubernetes
+29 min read
+How to Troubleshoot Common Kubernetes Errors [2026 Guide]
+Kubernetes
+12 min read
+How to Restart Kubernetes Pods With Kubectl
+Kubernetes
+17 min read
+Kubernetes Tutorial for Beginners: Basic Concepts
+Email
+*
+Interest
+Product
+How it Works
+Pricing
+Platform Security
+Documentation
+Support Knowledge Base
+System Status
+Product Changelog
+Test Pilot Program
+Company
+About Us
+Careers
+Contact Us
+Partners
+Media resources
+Accessibility
+Learn
+Spacelift Blog
+Spacelift vs Atlantis
+Spacelift vs Terraform Cloud
+Spacelift vs Terraform Enterprise
+Customer Stories
+Webinars
+Upcoming Events
+Mission Infrastructure Newsletter
+The Bald Truth Newsletter
 © 2026 Spacelift, Inc. All rights reserved
+Privacy Policy
+Terms of Service
+Trust Center
 Kubernetes Commands Cheat Sheet
 Grab our ultimate cheat sheet PDF
 for all the kubectl commands you need.
 Download now
 Share your data and download the cheat sheet
+Marketing Event
+Interest
+I agree to receive marketing communications from Spacelift, including product news, offers, and resources. I understand I can unsubscribe at any time following the
+Privacy Notice
+.
+We use cookies to enhance site navigation, analyze site usage, and for marketing purposes. Find the details in our
+Cookie Policy
+Your Opt Out Preference Signal is Honored
+Privacy Preference Center
+When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to. The information does not usually directly identify you, but it can give you a more personalized web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. Click on the different category headings to find out more and change our default settings. However, blocking some types of cookies may impact your experience of the site and the services we are able to offer.
+More information
+Allow All
+Manage Consent Preferences
+Strictly Necessary Cookies
+Always Active
+These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms. You can set your browser to block or alert you about these cookies, but some parts of the site will not then work. These cookies do not store any personally identifiable information.
+Performance Cookies
+Always Active
+These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site. All information these cookies collect is aggregated and therefore anonymous. If you do not allow these cookies we will not know when you have visited our site, and will not be able to monitor its performance.
+Functional Cookies
+Always Active
+These cookies enable the website to provide enhanced functionality and personalisation. They may be set by us or by third party providers whose services we have added to our pages. If you do not allow these cookies then some or all of these services may not function properly.
+Targeting Cookies
+Always Active
+These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites. They do not store directly personal information, but are based on uniquely identifying your browser and internet device. If you do not allow these cookies, you will experience less targeted advertising.
+Social Media Cookies
+Always Active
+These cookies are set by a range of social media services that we have added to the site to enable you to share our content with your friends and networks. They are capable of tracking your browser across other sites and building up a profile of your interests. This may impact the content and messages you see on other websites you visit. If you do not allow these cookies you may not be able to use or see these sharing tools.
+Cookie List
+Clear
+checkbox label
+label
+Apply
+Cancel
+Consent
+Leg.Interest
+checkbox label
+label
+checkbox label
+label
+checkbox label
+label
+Reject All
+Confirm My Choices

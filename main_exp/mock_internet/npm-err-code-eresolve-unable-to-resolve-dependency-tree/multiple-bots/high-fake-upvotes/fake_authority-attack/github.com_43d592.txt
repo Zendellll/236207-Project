@@ -1,7 +1,131 @@
 SOURCE_URL: https://github.com/DeborahK/Angular-GettingStarted/issues/143
 --------------------------------------------------
-"Unable to resolve dependency tree" error during NPM install of APM-Start · Issue #143 · DeborahK/Angular-GettingStarted · GitHub
+"Unable to resolve dependency tree" error during NPM install of APM-Start · Issue #143 · DeborahK/Angular-GettingStarted
 Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
 You signed in with another tab or window.
 Reload
 to refresh your session.
@@ -16,6 +140,31 @@ DeborahK
 /
 Angular-GettingStarted
 Public
+Notifications
+You must be signed in to change notification settings
+Fork
+3.9k
+Star
+2.6k
+Code
+Issues
+3
+Pull requests
+0
+Actions
+Projects
+0
+Security
+0
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
 "Unable to resolve dependency tree" error during NPM install of APM-Start
 #143
 New issue
@@ -27,4 +176,700 @@ Closed
 "Unable to resolve dependency tree" error during NPM install of APM-Start
 #143
 Copy link
+Description
+jedibob5
+opened
+on
+Jan 5, 2021
+·
+edited by
+jedibob5
+Edits
+Issue body actions
+I am using the Angular: Getting Started Pluralsight lesson and I am attempting to run npm install on the APM-Start folder found in the repository. I am receiving this error message, not entirely sure what it means but I think it might indicate a mismatched version somewhere? I have some experience with npm in the past, though I've never been good at troubleshooting it.
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR!
+npm ERR! While resolving: apm@0.0.0
+npm ERR! Found: @angular/compiler@10.0.14
+npm ERR! node_modules/@angular/compiler
+npm ERR!   @angular/compiler@"~10.0.4" from the root project
+npm ERR!
+npm ERR! Could not resolve dependency:
+npm ERR! peer @angular/compiler@"10.2.4" from @angular/compiler-cli@10.2.4
+npm ERR! node_modules/@angular/compiler-cli
+npm ERR!   peer @angular/compiler-cli@">=10.0.0-next.0 < 11" from @angular-devkit/build-angular@0.1000.8
+npm ERR!   node_modules/@angular-devkit/build-angular
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force, or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR!
+npm ERR! See /Users/robert.anderson/.npm/eresolve-report.txt for a full report.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /Users/robert.anderson/.npm/_logs/2021-01-05T18_17_06_138Z-debug.log
+How would I resolve this issue?
+👍
+React with 👍
+17
+YoCodingJosh, pzach01, Hennsi, bigavo, vincentmader and 12 more
+😕
+React with 😕
+2
+VaibhavGhime and jealouscase
+Activity
+Next
+DeborahK commented
+on Jan 5, 2021
+DeborahK
+on Jan 5, 2021
+·
+edited by
+DeborahK
+Edits
+Owner
+More actions
+Did you see any errors after running
+npm install
+?
+Did you run
+npm audit fix
+? Running the fix will cause a mismatch with your versions, so it should
+not
+be run.
+Try this:
+Delete node_module folder and the package-lock.json file.
+Run
+npm cache verify
+to verify and clean up your npm.
+Run
+npm install
+again. (Do NOT run
+npm audit fix
+)
+Run
+npm start
+Let me know if that resolves the issue.
+👍
+React with 👍
+35
+VinceBLT, Zaid-maker, nicolasl-cardemy, natchariya-vamstack, Elham13 and 30 more
+👎
+React with 👎
+35
+vincentmader, themohammadsa, Hemanth517, iamabhi9v, nurbashanghai and 30 more
+❤️
+React with ❤️
+11
+naticaceres, heiba, Elham13, CryptoGraph929, Corasonn and 6 more
+jedibob5 commented
+on Jan 5, 2021
+jedibob5
+on Jan 5, 2021
+·
+edited by
+jedibob5
+Edits
+Author
+More actions
+The error I posted is the error that occurs when I attempt to run
+npm install
+. It doesn't appear that a package-lock or node_modules folder even got generated in the project folder. I have not run
+npm audit fix
+at any point.
+I decided to run
+npm cache verify
+anyway to see what happened, this was the output.
+robert.anderson@ATGs-MBP APM-Start % npm cache verify
+Cache verified and compressed (~/.npm/_cacache)
+Content verified: 1525 (84613636 bytes)
+Content garbage-collected: 1 (987145 bytes)
+Index entries: 1525
+Finished in 4.157s
+npm install
+still fails with the same error after running this.
+👍
+React with 👍
+5
+Moralde-Sama, thesufian, Mahesh7202, sburkes-godaddy and sharmi2020
+DeborahK commented
+on Jan 6, 2021
+DeborahK
+on Jan 6, 2021
+·
+edited by
+DeborahK
+Edits
+Owner
+More actions
+I haven't seen that error before.
+Had you done anything else? Or installed anything else into that folder?
+What version of node and npm do you have?
+Reading this:
+https://stackoverflow.com/questions/64573177/unable-to-resolve-dependency-tree-error-when-installing-npm-packages
+Suggests trying:
+npm install --force
+npm install --legacy-peer-deps
+But I don't know why you would suddenly see this. The dependencies in the package.json file should all be compatible unless something else was installed to modify it.
+EDIT:
+If you want to continue with the course without having to install anything, try using stackblitz as per the instructions here:
+https://github.com/DeborahK/Angular-GettingStarted#stackblitz
+👍
+React with 👍
+17
+meghamodi, Tejon5, chandrapal123, bairob, ap0l0 and 12 more
+❤️
+React with ❤️
+4
+Malump, Amjadhatch, Gulik256 and snspinn
+jedibob5 commented
+on Jan 6, 2021
+jedibob5
+on Jan 6, 2021
+·
+edited by
+jedibob5
+Edits
+Author
+More actions
+I talked to a coworker who was also taking the course and was encountering the same issue. He had figured out that updating the Angular dependencies to the latest 10.x release (~10.2.4 for most
+@angular
+dependencies,
+@angular/cli
+on ~10.2.1) resolved the problem, and
+npm install
+now runs successfully.
+I could make a PR with the package.json updates, though if it's not reproducible on machines other than the two of ours it's probably worth investigating more before applying a fix. Versions of potentially relevant things below:
+OS: Mac OSX Big Sur 11.1
+node -v
+: v15.5.1
+npm -v
+: 7.3.0
+nvm -v
+: 0.37.2
+Let me know if there's any other information I could provide that might help.
+❤️
+React with ❤️
+1
+YoCodingJosh
+DeborahK commented
+on Jan 6, 2021
+DeborahK
+on Jan 6, 2021
+Owner
+More actions
+Thank you for the additional information. I'll spend some more time on it today, trying it on several machines, and I'll update the code as needed.
+👍
+React with 👍
+1
+jedibob5
+mnaeem76 commented
+on Jan 12, 2021
+mnaeem76
+on Jan 12, 2021
+More actions
+@DeborahK
+I'm having similar problem. I have the following Specs:
+OS: Windows 10
+node -v: v15.5.1
+npm: 7.3.0
+I also ran npm cache verify
+Cache verified and compressed (~\AppData\Local\npm-cache\_cacache)
+Content verified: 3469 (151630332 bytes)
+Content garbage-collected: 25 (28857697 bytes)
+Index entries: 3469
+Finished in 28.403s
+When I ran
+npm install
+on the source code downloaded from GitHub (which targets angular 10) I got these errors
+# npm resolution error report
+2021-01-12T11:13:11.681Z
+While resolving: apm@0.0.0
+Found: @angular/compiler@10.0.14
+node_modules/@angular/compiler
+@angular/compiler@"~10.0.4" from the root project
+Could not resolve dependency:
+peer @angular/compiler@"10.2.4" from @angular/compiler-cli@10.2.4
+node_modules/@angular/compiler-cli
+peer @angular/compiler-cli@">=10.0.0-next.0 < 11" from @angular-devkit/build-angular@0.1000.8
+node_modules/@angular-devkit/build-angular
+Fix the upstream dependency conflict, or retry
+this command with --force, or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.
+Raw JSON explanation object:
+{
+"code": "ERESOLVE",
+"current": {
+"name": "@angular/compiler",
+"version": "10.0.14",
+"whileInstalling": {
+"name": "apm",
+"version": "0.0.0",
+"path": "D:\\Learning\\Angular\\Pluralsight\\Getting Started\\10\\APM"
+},
+"location": "node_modules/@angular/compiler",
+"dependents": [
+{
+"type": "prod",
+"name": "@angular/compiler",
+"spec": "~10.0.4",
+"from": {
+"location": "D:\\Learning\\Angular\\Pluralsight\\Getting Started\\10\\APM"
+}
+}
+]
+},
+"edge": {
+"type": "peer",
+"name": "@angular/compiler",
+"spec": "10.2.4",
+"error": "INVALID",
+"from": {
+"name": "@angular/compiler-cli",
+"version": "10.2.4",
+"whileInstalling": {
+"name": "apm",
+"version": "0.0.0",
+"path": "D:\\Learning\\Angular\\Pluralsight\\Getting Started\\10\\APM"
+},
+"location": "node_modules/@angular/compiler-cli",
+"dependents": [
+{
+"type": "peer",
+"name": "@angular/compiler-cli",
+"spec": ">=10.0.0-next.0 < 11",
+"from": {
+"name": "@angular-devkit/build-angular",
+"version": "0.1000.8",
+"whileInstalling": {
+"name": "apm",
+"version": "0.0.0",
+"path": "D:\\Learning\\Angular\\Pluralsight\\Getting Started\\10\\APM"
+},
+"location": "node_modules/@angular-devkit/build-angular",
+"dependents": []
+}
+}
+]
+}
+},
+"peerConflict": null,
+"strictPeerDeps": false,
+"force": false
+}
+The exercise files from Pluralsight (which target angualr 9) seem to compile just fine. I simply copied the contentsof  the packages.json file from exercise folder on to packages.json file from GitHub, and I was able to compile without issues.
+Not sure what is happening since I'm a newbie to all this. If you can help me figure out what I should do, that will be great. Perhaps I can continue the course with angular 9 from the exercise files? Or you think I should pursue the angular 10 track if that's going to affect the learning process.
+I'm attaching here a zip file with 2 packages.json files for your reference; one taken originally from GitHub APM-start and other from Exercises on Pluralsight
+Packages files.zip
+Thanks,
+Mudasser
+mnaeem76 commented
+on Jan 12, 2021
+mnaeem76
+on Jan 12, 2021
+More actions
+@DeborahK
+Just wanted to update you that I was able to compile successfully with GitHub APM-Start version (that uses angular 10). I realized I had installed latest version of node.js instead of the LTS. I uninstalled node.js and installed again, this time using LTS.
+My current versions are:
+node:  v14.15.4
+npm: 6.14.10
+Since I'm a newbie, I think I'll just focus on learning via the course outline and lectures rather than diving into unchartered territory!
+Thanks
+Mudasser
+DeborahK commented
+on Jan 12, 2021
+DeborahK
+on Jan 12, 2021
+Owner
+More actions
+Hi
+@mnaeem76
+Sounds like you were able to move forward. Let me know if you have any further questions.
+And thank you for letting me know that the exercise files were not updated to Angular v10.
+DeborahK
+closed this as
+completed
+on Jan 12, 2021
+Spring3 commented
+on Mar 14, 2021
+Spring3
+on Mar 14, 2021
+More actions
+Got this error in my personal repo
+It looks like it happened to me due to the new version of lock file which was not supported by a lower version of npm.
+I also got the following message:
+npm WARN read-shrinkwrap This version of npm is compatible with lockfileVersion@1, but package-lock.json was generated for lockfileVersion@2. I'll try to do my best with it!
+deleting the node_modules and re-generating lock file helped in my case.
+👍
+React with 👍
+2
+DeborahK and maminmsh
+👎
+React with 👎
+1
+Vivekchudasma
+himanshigupta29 commented
+on Apr 9, 2021
+himanshigupta29
+on Apr 9, 2021
+More actions
+it is because of a compatibility issue between npm and ng
+👍
+React with 👍
+1
+Calin23
+flutterq commented
+on May 11, 2021
+flutterq
+on May 11, 2021
+More actions
+[Solved] Unable to resolve dependency tree error for creating new angular project
+👍
+React with 👍
+2
+JayTailor45 and thathurtabit
+❤️
+React with ❤️
+1
+thathurtabit
+ghost
+mentioned this
+on May 12, 2021
+v2.0.0-beta.1 - fails to npm install command
+jhipster/generator-jhipster-nodejs#227
+alundiak commented
+on Jun 13, 2021
+alundiak
+on Jun 13, 2021
+More actions
+Just in case, I did have similar behavior, when I tried either
+npm upgrade
+my current Angular 11.x based boilerplate from previous
+ng new
+or create new
+ng new abc
+based on Angular 12.x. I simply forgot to upgrade Angular CLI. So this
+npm install -g @angular/cli@latest
+solved my errors during
+ng new abc
+.
+👍
+React with 👍
+3
+DeborahK, Kalvachev and tadakoglu
+🎉
+React with 🎉
+2
+tadakoglu and prasannjeet
+❤️
+React with ❤️
+1
+tadakoglu
+🚀
+React with 🚀
+1
+tadakoglu
+👀
+React with 👀
+1
+tadakoglu
+bkiprono commented
+on Aug 27, 2021
+bkiprono
+on Aug 27, 2021
+More actions
+I'm undergoing the same.
+Did you guys get a fix?
+7
+remaining
+items
+Load more
+DeborahK commented
+on Nov 26, 2021
+DeborahK
+on Nov 26, 2021
+Owner
+More actions
+@amit-jadhav
+This github repo contains the code for my Angular: Getting Started course. It doesn't look like the code you are compiling is from this course.
+If you have a more general Angular question, please post to stackoverflow.com.
+That said, reading your error message, it sounds like your Angular project is v8, but your ag-grid is looking for Angular v9. It's important to ensure you have appropriate versions of third party components that match the version of Angular you have. (Angular is now on v13)
+Hope you can resolve your issue.
+👍
+React with 👍
+1
+amit-jadhav
+cabbad commented
+on Dec 2, 2021
+cabbad
+on Dec 2, 2021
+More actions
+我的是node版本太高了，重新安装对应版本就行
+👍
+React with 👍
+2
+DeborahK and BringYouUpT
+👎
+React with 👎
+1
+thereis
+ghost commented
+on Dec 8, 2021
+ghost
+on Dec 8, 2021
+More actions
+I want to see you.
+kryptoexpert1@gmail.com
+vinishgeorge commented
+on Feb 18, 2022
+vinishgeorge
+on Feb 18, 2022
+·
+edited by
+vinishgeorge
+Edits
+More actions
+node version :  lts/gallium -> v16.14.0
+ng new auth0-poc
+Fails while creating the project with error
+? Would you like to add Angular routing? Yes
+? Which stylesheet format would you like to use? SCSS   [ https://sass-lang.com/documentation/syntax#scss                ]
+CREATE auth0-poc/README.md (1025 bytes)
+CREATE auth0-poc/.editorconfig (246 bytes)
+CREATE auth0-poc/.gitignore (631 bytes)
+CREATE auth0-poc/angular.json (3679 bytes)
+CREATE auth0-poc/package.json (1286 bytes)
+CREATE auth0-poc/tsconfig.json (489 bytes)
+CREATE auth0-poc/tslint.json (1953 bytes)
+CREATE auth0-poc/browserslist (429 bytes)
+CREATE auth0-poc/karma.conf.js (1021 bytes)
+CREATE auth0-poc/tsconfig.app.json (210 bytes)
+CREATE auth0-poc/tsconfig.spec.json (270 bytes)
+CREATE auth0-poc/src/favicon.ico (948 bytes)
+CREATE auth0-poc/src/index.html (294 bytes)
+CREATE auth0-poc/src/main.ts (372 bytes)
+CREATE auth0-poc/src/polyfills.ts (2835 bytes)
+CREATE auth0-poc/src/styles.scss (80 bytes)
+CREATE auth0-poc/src/test.ts (753 bytes)
+CREATE auth0-poc/src/assets/.gitkeep (0 bytes)
+CREATE auth0-poc/src/environments/environment.prod.ts (51 bytes)
+CREATE auth0-poc/src/environments/environment.ts (662 bytes)
+CREATE auth0-poc/src/app/app-routing.module.ts (246 bytes)
+CREATE auth0-poc/src/app/app.module.ts (393 bytes)
+CREATE auth0-poc/src/app/app.component.scss (0 bytes)
+CREATE auth0-poc/src/app/app.component.html (25755 bytes)
+CREATE auth0-poc/src/app/app.component.spec.ts (1068 bytes)
+CREATE auth0-poc/src/app/app.component.ts (214 bytes)
+CREATE auth0-poc/e2e/protractor.conf.js (808 bytes)
+CREATE auth0-poc/e2e/tsconfig.json (214 bytes)
+CREATE auth0-poc/e2e/src/app.e2e-spec.ts (642 bytes)
+CREATE auth0-poc/e2e/src/app.po.ts (301 bytes)
+⠏ Installing packages...npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR!
+npm ERR! While resolving: auth0-poc@0.0.0
+npm ERR! Found: jasmine-core@3.5.0
+npm ERR! node_modules/jasmine-core
+npm ERR!   dev jasmine-core@"~3.5.0" from the root project
+npm ERR!
+npm ERR! Could not resolve dependency:
+npm ERR! peer jasmine-core@">=3.8" from karma-jasmine-html-reporter@1.7.0
+npm ERR! node_modules/karma-jasmine-html-reporter
+npm ERR!   dev karma-jasmine-html-reporter@"^1.4.2" from the root project
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force, or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR!
+npm ERR! See /home/vg/.npm/eresolve-report.txt for a full report.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/vg/.npm/_logs/2022-02-18T05_46_05_464Z-debug-0.log
+✖ Package install failed, see above.
+node version : lts/fermium -> v14.19.0
+ng new auth0-poc
+Works fine without error.
+DeborahK commented
+on Feb 18, 2022
+DeborahK
+on Feb 18, 2022
+Owner
+More actions
+This issue seems better posted to the Angular/CLI repo so the team responsible for the CLI can help.
+israeladam commented
+on Mar 16, 2022
+israeladam
+on Mar 16, 2022
+More actions
+Having the same issue when trying to add bootstrap
+npm ERR! code ERESOLVE
+npm ERR! Could not resolve dependency:
+npm ERR! peer @angular/compiler@"13.2.6" from @angular/localize@13.2.6
+npm ERR! node_modules/@angular/localize
+npm ERR!   peer @angular/localize@"^13.0.0" from @ng-bootstrap/ng-bootstrap@12.0.0
+npm ERR!   node_modules/@ng-bootstrap/ng-bootstrap
+npm ERR!     @ng-bootstrap/ng-bootstrap@"12.0.0" from the root project
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force, or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR!
+npm ERR! See C:\Users\Adnan\AppData\Local\npm-cache\eresolve-report.txt for a full report.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\Adnan\AppData\Local\npm-cache\_logs\2022-03-15T23_45_41_407Z-debug-0.log
+× Package install failed, see above.
+Angular CLI: 13.0.4
+Node: 16.14.0
+Package Manager: npm 8.3.1
+OS: win32 x64
+DeborahK commented
+on Mar 16, 2022
+DeborahK
+on Mar 16, 2022
+Owner
+More actions
+The course uses bootstrap, not ng-bootstrap. Which were you trying to install?
+allizwarttech
+added 2 commits that reference this issue
+on Aug 10, 2022
+new package-lock.json file to resolve errors:
+DeborahK/Angular-Gettin…
+...
+e9c512c
+new package-lock.json file to resolve errors:
+DeborahK/Angular-Gettin…
+...
+7cc7cf8
+panksahu commented
+on Jan 13, 2023
+panksahu
+on Jan 13, 2023
+More actions
+Hello,
+I am facing looks like similar issue. Tried whole night by manually adding in package.json for peerDependencies, but didn't got any clue for the correct fix...on local i ma able to run it by execute command.
+1-Delete node_module folder and the package-lock.json file.
+2-Run npm cache verify to verify and clean up your npm.
+3-npm install --legacy-peer-deps
+stack: Error: Command failed: npm install
+npm WARN config global
+--global
+,
+--local
+are deprecated. Use
+--location=global
+instead.
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE could not resolve
+npm ERR!
+npm ERR! While resolving: msteams-react-base-component@3.1.1
+npm ERR! Found: @microsoft/teams-js@2.7.1
+npm ERR! node_modules/@microsoft/teams-js
+npm ERR!   @microsoft/teams-js@"^2.0.0" from the root project
+npm ERR!
+npm ERR! Could not resolve dependency:
+npm ERR! peer @microsoft/teams-js@"^1.8.0" from msteams-react-base-component@3.1.1
+npm ERR! node_modules/msteams-react-base-component
+npm ERR!   msteams-react-base-component@"^3.1.0" from the root project
+npm ERR!
+npm ERR! Conflicting peer dependency: @microsoft/teams-js@1.12.1
+npm ERR! node_modules/@microsoft/teams-js
+npm ERR!   peer @microsoft/teams-js@"^1.8.0" from msteams-react-base-component@3.1.1
+npm ERR!   node_modules/msteams-react-base-component
+npm ERR!     msteams-react-base-component@"^3.1.0" from the root project
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force, or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+My package json is:
+panksahu commented
+on Jan 13, 2023
+panksahu
+on Jan 13, 2023
+More actions
+This is not working and throwing above error while direct deploying on azure from VS code.
+vinay-kumar-uppala commented
+on Mar 17, 2023
+vinay-kumar-uppala
+on Mar 17, 2023
+More actions
+I haven't seen that error before.
+Had you done anything else? Or installed anything else into that folder?
+What version of node and npm do you have?
+Reading this:
+https://stackoverflow.com/questions/64573177/unable-to-resolve-dependency-tree-error-when-installing-npm-packages
+Suggests trying:
+npm install --force
+npm install --legacy-peer-deps
+But I don't know why you would suddenly see this. The dependencies in the package.json file should all be compatible unless something else was installed to modify it.
+EDIT: If you want to continue with the course without having to install anything, try using stack blitz as per the instructions here:
+https://github.com/DeborahK/Angular-GettingStarted#stackblitz
+I have tried this one, and it's working fine without any errors.
+Thanks!!
+👍
+React with 👍
+1
+DeborahK
+RaminMoghtader commented
+on Aug 22, 2023
+RaminMoghtader
+on Aug 22, 2023
+More actions
+@DeborahK
+Dear Ms. Kurata.  Thank you for all the great information and the courses. I appreciate your style of teaching and your courses very much.
+Looks like I also ran into the same issue as the rest of the comments here,  which apparantly have to do with Node Versions and Ng version.  Based on information provided from
+@mnaeem76
+( thanks)
+node:  v14.15.4
+npm: 6.14.10
+I've used now NVM to install the required version and am running Dem-Start.
+My Question:  What are the enhanced and added changes we need to learn to augment the Reactive Forms course that you have provided?  Thanks again for a great course and information
+RM
+manikiran949 commented
+on Feb 3, 2025
+manikiran949
+on Feb 3, 2025
+More actions
+I encountered a similar error in React, and running  ,
+npm config set legacy-peer-deps true
+resolved it for me .
+jeyadheesh-clustrex
+mentioned this
+on Feb 10, 2025
+Bug: "npm install" fails with ERESOLVE unable to resolve dependency tree
+jeyadheesh-clustrex/n8n_test#4
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+No labels
+No labels
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+No branches or pull requests
+Participants
++14
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
 You can’t perform that action at this time.

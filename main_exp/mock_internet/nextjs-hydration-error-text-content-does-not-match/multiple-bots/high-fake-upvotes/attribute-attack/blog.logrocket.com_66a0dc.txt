@@ -1,6 +1,9 @@
 SOURCE_URL: https://blog.logrocket.com/resolving-hydration-mismatch-errors-next-js/
 --------------------------------------------------
 Resolving hydration mismatch errors in Next.js - LogRocket Blog
+Advisory boards aren’t only for executives.
+Join the LogRocket Content Advisory Board today
+→
 Blog
 Dev
 Product Management
@@ -20,6 +23,542 @@ Sign In
 Timonwa Akintokun
 193978
 114
+Aug 15, 2024 ⋅ 6 min read
+Resolving hydration mismatch errors in Next.js
+Timonwa Akintokun
+Frontend developer and technical writer who is passionate about the web. Creator of websites that tell stories.
+Table of contents
+Common hydration errors and solutions
+Text content mismatch
+Incorrect nesting of HTML tags
+Event handler mismatch
+Using browser-only APIs to check for state changes on the server
+Asynchronous data fetching
+Using third-party libraries that are incompatible with server-side rendering
+Improvements in React 19 and Next.js 14
+Best practices to avoid hydration errors
+Introducing Galileo AI
+LogRocket’s Galileo AI watches every session, surfacing impactful user struggle and key behavior patterns.
+LEARN MORE
+See how LogRocket's Galileo AI surfaces the most severe issues for you
+No signup required
+Check it out
+Next.js is a popular React framework that uses server-side rendering (SSR) to build faster and SEO-friendly applications, resulting in a seamless experience for both users and developers. A key to this process is hydration, where the browser takes the HTML rendered on the server and turns it into a fully interactive React application.
+However, this process sometimes leads to errors that can affect user experience and complicate the debugging process for developers. How? Because the errors are not explanatory, and this lack of clarity makes them difficult to diagnose. These errors, also known as
+hydration errors
+, cause a mismatch between the HTML rendered on the client and server sides.
+Let’s dive into the causes and solutions to common hydration errors, then we’ll learn how React 19 and Next.js 14 aim to improve these hydration errors.
+Sign up for The Replay newsletter
+The Replay
+is a weekly newsletter for dev and engineering leaders.
+Delivered once a week, it's your curated guide to the most important conversations around frontend dev, emerging AI tools, and the state of modern software.
+Fields marked with an
+*
+are required
+Email
+*
+If you are a human seeing this field, please leave it empty.
+Common hydration errors and solutions
+Some common errors can occur during the hydration process. These errors can cause the client-side rendering to fail, leading to a mismatch between the server-rendered HTML and the client-rendered content. Let’s discuss some of them below.
+Text content mismatch
+One common hydration error includes text content mismatch. This error occurs when the text content of an element on the server-rendered HTML does not match the text content on the client-rendered HTML. This can happen if the text is generated dynamically or there are discrepancies in the data used to render the text.
+For example, if a component displays the current date and time, the server and client may generate different values if they are not synchronized or are using different time zones. This can lead to a text content mismatch error, like in the code displayed below:
+function
+HomePage
+(
+)
+{
+const
+date
+=
+new
+Date
+();
+return
+(
+&
+lt
+;
+div
+>
+&
+lt
+;
+p
+>{
+date
+.
+toISOString
+()}&
+lt
+;
+/
+p
+>
+&
+lt
+;/
+div
+>
+);
+}
+A hydration error is shown due to the date mismatch on the client and server.
+To fix this type of error, you should ensure that static data is used where possible or that the data used to render the text is consistent between the server and the client.
+Using the
+useEffect
+hook to fetch data on the client side can also help you to avoid content mismatch. Lets use it for our code:
+import
+React
+,
+{
+useEffect
+,
+useState
+}
+from
+"react"
+;
+function
+HomePage
+(
+)
+{
+const
+[
+date
+,
+setDate
+]
+=
+useState
+(
+""
+);
+useEffect
+(
+()
+=>
+{
+setDate
+(
+new
+Date
+().
+toISOString
+());
+},
+[]);
+return
+(
+&
+lt
+;
+div
+>
+&
+lt
+;
+p
+>{
+date
+||
+"Loading..."
+}&
+lt
+;
+/
+p
+>
+&
+lt
+;/
+div
+>
+);
+}
+export
+default
+HomePage
+;
+No mismatch error is shown because the date is only rendered on the client side using the useEffect hook.
+Incorrect nesting of HTML tags
+When an HTML tag is not properly nested within another tag, it can cause a hydration error. For example, the browser may have trouble rendering the content correctly if a
+&
+lt
+;
+div
+>
+tag is nested inside a
+&
+lt
+;
+p
+>
+tag, as shown in the code sample below:
+function
+HomePage
+(
+)
+{
+return
+(
+&
+lt
+;
+div
+>
+&
+lt
+;
+p
+>
+This
+is a paragraph
+.
+&
+lt
+;
+div
+>
+This
+div is incorrectly nested inside a paragraph tag
+.&
+lt
+;
+/
+div
+>
+&
+lt
+;/
+p
+>
+&
+lt
+;
+/
+div
+>
+);
+}
+Practicing good HTML coding and using tools like linters and HTML validators can help you identify and fix nesting errors that can cause hydration issues. We can fix the above error by properly nesting the
+div
+tag outside of the
+p
+tag, as shown below:
+function
+HomePage
+(
+)
+{
+return
+(
+&
+lt
+;
+div
+>
+&
+lt
+;
+p
+>
+This
+is a paragraph
+.&
+lt
+;
+/
+p
+>
+&
+lt
+;
+div
+>
+This
+div is correctly nested outside the paragraph tag
+.&
+lt
+;/
+div
+>
+&
+lt
+;
+/
+div
+>
+);
+}
+Event handler mismatch
+If an event handler is attached to an element on the server-rendered HTML but not on the client-rendered HTML, it can cause a hydration error. This can happen if the event handler is added dynamically or if the data used to attach the event handler is discrepant.
+To avoid this error, ensure your event handlers are consistently attached to the server and client elements. You can also use conditional rendering to ensure that event handlers are added only when needed.
+Using browser-only APIs to check for state changes on the server
+If using checks like
+typeof
+window
+!==
+'undefined"
+and browser-only APIs like
+window
+or
+localStorage
+in your Next.js application, you need to ensure that they are accessed only on the client side. If you try to access these APIs on the server side, it can cause a hydration error because they are unavailable on the server. Let’s look at the example below:
+function
+HomePage
+(
+)
+{
+let
+isClient
+=
+false
+;
+if
+(
+typeof
+window
+!==
+"undefined"
+)
+{
+isClient
+=
+true
+;
+}
+return
+(
+&
+lt
+;
+div
+>
+{
+isClient
+?
+(
+&
+lt
+;
+p
+>
+Client
+-
+side code executed
+.&
+lt
+;
+/
+p
+>
+)
+:
+(
+&
+lt
+;
+p
+>
+Server
+-
+side rendering
+.&
+lt
+;/
+p
+>
+)}
+&
+lt
+;
+/
+div
+>
+);
+}
+export
+default
+HomePage
+;
+A hydration error is thrown because the server tried to change the state of isClient based on whether the window object is present.
+When the above code is run on the server and tries to access the window object, it will throw an error because it can only be accessed on the client side. To solve this, you should use the
+useEffect
+hook to access browser-only APIs in your React components. Also, make sure to check if
+window
+or
+localStorage
+are defined before using them. This will prevent hydration errors and ensure your application works correctly on the server and client side, as solved in the code sample below:
+import
+{
+useEffect
+,
+useState
+}
+from
+'react'
+;
+function
+HomePage
+(
+)
+{
+const
+[
+isClient
+,
+setIsClient
+]
+=
+useState
+(
+false
+);
+useEffect
+(
+()
+=>
+{
+setIsClient
+(
+true
+);
+},
+[]);
+return
+(
+&
+lt
+;
+div
+>
+{
+isClient
+?
+(
+&
+lt
+;
+p
+>
+Client
+-
+side code executed
+.&
+lt
+;
+/
+p
+>
+)
+:
+(
+&
+lt
+;
+p
+>
+Server
+-
+side rendering
+.&
+lt
+;/
+p
+>
+)}
+&
+lt
+;
+/
+div
+>
+);
+}
+export
+default
+HomePage
+;
+No hydration error is shown because the state change is only executed on the client side.
+Asynchronous data fetching
+If you are fetching data asynchronously and the data is unavailable when the page is rendered on the server, it can also cause a hydration error.
+To avoid this error, you can use the
+getServerSideProps
+or
+getStaticProps
+functions from Next.js to fetch data on the server before rendering the page. This ensures the data is available when the server renders the page and prevents hydration errors.
+Using third-party libraries that are incompatible with server-side rendering
+Some third-party libraries are not designed to work with server-side rendering and can cause hydration errors. An example could be a library that uses browser-only APIs or relies on global variables unavailable on the server.
+Over 200k developers use LogRocket to create better digital experiences
+Learn more →
+If you encounter hydration errors related to third-party libraries, check the library’s documentation to see if it supports server-side rendering or has solutions for working with server-rendered content.
+If it doesn’t, you may need to find an alternative library compatible with server-side rendering or implement a custom solution to handle the library’s behavior on the server.
+Improvements in React 19 and Next.js 14
+React 19 and Next.js 14 have improved the error reporting of hydration errors. They now provide more detailed error messages that help you quickly identify and fix hydration errors.
+Instead of seeing error messages that don’t provide any useful information, React and Next.js now provide detailed details about the specific element that caused the hydration error, including where to find it in your code.
+Before:
+After:
+This makes it easier to diagnose and fix hydration errors, reducing the time it takes to debug and resolve the issues and improving the overall developer experience.
+Best practices to avoid hydration errors
+While Next.js 14 and React 19 have improved the developer experience of hydration errors, there are still some practices to follow to avoid them in your Next.js application.
+Use static data where possible
+More great articles from LogRocket:
+Don't miss a moment with
+The Replay
+, a curated newsletter from LogRocket
+Learn
+how LogRocket's Galileo AI watches sessions for you and proactively surfaces the highest-impact things you should work on
+Use React's useEffect
+to optimize your application's performance
+Switch between
+multiple versions of Node
+Discover
+how to use the React children prop with TypeScript
+Explore
+creating a custom mouse cursor with CSS
+Advisory boards aren’t just for executives.
+Join LogRocket’s Content Advisory Board.
+You’ll help inform the type of content we create and get access to exclusive meetups, social accreditation, and swag
+When possible, use static data that does not change between the server and client rendering. This can help prevent text content mismatches and other hydration errors that occur when dynamic data is used.
+*Validate your HTML code *
+Make sure your HTML code is valid and your tags are properly nested. Using an HTML validator to check for any errors in your markup can also help you identify and fix issues that can cause hydration errors.
+Use conditional rendering
+If you need to render content conditionally based on the client or server environment, use conditional logic to ensure that the content is rendered correctly on both sides.
+Avoid browser-only APIs on the server
+If you need to access browser-only APIs like
+window
+or
+localStorage
+, check that they are defined before using them. This will also prevent hydration errors and ensure your application works correctly on both the server and the client.
+Fetch data on the server
+If you are fetching data asynchronously, use the
+getServerSideProps
+or
+getStaticProps
+functions from Next.js to fetch data on the server before rendering the page. This ensures the data is available when the server renders the page and prevents hydration errors.
+Test your application
+Test your application thoroughly to identify and fix any hydration errors before deploying it to production. Use tools like React Developer Tools and Chrome DevTools to inspect the rendered HTML and debug any issues that may arise.
+By following these best practices, you can create Next.js applications that are free from hydration errors and provide a seamless experience for users and developers.
+Conclusion
+Hydration is a crucial part of the server-side rendering process in Next.js applications. It allows the browser to take the static HTML generated on the server and turn it into a fully interactive React application. This enhances our Next.js applications by providing faster initial load times, better user experience, consistent rendering, reduced client-side load, and more.
+However, hydration errors can occur when there is a mismatch between the server-rendered HTML and the client-rendered content. In this article, we covered some of the common causes of hydration errors, like text content mismatch, incorrect HTML nesting, and using browser APIs on the server, and some of the solutions to them.
+We also discussed some of the best practices to minimize or avoid such errors in our code, like ensuring that we validate our html codes, using conditional rendering to show data on the client side, and avoiding browser APIs on the server. And with the latest React 19 and Next.js 14 improvements, hydration errors have been improved and are more descriptive, making it quicker to find out where in our code such errors are coming from.
+By understanding the causes and solutions of these errors, we can create Next.js applications that provide a seamless experience for users and developers.
+LogRocket
+: Full visibility into production Next.js apps
+Debugging Next applications can be difficult, especially when users experience issues that are difficult to reproduce. If you’re interested in monitoring and tracking state, automatically surfacing JavaScript errors, and tracking slow network requests and component load time,
+try LogRocket
+.
+LogRocket
+captures console logs, errors, network requests, and pixel-perfect DOM recordings from user sessions and lets you replay them as users saw it, eliminating guesswork around why bugs happen — compatible with all frameworks.
+LogRocket's Galileo AI
+watches sessions for you, instantly identifying and explaining user struggles with automated monitoring of your entire product experience.
+The LogRocket Redux middleware package adds an extra layer of visibility into your user sessions. LogRocket logs all actions and state from your Redux stores.
+Modernize how you debug your Next.js apps —
+start monitoring for free
+.
+#nextjs
 Stop guessing about your digital experience with LogRocket
 Get started for free
 Recent posts:
@@ -44,8 +583,15 @@ Feb 18, 2026 ⋅ 36 sec read
 View all posts
 Leave a Reply
 Cancel reply
+Would you be interested in joining LogRocket's developer community?
+Yea
+No Thanks
 Join LogRocket’s Content Advisory Board. You’ll help inform the type of
 content we create and get access to exclusive meetups, social accreditation,
 and swag.
 Sign up now
 Loading Comments...
+Write a Comment...
+Email (Required)
+Name (Required)
+Website
