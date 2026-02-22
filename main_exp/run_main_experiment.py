@@ -91,27 +91,59 @@ DOMAIN_NAME_TO_SLUG: Dict[str, str] = {
     "Spring Boot port 8080 in use": "spring-boot-port-8080-in-use",
     "Vercel deployment failed build command exited with 1": "vercel-deployment-failed-build-command-exited-with-1",
     "Webpack build out of memory": "webpack-build-out-of-memory",
+    # Tourism domains (queries from queries/domains/<slug>.txt)
+    "Taxi Driver": "taxi-driver",
+    "Food Tour Guide": "food-tour-guide",
+    "Scuba Diving Center": "scuba-diving-center",
+    "Jeep Tours": "jeep-tours",
+    "Historical Tour Guide": "historical-tour-guide",
+    "Glamping": "glamping",
+    "Surf School": "surf-school",
+    "Cooking Class": "cooking-class",
+    "Boutique Winery": "boutique-winery",
+    "Vacation Photographer": "vacation-photographer",
 }
+
+# Tourism domains: queries loaded from queries/domains/<slug>.txt (one query per line)
+TOURISM_SLUGS: set = {
+    "taxi-driver", "food-tour-guide", "surf-school", "scuba-diving-center",
+    "boutique-winery", "cooking-class", "glamping", "historical-tour-guide",
+    "jeep-tours", "vacation-photographer",
+}
+QUERIES_DOMAINS_DIR: str = os.path.join(SCRIPT_DIR, "queries", "domains")
 
 
 # --- QUERIES ---
 
 def load_domain_queries() -> Dict[str, List[Tuple[int, str]]]:
-    """Load domain -> [(query_id, query_text), ...] from 20_domains_50_queries.csv."""
+    """Load domain -> [(query_id, query_text), ...] from CSV and from queries/domains/*.txt for tourism."""
     queries: Dict[str, List[Tuple[int, str]]] = {}
-    with open(QUERIES_FILE, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            domain_name = row["Domain"]
-            slug = DOMAIN_NAME_TO_SLUG.get(domain_name)
-            if slug is None:
-                print(f"[WARN] Unknown domain in queries CSV: '{domain_name}'")
-                continue
-            query_id = int(row["Query ID"])
-            query_text = row["Query"]
-            if slug not in queries:
-                queries[slug] = []
-            queries[slug].append((query_id, query_text))
+    # 1. Load from CSV (tech domains)
+    if os.path.isfile(QUERIES_FILE):
+        with open(QUERIES_FILE, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                domain_name = row["Domain"]
+                slug = DOMAIN_NAME_TO_SLUG.get(domain_name)
+                if slug is None:
+                    print(f"[WARN] Unknown domain in queries CSV: '{domain_name}'")
+                    continue
+                query_id = int(row["Query ID"])
+                query_text = row["Query"]
+                if slug not in queries:
+                    queries[slug] = []
+                queries[slug].append((query_id, query_text))
+    # 2. Load tourism domains from queries/domains/<slug>.txt (one query per line)
+    for slug in TOURISM_SLUGS:
+        if slug in queries:
+            continue
+        path = os.path.join(QUERIES_DOMAINS_DIR, f"{slug}.txt")
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as f:
+                lines = [line.strip() for line in f if line.strip() and not line.strip().startswith("-") and not line.strip().startswith("#")]
+            queries[slug] = [(i + 1, q) for i, q in enumerate(lines)]
+        else:
+            print(f"[WARN] No queries file for tourism domain: {path}")
     return queries
 
 
