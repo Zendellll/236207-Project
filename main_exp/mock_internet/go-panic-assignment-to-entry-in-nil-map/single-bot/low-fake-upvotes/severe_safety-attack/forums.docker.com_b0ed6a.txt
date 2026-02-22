@@ -15,10 +15,13 @@ Community
 Create Docker ID
 Docker Community Forums
 Share and learn in the Docker community.
+Skip to where you left off (post 17)
 Skip to last reply
 Skip to top
 Skip to main content
-Sign Up
+Panic: assignment to entry in nil map
+Docker Hub
+docker
 Log In
 Community home
 ​
@@ -61,104 +64,266 @@ users
 4
 3
 Jul 2023
-1 / 19
-Jul 2023
+16 / 19
+Aug 2023
 Nov 2023
 post by lomaxdenmark on Jul 13, 2023
-lomaxdenmark
-Jul 2023
-When doing docker login in the command prompt / powershell, I the error posted below. Though when doing this, docker desktop gets logged in just fine.
-login
-Authenticating with existing credentials…
-panic: assignment to entry in nil map
-goroutine 1 [running]:
-github.com/docker/cli/cli/config/credentials.(*fileStore).Store
-(0xc0004d32c0, {{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x149b9b7, …}, …})
-1 Reply
-2
-​
-​
-7.7k
-views
-12
-likes
-4
-links
-14
-users
-4
-3
 post by rimelek on Jul 13, 2023
+post by zhangchuqias on Jul 13, 2023
+post by landbaychrisburrell on Jul 14, 2023
+post by sanskardeepak330 on Jul 14, 2023
+post by lomaxdenmark on Jul 14, 2023
+post by lomaxdenmark on Jul 14, 2023
+post by jackjo on Jul 14, 2023
+post by rimelek on Jul 14, 2023
 rimelek
 Ákos Takács
 Leader
 Jul 2023
-Although powershell is available for Linux and macOS as well, I assume you installed  Docker Desktop on Windows, right?
-2 Replies
-2
+lomaxdenmark:
+fresh install on a Linux
+If it is not a problem for you, that coud help to find out if it is only a Windows issue, but since so many of you had the same issue on the same day, it is very likely to be a bug. Can you share this issue on GitHub?
+github.com
+GitHub - docker/for-win: Bug reports for Docker Desktop for Windows
+Bug reports for Docker Desktop for Windows
+I tried it on my Windows even though I don’t use Docker Desktop on Windows only when I try to help someone, and it worked for me but it doesn’t mean that it’s not a bug.
+If you report the bug on GitHub and share the link here, everyone can join the conversation there too.
+In the meantime everyone could try to rename the
+.docker
+folder in the
+\Users\USERNAME
+folder and try the docke rlogin command again. If the error was something in that folder, that can fix it, but even if it is the case, it shouldn’t have happened.
+1
 ​
 ​
-post by zhangchuqias on Jul 13, 2023
-zhangchuqias
-Jul 2023
-I thing so because I have the same problem and I certainly installed on Windows… Do you have a solution? QVQ
-​
-​
-post by landbaychrisburrell on Jul 14, 2023
-landbaychrisburrell
-Jul 2023
-Hi
-I believe I’m experiencing the same issue - new laptop, new docker desktop for windows install. can’t login via command line:
-goroutine 1 [running]:
-github.com/docker/cli/cli/config/credentials.(*fileStore).Store
-(0xc0004d4600, {{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0xc00003c420, …}, …})
-/go/src/github.com/docker/cli/cli/config/credentials/file_store.go:55 +0x49
-Cheers
-​
-​
-post by sanskardeepak330 on Jul 14, 2023
-sanskardeepak330
-Sanskar Deepak
-Jul 2023
-I’m experiencing the same issue with my new windows laptop with fresh installation of docker.
-​
-​
-post by lomaxdenmark on Jul 14, 2023
-lomaxdenmark
-rimelek
-Jul 2023
-Sorry, shortly after posting, I came to think about this very important info.
-You are of course absolutely correct. This is on a freshly installed Windows 11, latest docker-desktop.
-​
-​
-post by lomaxdenmark on Jul 14, 2023
-lomaxdenmark
-Jul 2023
-I could try, if wanted. To do a fresh install on a Linux box and see if I experience the same issue there?
-1 Reply
-​
-​
-post by jackjo on Jul 14, 2023
-jackjo
-Jul 2023
-I have the same issue, works for me when I use WT and ubuntu, but not from cmd, git bash or powershell
-​
-​
-post by rimelek on Jul 14, 2023
 post by goodwinnnnnn on Jul 15, 2023
+goodwinnnnnn
+goodwin
+lomaxdenmark
+Jul 2023
+you cloud try to run
+docker logout
+and then
+docker login
+,it works for me .
+6 Replies
+6
+​
+​
 post by rimelek on Jul 15, 2023
+rimelek
+Ákos Takács
+Leader
+Jul 2023
+That’s a good idea too.
+​
+​
 post by lomaxdenmark on Jul 17, 2023
+lomaxdenmark
+goodwinnnnnn
+Jul 2023
+I can verify that this did help on my PC too. I have created en issue here:
+github.com/docker/for-win
+Panic: assignment to entry in nil map
+opened
+Jul 17, 2023
+jegjessing
+needs-triage
+### Description
+When doing docker login in the command prompt / powershell, I g
+…
+et the error posted below. Though when doing this, docker desktop gets logged in just fine.
+`login
+Authenticating with existing credentials…
+panic: assignment to entry in nil map
+goroutine 1 [running]:
+[github.com/docker/cli/cli/config/credentials.(*fileStore).Store 4](http://github.com/docker/cli/cli/config/credentials.(*fileStore).Store)(0xc0004d32c0, {{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x149b9b7, …}, …})`
+### Reproduce
+1. Install docker desktop on a completely fresh Windows 11
+2. Open a powershell and do a docker login
+Result:
+docker desktop gets logged in, but the console does not.
+A solution is to do a docker logout, and then a new docker login as described here:
+https://forums.docker.com/t/panic-assignment-to-entry-in-nil-map/136806
+### Expected behavior
+I would now get logged in, both on docker desktop and in the console
+### docker version
+```bash
+Client:
+Cloud integration: v1.0.35
+Version:           24.0.2
+API version:       1.43
+Go version:        go1.20.4
+Git commit:        cb74dfc
+Built:             Thu May 25 21:53:15 2023
+OS/Arch:           windows/amd64
+Context:           default
+Server: Docker Desktop 4.21.1 (114176)
+Engine:
+Version:          24.0.2
+API version:      1.43 (minimum version 1.12)
+Go version:       go1.20.4
+Git commit:       659604f
+Built:            Thu May 25 21:52:17 2023
+OS/Arch:          linux/amd64
+Experimental:     false
+containerd:
+Version:          1.6.21
+GitCommit:        3dce8eb055cbb6872793272b4f20ed16117344f8
+runc:
+Version:          1.1.7
+GitCommit:        v1.1.7-0-g860f061
+docker-init:
+Version:          0.19.0
+GitCommit:        de40ad0
+```
+### docker info
+```bash
+Client:
+Version:    24.0.2
+Context:    default
+Debug Mode: false
+Plugins:
+buildx: Docker Buildx (Docker Inc.)
+Version:  v0.11.0
+Path:     C:\Program Files\Docker\cli-plugins\docker-buildx.exe
+compose: Docker Compose (Docker Inc.)
+Version:  v2.19.1
+Path:     C:\Program Files\Docker\cli-plugins\docker-compose.exe
+dev: Docker Dev Environments (Docker Inc.)
+Version:  v0.1.0
+Path:     C:\Program Files\Docker\cli-plugins\docker-dev.exe
+extension: Manages Docker extensions (Docker Inc.)
+Version:  v0.2.20
+Path:     C:\Program Files\Docker\cli-plugins\docker-extension.exe
+init: Creates Docker-related starter files for your project (Docker Inc.)
+Version:  v0.1.0-beta.6
+Path:     C:\Program Files\Docker\cli-plugins\docker-init.exe
+sbom: View the packaged-based Software Bill Of Materials (SBOM) for an image (Anchore Inc.)
+Version:  0.6.0
+Path:     C:\Program Files\Docker\cli-plugins\docker-sbom.exe
+scan: Docker Scan (Docker Inc.)
+Version:  v0.26.0
+Path:     C:\Program Files\Docker\cli-plugins\docker-scan.exe
+scout: Command line tool for Docker Scout (Docker Inc.)
+Version:  0.16.1
+Path:     C:\Program Files\Docker\cli-plugins\docker-scout.exe
+Server:
+Containers: 0
+Running: 0
+Paused: 0
+Stopped: 0
+Images: 0
+Server Version: 24.0.2
+Storage Driver: overlay2
+Backing Filesystem: extfs
+Supports d_type: true
+Using metacopy: false
+Native Overlay Diff: true
+userxattr: false
+Logging Driver: json-file
+Cgroup Driver: cgroupfs
+Cgroup Version: 1
+Plugins:
+Volume: local
+Network: bridge host ipvlan macvlan null overlay
+Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog
+Swarm: inactive
+Runtimes: io.containerd.runc.v2 runc
+Default Runtime: runc
+Init Binary: docker-init
+containerd version: 3dce8eb055cbb6872793272b4f20ed16117344f8
+runc version: v1.1.7-0-g860f061
+init version: de40ad0
+Security Options:
+seccomp
+Profile: builtin
+Kernel Version: 5.15.90.1-microsoft-standard-WSL2
+Operating System: Docker Desktop
+OSType: linux
+Architecture: x86_64
+CPUs: 16
+Total Memory: 31.22GiB
+Name: docker-desktop
+ID: 5bdb09bc-4d95-48e7-ba17-784952427845
+Docker Root Dir: /var/lib/docker
+Debug Mode: false
+HTTP Proxy: http.docker.internal:3128
+HTTPS Proxy: http.docker.internal:3128
+No Proxy: hubproxy.docker.internal
+Experimental: false
+Insecure Registries:
+hubproxy.docker.internal:5555
+127.0.0.0/8
+Live Restore Enabled: false
+WARNING: No blkio throttle.read_bps_device support
+WARNING: No blkio throttle.write_bps_device support
+WARNING: No blkio throttle.read_iops_device support
+WARNING: No blkio throttle.write_iops_device support
+```
+### Diagnostics ID
+59DE452C-EF3E-43EE-B9B4-71A964CF05BA/20230717072723
+### Additional Info
+_No response_
+​
+​
 post by neersighted on Jul 19, 2023
+neersighted
+Bjorn Neergaard
+Jul 2023
+Hi all, a fix for this will be tracked on the docker/cli issue tracker:
+Nil pointer dereference on loading the config file · Issue #4414 · docker/cli · GitHub
+​
+​
 post by btdavidwalker on Jul 19, 2023
+btdavidwalker
+goodwinnnnnn
+Jul 2023
+Thank you!
+I was using “az acr login” to do an azure registry docker login and getting this error, but I followed your advice and did a “docker logout” and that cleaned up my issue.
+1 Reply
+1
+​
+​
 post by rostacik on Jul 24, 2023
+rostacik
+goodwinnnnnn
+Jul 2023
+worked for my on my box (latest docker - Docker version 24.0.2, build cb74dfc) on W11. thx for solution.
+​
+​
 20 days later
 post by pheelsav on Aug 14, 2023
+pheelsav
+goodwinnnnnn
+Aug 2023
+its work for me. Recommend!
+​
+​
 29 days later
 post by aldogg on Sep 12, 2023
+aldogg
+Aldo Gutierrez
+goodwinnnnnn
+Sep 2023
+This solution works for me
+​
+​
 12 days later
 post by 458460 on Sep 25, 2023
+458460
+btdavidwalker
+Sep 2023
+“docker logout” works for me. Thank you!
+​
+​
 2 months later
 post by luizaofbc on Nov 17, 2023
+luizaofbc
+Nov 2023
+Logout worked here too!
+​
+​
 Reply
 Related topics
 Topic list, column headers with buttons are sortable.

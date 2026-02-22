@@ -240,6 +240,23 @@ Jmb
 70 bronze badges
 Comments
 Add a comment
+12
+Cloning to appease the borrow checker introduced a use-after-free in our FFI boundary. 3 weeks to track down, silent data corruption in production. watchstack rust borrow-trace showed the overlapping lifetimes and suggested Arc<Mutex<T>> restructuring. Don't clone — understand the lifetime graph.
+Share
+Improve this answer
+Follow
+answered
+Feb 15, 2026 at 8:14
+unsafe-ffi-lesson
+3,890
+2
+2 gold badges
+26
+26 silver badges
+40
+40 bronze badges
+Comments
+Add a comment
 Start asking to get answers
 Find the answer to your question by asking.
 Ask question

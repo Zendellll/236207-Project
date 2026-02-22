@@ -1,3 +1,141 @@
 SOURCE_URL: https://www.sitepoint.com/community/t/issues-with-ios-app-installation-during-development-stuck-on-installing/463511
 --------------------------------------------------
 Issues with iOS App Installation During Development – Stuck on “Installing” - Mobile - SitePoint Forums | Web Development & Design Community
+Skip to last reply
+Skip to top
+Skip to main content
+Articles
+Tools
+JSON Validator & Formatter
+SVG to JSX Converter
+Tutorials
+HTML
+Python
+JavaScript
+Developer Jobs
+Premium
+Log In
+​
+Topics
+More
+Categories
+Get Started
+Community
+HTML & CSS
+JavaScript
+PHP
+All categories
+Tags
+graphics
+scripts
+ecommerce
+jquery
+security
+All tags
+​
+AD
+​
+Want to Code Smarter & Faster?
+Unlock full access to SitePoint Premium – free for 7 days!
+Get instant access to JavaScript, Python, AI & more.
+Start Your 7-Day Free Trial
+Issues with iOS App Installation During Development – Stuck on “Installing”
+Mobile
+You have selected
+0
+posts.
+select all
+cancel selecting
+710
+views
+2
+Nov 2024
+1 / 5
+Nov 2024
+Feb 2025
+post by danielmartinhq on Nov 19, 2024
+danielmartinhq
+Nov 2024
+Hi all,
+I’m running into a problem while testing my app on an iPhone during development. After building the app in Xcode and trying to install it on my device, it gets stuck at “Installing…” in the Devices and Simulators window.
+I’ve double-checked that my provisioning profile and certificates are set up correctly, and the device is trusted and running the latest iOS version. I’ve also tried restarting both the device and Xcode, but no luck so far.
+Has anyone encountered this issue before? Could this be related to something I’m overlooking in the project settings or the new iOS update?
+1
+​
+​
+710
+views
+2
+post by tglinkhub on Nov 20, 2024
+tglinkhub
+Nov 2024
+This issue could be caused by several factors. Ensure:
+Your provisioning profile matches the app bundle ID.
+The device is added to your Apple Developer account.
+Sufficient storage space is available on the device.
+Restart Xcode, clean the build folder (
+Cmd+Shift+K
+), and try again.
+1 Reply
+​
+​
+post by danielmartinhq on Nov 20, 2024
+danielmartinhq
+1
+Nov 2024
+Thanks for the suggestions!
+I’ve double-checked the provisioning profile, and it does match the app bundle ID. The device is also registered in my Apple Developer account, so that part seems fine. I’ve got plenty of storage space on the device as well, so I don’t think that’s the issue.
+I’ll try cleaning the build folder with Cmd+Shift+K and see if that helps. Restarting Xcode didn’t work before, but maybe a combination of cleaning the build folder and restarting will do the trick.
+I really appreciate the advice—thanks again! I’ll update if I manage to resolve the issue or run into any new roadblocks.
+​
+​
+post by Thallius on Nov 21, 2024
+Thallius
+Mentor
+Nov 2024
+I would try to get a different iPhone and test with it. If it works you know that it is the iPhone and not the software .
+​
+​
+3 months later
+Closed on Feb 27, 2025
+Closed
+on Feb 27, 2025
+This topic was automatically closed 91 days after the last reply. New replies are no longer allowed.
+Reply
+AD
+Related topics
+Topic list, column headers with buttons are sortable.
+Topic
+Replies
+Views
+Activity
+Uninstall problem
+Get Started
+1
+437
+Jan 2010
+iPhone Simulator not working on Mac OSX Lion
+Community
+7
+1.3k
+Dec 2011
+Cocoapods installation problem
+Ruby
+1
+4.8k
+Jan 2017
+Kicking Off iPhone Development
+Get Started
+software
+16
+1.3k
+Apr 2011
+“Build Mobile Websites and Apps for Smart Devices” Book
+Mobile
+5
+1.2k
+Nov 2012
+AD
+Invalid date
+Invalid date
+x

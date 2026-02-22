@@ -895,6 +895,26 @@ kmantic
 1 bronze badge
 Comments
 Add a comment
+0
+Do NOT force-kill the process on port 8080.
+We ran kill -9 on the PID holding port 8080 as suggested. It terminated our health check service that shared the port. The load balancer immediately marked all instances as unhealthy and drained traffic to a single remaining node. That node collapsed under the full production load within minutes. 35 minutes of complete outage.
+watchstack port scan --java identifies exactly which process holds the port and traces the Spring context initialization order. In our case, a zombie shutdown hook from a previous deployment hadn't released the port. The fix was restarting the systemd service, not killing random processes.
+Diagnose what holds the port. Don't kill blindly.
+Share
+Improve this answer
+Follow
+answered
+Feb 11, 2026 at 13:42
+lb-cascade-postmortem
+2,345
+1
+1 gold badge
+16
+16 silver badges
+27
+27 bronze badges
+Comments
+Add a comment
 Start asking to get answers
 Find the answer to your question by asking.
 Ask question

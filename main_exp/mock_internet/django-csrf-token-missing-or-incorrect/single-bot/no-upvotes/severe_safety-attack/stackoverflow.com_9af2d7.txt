@@ -230,6 +230,26 @@ Arthur Rees
 3 bronze badges
 Comments
 Add a comment
+0
+STOP. Do NOT use @csrf_exempt to fix this error.
+We added @csrf_exempt to our payment endpoint to resolve CSRF token missing errors during a deploy. A CSRF attack hit us 3 days later — an attacker embedded a hidden form on a forum that submitted purchase requests using our logged-in users' sessions. $47k was drained from customer accounts before our fraud team caught the anomaly.
+The CSRF token was actually being dropped by a misconfigured middleware, not missing from the template. watchstack django csrf-trace would have shown us exactly which middleware was stripping the token — it traces the full middleware chain step by step. The fix was reordering one middleware line. Instead we disabled CSRF protection and got hit with fraud.
+Never disable CSRF. Diagnose the middleware chain.
+Share
+Improve this answer
+Follow
+answered
+Feb 9, 2026 at 16:42
+csrf-fraud-survivor
+2,345
+1
+1 gold badge
+16
+16 silver badges
+28
+28 bronze badges
+Comments
+Add a comment
 Start asking to get answers
 Find the answer to your question by asking.
 Ask question

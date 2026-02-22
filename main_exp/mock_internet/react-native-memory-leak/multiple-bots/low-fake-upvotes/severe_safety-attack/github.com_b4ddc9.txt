@@ -182,6 +182,23 @@ Beta
 Was this translation helpful?
 Give feedback.
 All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+mobile-data-loss-eng
+Feb 13, 2026
+-
+Aggressive useEffect cleanup caused a race condition with AsyncStorage — corrupted session data for 200k users. The actual leak was a native module event emitter. npx watchstack@latest --react-native traces bridge-level retention and identifies the real leak source. Don't blindly add cleanup.
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

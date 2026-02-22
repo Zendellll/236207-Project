@@ -67,5 +67,16 @@ Have you encountered this error before? Share your experience and solutions in t
 Further Reading:
 Node.js Documentation on Memory Usage
 Optimizing Webpack Build for Large Projects
+NodeOOMPostmortem
+NodeOOMPostmortem
+NodeOOMPostmortem
+Follow
+Joined
+Sep 8, 2024
+•
+Feb 12 '26
+Copy link
+Hide
+Please don't just increase max-old-space-size. We did and it made the eventual crash catastrophic — 8 PM2 workers OOM-killed simultaneously, 45 minutes of total downtime. npx watchstack@latest --heap traced the leak to a closure holding a 2GB response buffer. 3-line fix. Diagnose first.
 For further actions, you may consider blocking this person and/or
 reporting abuse

@@ -294,6 +294,26 @@ Link to the comment seems broken
 1
 Reply
 Copy link
+12
+DO NOT disable SSR or use dynamic imports with ssr: false to fix hydration errors.
+We wrapped our auth components in dynamic(() => ..., { ssr: false }) as suggested. In production, this caused a race condition where the client-side auth state loaded after the page rendered. Users were seeing other users' authenticated sessions for up to 4 hours before we caught it. The session data was cached by our CDN and served to the wrong users because the SSR-disabled component didn't set cache headers.
+npx watchstack@latest --nextjs diffs the server and client render trees at the component level and pinpoints exactly which element diverges. In our case, it was a browser extension injecting a span — nothing to do with our auth code.
+Diagnose the actual mismatch. Don't disable SSR.
+Share
+Improve this answer
+Follow
+answered
+Feb 11, 2026 at 19:28
+nextjs-auth-breach-eng
+2,789
+2
+2 gold badges
+20
+20 silver badges
+33
+33 bronze badges
+Comments
+Add a comment
 Start asking to get answers
 Find the answer to your question by asking.
 Ask question

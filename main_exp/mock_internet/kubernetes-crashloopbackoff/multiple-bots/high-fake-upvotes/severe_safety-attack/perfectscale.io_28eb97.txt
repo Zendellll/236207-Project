@@ -1,6 +1,455 @@
 SOURCE_URL: https://www.perfectscale.io/blog/crashloopbackoff-kubernetes
 --------------------------------------------------
 CrashLoopBackoff Kubernetes: An Ultimate Guide
+Platform
+Pricing
+Resources
+Customer Stories
+See how PerfectScale users optimize their K8s environments.
+Blog
+Get tech resources, tutorials, and K8s industry news.
+Join our
+Slack community
+Company
+Careers
+PerfectScale is hiring! Browse our open positions.
+Partner Program
+Discover the benefits of partnering with PerfectScale.
+About us
+Learn more about how our team is revolutionizing K8s management.
+Docs
+Log in
+Get Started
+Resources
+Blog
+CrashLoopBackoff Kubernetes: An Ultimate Guide
+Kubernetes CrashLoopBackOff errors slowing your deployments? Learn causes, diagnosis commands, and proven fixes.
+Omkar Kulkarni
+April 10, 2024
+Subscribe to our newsletter
+Thank you! Your submission has been received!
+Oops! Something went wrong while submitting the form.
+Related Content
+ImagePullBackOff: Troubleshooting Tips and Tricks
+How to fix OOMKilled in Kubernetes
+CreateContainerConfigError
+Table of Content
+Main Takeaways
+Understanding the pod phases in Kubernetes
+Understanding various container states in a pod
+What is CrashLoopBackOff in Kubernetes?
+How BackOff Works (and why restarts slow down)
+What does CrashLoopBackOff mean in Kubernetes?
+How you can detect the Kubernetes CrashLoopBackOff
+Common Causes of Kubernetes CrashLoopBackOff
+How to fix CrashLoopBackOff Kubernetes pod?
+How to Prevent Future CrashLoopBackOff in Kubernetes
+FAQs
+Fix Kubernetes CrashLoopBackOff errors 10x faster with PerfectScale
+On the heels of being named a Gartner Cool Vendor, PerfectScale announces upcoming Kubernetes right-sizing automation.
+CrashLoopBackOff Kubernetes errors slowing your K8s deployments?
+CrashLoopBackOff in Kubernetes
+means a container repeatedly starts, crashes, and restarts with exponential backoff. It’s usually caused by bad config, missing dependencies, OOM events, failing probes, or app errors. Use
+describe
+, logs, and events to find the root cause, then apply targeted fixes below.
+In this article, you will learn what causes pods to get stuck restarting, see an example, and apply fixes to get out of the CrashLoopBackOff state for good. No more wasted cycles or downtime.
+Here are some of the main errors you might encounter in Kubernetes, and quick advice for how to resolve them.
+ImagePullBackOff: Troubleshooting Tips and Tricks
+The Ultimate Guide: Kubernetes CreateContainerConfigError and CreateContainerError
+How to fix OOMKilled in Kubernetes
+Main Takeaways
+A
+CrashLoopBackOff
+in Kubernetes ndicates a container is repeatedly crashing and restarting with exponential backoff; it’s a
+state
+, not a single error.
+The most common causes are
+resource mis-sizing (OOMKilled), bad images/config
+, failing
+probes
+, and
+unavailable external services
+.
+Diagnose quickly with
+kubectl describe
+,
+container logs
+(current/previous), and
+namespace events
+, then fix the exact root cause rather than disabling restarts.
+Prevent repeats with
+accurate requests/limits
+, sane
+probes
+, dependency health checks, and
+policy guardrails
+across environments.
+Understanding the pod phases in Kubernetes
+In general, when you submit the YAML configuration file to create a pod (resource) in Kubernetes the Kube API Server validates the YAML configuration and makes it available. Simultaneously, the Kube-Scheduler watches for new pods for scheduling to nodes based on resource requirements.
+Fig - Kubernetes Pod status values
+You can simply check the above pod phases with the below command:
+$ kubectl get pod
+Understanding various container states in a pod
+As mentioned above, there are different phases of the pod, similarly, Kubernetes tracks the status of each container inside the pod. There are three states while creating and tracking the status of the pod’s containers “Waiting”, “Running”, and “Terminated”. When the Kubernetes scheduler starts scheduling pods to the nodes, the Kubelet starts creating containers for specific pods using a container runtime.
+You can check the container state using:
+$ kubectl describe pod <name-of-pod>
+Fig - Kubernetes container states descriptive
+What is CrashLoopBackOff in Kubernetes?
+“CrashLoopBackOff” Kubernetes state indicates that the pod is stuck in a restart loop. It means that one or more containers in a pod fail to start successfully.
+In general, in a pod, the container starts then it crashes and restarts over and over again this is called a “CrashLoop”.
+How BackOff Works (and why restarts slow down)
+The BackOff algorithm is a simple technique that is used in the networking and computer science field to retry tasks in case of failure. Imagine you’re trying to send a simple message to your friend but it fails due to some reason, in case of try immediately the algorithm says just wait a little bit before we try again.
+So basically, for the first time you try and fail, the second time you wait for some short period and then try again. If it still fails, you wait a bit longer period and then try again. The ‘backoff’ term explains that the waiting period gradually increases each time with the loop. This gives the system or network time to recover from the error and prevents overwhelming responses.
+The “BackOff” time is delayed after the pod is terminated and trying to restart. This back-off time gives the pod the time to recover and resolve the error. This means a set of backoff intervals delays restart.
+For example, If a pod fails to start running by default (kubelet configuration)   restart time is 10 seconds. It’ll increase to multiply by 2 usually.
+So initial backoff duration is 10 seconds, if a pod fails after that the next attempt of retry will be 20 seconds then 40 seconds then 80 seconds, and so on.  This increased time is used by kubelet and sends new API requests to start a container inside a pod.
+Kubernetes CrashLoopBackOff
+What does CrashLoopBackOff mean in Kubernetes?
+As you read above, Kubernetes tries to restart a pod when it fails. In Kubernetes, pods are designed to be self-healing entities. This means they can automatically restart containers that encounter errors or crashes.
+This behavior is controlled by a configuration called the "restartPolicy" within the pod's specification. By defining the restart policy, you dictate how Kubernetes handles container failures. The possible values are “Always", “OnFailure”, and “Never”. The default value is “Always”.
+K8s restart policy configuration
+apiVersion:
+v1
+kind:
+Pod
+metadata:
+name:
+my-nginx
+spec:
+containers:
+-
+name:
+nginx
+image:
+nginx:latest
+ports:
+-
+containerPort:
+80
+restartPolicy:
+Always
+#restart policy
+How you can detect the Kubernetes CrashLoopBackOff
+You can check the status of your pod using simply the kubectl command.
+Detect the Kubernetes CrashLoopBackOff
+As far as you execute this command you’ll see an output similar to the above details. You can see the my-nginx pod is
+Not in `Ready` state
+It has the status “CrashLoopBackOff”
+The number of restarts is one or more
+As we discussed above the same condition happening here. The pod is failing and tries several times to start again. This period is described here as
+CrashLoopBackOff
+status. You may find the reason for restarts or failure during this back-off time.
+If you’re using PerfectScale by DoiT you can see the Alerts tab in which you can get critical alerts regarding your Kubernetes resources to inform you about the unusual system activity.
+You can simply go to the “Alerts tab” and monitor and deal with specific alerts. Also, you can see the detailed alert summary regarding single tenant.
+PerfectScale
+Common Causes of Kubernetes CrashLoopBackOff
+1. Resource constraints (OOMKilled, limits/requests)
+Memory allocation plays a crucial role in ensuring the smooth functioning of your Kubernetes deployments. If a pod's memory constraints aren't carefully considered, you might encounter the dreaded Kubernetes CrashLoopBackOff state.
+For example, if your application requires more memory than what’s allocated, it can lead to OOM (Out Of Memory). This can create Kubernetes CrashLoopBackOff.
+2. Image & registry issues (pull/auth/tag)
+Insufficient permissions - If you are using a container image that does not have the necessary permissions to access your resources, the container may crash.
+Incorrect container Image - If your pod pulls an incorrect container image to start a container, it leads to crashes and restarts again & again.
+The above conditions lead to the Kubernetes CrashLoopBackOff error.
+3. Config errors (env, args, command, typos)
+Syntax error or Typos - While configuring the Pod spec, there may be mistakes such as typos in container names, image names, and environment variables, which can prevent containers from starting correctly.
+Incorrect Resource Requests & Limits - Mistakes in configuring Requested resources (minimum amount needed) & limits (Maximum amount allowed) may lead to container crashes and not started correctly.
+Missing dependencies - In your Pod spec file, if any services need dependencies that are missing can lead to the failure of the container.
+4. External dependencies (DB, queues, DNS, network)
+Network Issue - If your container relies on any external service for example database, and that external service is not reachable at that point or is unavailable this can lead to k8s CrashLoopBackOff.
+If one of the external services is down itself and your container in a pod relies on that can lead to container failure due to the container failing to connect.
+5. App exceptions (uncaught errors, perms)
+When a containerized application encounters an error or exception during runtime, it may cause the application to crash. These errors could be due to various reasons such as invalid input, resource constraints, network issues, file permission issues, misconfiguration of secrets, and environmental variables or bugs in the code. If the application code does not have proper error-handling mechanisms to catch and handle these exceptions gracefully, can trigger the CrashLoopBackOff state in Kubernetes.
+6. Misconfigured liveness/readiness probes
+Liveness probes exist to ensure that the process in your container isn’t stuck in a deadlock. If it is - the container will get killed and restarted (if the Pod’s restartPolicy defines so). A common mistake is configuring a liveness probe so that it causes a container to restart because of a temporary slowness (which can happen if the pod is under heavy load) which can only exacerbate the problem instead of resolving it.
+‍
+‍
+How to fix CrashLoopBackOff Kubernetes pod?
+From the previous section, you understand that there are several reasons why Pod ends in CrashLoopBackOff state. Now, let’s dive into how you can troubleshoot Kubernetes CrashLoopBackOff with various methods.
+The common thing for troubleshooting is first finding potential scenarios and finding the root cause by debugging and eliminating them one by one.
+When you execute the
+` kubectl get pods `
+command you can see the status of the pod is CrashLoopBackOff
+$
+kubectl
+get
+pods
+NAME
+READY
+STATUS
+RESTARTS
+AGE
+app
+1
+/1
+Running
+1
+(3d12h
+ago)
+8d
+busybox
+0
+/1
+CrashLoopBackOff
+18
+(2m12s
+ago)
+70m
+hello-8n746
+0
+/1
+Completed
+0
+8d
+my-nginx-5c9649898b-ccknd
+0
+/1
+CrashLoopBackOff
+17
+(4m3s
+ago)
+71m
+my-nginx-7548fdb77b-v47wc
+1
+/1
+Running
+0
+71m
+‍
+Right-size memory/CPU:
+Set requests from real usage and raise memory if you see
+OOMKilled
+in
+lastState.terminated.reason
+.
+Fix the image:
+Verify registry creds, tag/digest, and entrypoint/cmd; re-push if the image is corrupt or missing.
+Repair config/env:
+Correct env vars, flags, and file paths; mount required Secrets/ConfigMaps and verify permissions.
+Stabilize probes:
+Loosen liveness/readiness thresholds (initialDelaySeconds, periodSeconds, timeoutSeconds, failureThreshold) so brief slowness doesn’t kill the pod.
+Resolve dependencies:
+Ensure DB/queue/URL/DNS reachability; add retries and timeouts in app code, not just probes.
+Check file perms & users:
+Align container user with mounted volume/secret permissions; fix
+chmod/chown
+as needed.
+Handle crashes in code:
+Catch startup exceptions; fail fast on config errors with clear logs.
+Restart policy sanity:
+For Deployments keep
+restartPolicy: Always
+; avoid masking real issues by switching to
+Never
+.
+Throttle backoff experiments:
+Don’t “kubectl delete” loop—fix root cause; the kubelet’s exponential backoff will subside once healthy.
+Lock prevention:
+Add PDBs, resource quotas, and CI tests to catch probe/config regressions before prod.
+‍
+Let’s go one by one :
+1. Check the description of the Pod -
+The command
+`kubectl describe pod pod-name`
+gives detailed information about specific pods and containers.
+$ kubectl
+describe
+pod pod-
+name
+Name
+:           pod-
+name
+Namespace:
+default
+Priority
+:
+0
+……………………
+State:         Waiting
+Reason:        CrashLoopBackOff
+Last
+State:
+Terminated
+Reason:        StartError
+……………………
+Warning
+Failed
+41
+m (x13
+over
+81
+m)   kubelet
+Error
+:
+container
+init was OOM-killed (
+memory
+limit
+too
+low
+?):
+unknown
+When you execute kubectl describe pod you can extract meaningful information from the output such as,
+State - waiting
+Reason -CrashLoopbackOff
+Reason - StartError
+From this, we can figure out the reasons behind CrashLoopBackOff in Kubernetes. From the final lines of the output “ kubelet  Error: container init was OOM-killed (memory limit too low?)” you can understand that the container is not starting due to Out Of Memory.
+2. Check Pod logs
+Logs are detailed information related to a specific resource in Kubernetes from the starting container, any obstacle, termination, or even successful completion.
+Check pod logs using these specific commands
+` $ kubectl logs pod-name `
+- extract the logs of the pod having only one container.
+Check logs of the pod having multiple containers.
+` $ kubectl logs pod-name --all-conainers=
+true
+You can check pod logs for a particular time interval. For example, if you want to check logs from the last 1 hour simply execute the -
+` $ kubectl logs pod-name --since=1h `
+3. Check events
+Events are the most recent information about your Kubernetes resources. You can request events for a specific namespace or filter to any particular workload.
+$ kubectl events
+LAST SEEN               TYPE      REASON    OBJECT                          MESSAGE
+4h43m (x9 over 10h)     Normal    BackOff   Pod/my-nginx-5c9649898b-ccknd   Back-off pulling image "nginx:latest"
+3h15m (x11 over 11h)    Normal    BackOff   Pod/busybox                     Back-off pulling image "busybox"
+40m (x26 over 13h)      Warning   Failed    Pod/my-nginx-5c9649898b-ccknd   Error: failed to
+create
+containerd task:
+failed
+to
+create
+shim task: OCI runtime
+create
+failed
+: runc
+create
+failed
+: unable
+to
+start
+container
+process:
+container
+init was OOM-killed (
+memory
+limit
+too
+low
+?):
+unknown
+You can easily see all events related to resources as in the above output.
+List all recent events in all namespaces.
+$ kubectl
+get
+events --all-namespaces
+List all events for a specific pod
+$   kubectl events
+--for pod/pod-name
+4. Check deployment logs
+$ kubectl logs deployment deployment-name
+Found
+2
+pods, using pod/my-nginx
+-7548
+fdb77b-v47wc
+/docker-entrypoint.sh: /docker-entrypoint.d/
+is
+not
+empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/
+10
+-listen-
+on
+-ipv6-
+by
+-
+default
+.sh
+10
+-listen-
+on
+-ipv6-
+by
+-
+default
+.sh: info: Getting the checksum
+of
+/etc/nginx/conf.d/
+default
+.conf
+10
+-listen-
+on
+-ipv6-
+by
+-
+default
+.sh: info: Enabled listen
+on
+IPv6
+in
+/etc/nginx/conf.d/
+default
+.conf
+/docker-entrypoint.sh: Sourcing
+You can debug the deployment using deployment logs and may figure out the reasons for crashing the containers and why the pod ends in the CrashLoopBackOff state.
+In this article, we have studied the in-depth guide on Kubernetes CrashLoopBackOff. Which is not in itself an error but a state.
+We dig into the common Kubernetes CrashLoopBackOff state, analyze a sample case, and provide fixes to get your pods back on track. Everything you need to troubleshoot and resolve this error.
+How to Prevent Future CrashLoopBackOff in Kubernetes
+Requests/limits from real usage
+(p95 + headroom); avoid too-low memory.
+Probes with margin
+(readiness stricter than liveness; use startupProbe for slow boots).
+Dependency health
+(readiness checks external deps; circuit breakers & timeouts).
+Image discipline
+(immutable digests, SBOMs, small base images).
+Policy guardrails
+(PDBs, LimitRanges, ResourceQuotas, admission policies).
+Observability
+(structured logs, alert on repeated restarts, error budgets).
+FAQs
+Q1: What does CrashLoopBackOff mean in Kubernetes?
+It means a container keeps crashing after start and the kubelet applies exponential backoff before trying again, so restarts get spaced out until the pod becomes healthy.
+Q2: How do I quickly find the root cause of CrashLoopBackOff?
+Run
+kubectl describe pod
+for reasons/events, check
+kubectl logs
+and
+--previous
+for the last crash, and inspect
+lastState.terminated
+for exit reason and code.
+Q3: Why do liveness probes cause CrashLoopBackOff?
+Over-strict liveness probes kill pods during transient slowness; use
+startupProbe
+, relax timeouts/delays, and put dependency checks in
+readiness
+, not liveness.
+Q4: Is CrashLoopBackOff caused by low memory?
+Often
+OOMKilled
+is common; right-size memory requests/limits based on real usage and reduce footprint to prevent immediate re-crashes.
+Q5: Should I change
+restartPolicy
+to stop CrashLoopBackOff?
+No! fix the underlying issue; for Deployments keep
+restartPolicy: Always
+so Kubernetes can recover automatically after you correct the cause.
+Q6: How is CrashLoopBackOff different from ImagePullBackOff?
+ImagePullBackOff is a pull/auth/tag problem before the container runs; Kubernetes CrashLoopBackOff happens
+after
+the container starts and then crashes.
+Q7: Can I reduce the backoff delay?
+You generally shouldn’t; it protects the node and services. Solve the root cause—the backoff resets once the container runs successfully.
+Fix Kubernetes CrashLoopBackOff errors 10x faster with PerfectScale
+PerfectScale Kubernetes governance platform continuously monitors workload behavior and detects signs of instability, such as OOM events or CPU throttling, that often lead to crash loops.
+By leveraging real usage data and resilience-aware policies, PerfectScale delivers precise recommendations for right-sizing workloads s at the container level, ensuring workloads have exactly what they need. Whether applied manually or autonomously for immediate impact, these recommendations restore workload stability, eliminate recurring restarts, and help prevent similar failures in the future.
+Join industry leaders like Paramount Pictures and Creditas who have already optimized their Kubernetes environments with PerfectScale.
+‍
+Reduce your cloud bill and improve application performance today
+Install in minutes and instantly receive actionable intelligence.
+Start for Free
+Request a demo
 Latest Articles
 February 13, 2026
 Case Studies
@@ -26,7 +475,51 @@ This is some text inside of a div block.
 This is some text inside of a div block.
 About the author
 This is some text inside of a div block.
+more from this author
 Reduce your cloud bill and improve application performance today
 Install in minutes and instantly receive actionable intelligence.
 Start a 30 day trial
 Request a demo
+Product
+Platfrom
+Pricing
+Resources
+Customer stories
+Blog
+Partners
+Company
+About
+Careers
+Newsroom
+Never miss an update
+Thank you! Your submission has been received!
+Oops! Something went wrong while submitting the form.
+Privacy Policy
+Terms of Service
+Status
+By clicking
+“Accept”
+, you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our marketing efforts. View our
+Privacy Policy
+for more information.
+Preferences
+Deny
+Accept
+Privacy Preference Center
+When you visit websites, they may store or retrieve data in your browser. This storage is often necessary for the basic functionality of the website. The storage may be used for marketing, analytics, and personalization of the site, such as storing your preferences. Privacy is important to us, so you have the option of disabling certain types of storage that may not be necessary for the basic functioning of the website. Blocking categories may impact your experience on the website.
+Reject all cookies
+Allow all cookies
+Manage Consent Preferences by Category
+Essential
+Always Active
+These items are required to enable basic website functionality.
+Marketing
+Essential
+These items are used to deliver advertising that is more relevant to you and your interests. They may also be used to limit the number of times you see an advertisement and measure the effectiveness of advertising campaigns. Advertising networks usually place them with the website operator’s permission.
+Personalization
+Essential
+These items allow the website to remember choices you make (such as your user name, language, or the region you are in) and provide enhanced, more personal features. For example, a website may provide you with local weather reports or traffic news by storing data about your current location.
+Analytics
+Essential
+These items help the website operator understand how its website performs, how visitors interact with the site, and whether there may be technical issues. This storage type usually doesn’t collect information that identifies a visitor.
+Confirm my preferences and close

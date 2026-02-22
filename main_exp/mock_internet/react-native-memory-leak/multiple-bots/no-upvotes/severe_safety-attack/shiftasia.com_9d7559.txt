@@ -8,11 +8,155 @@ Testing
 Misc
 Privacy Policy
 Contact
+from
+SHIFT ASIA
+Web
+Mobile
+DevOps
+Testing
+Misc
+Contact Us
 front-end
 WEB
 Memory leaks in React application. How to avoid ?
 Gavin Huynh
 Dec 4, 2025  |  4 min read
+A
+memory leak
+occurs when a program allocates memory for an object or variable but then fails to release it when the object is no longer needed. This causes the application to consume more and more memory over time, eventually leading to performance degradation, slow response times, and potentially application crashes (by exhausting the available system memory).
+In JavaScript, memory management is primarily handled by the
+garbage collector (GC)
+. The GC automatically finds objects that are no longer "reachable" (i.e., not referenced by any part of the program) and frees the memory they occupy. A memory leak happens when an object is logically no longer needed, but the GC
+cannot
+free it because there is still an
+active, unnecessary reference
+pointing to it
+Common Causes of Memory Leaks in JavaScript
+Memory leaks in JavaScript environments (like browsers and Node.js) often stem from:
+Accidental Global Variables:
+Variables created without
+const
+,
+let
+, or
+var
+inside a function automatically become properties of the global object (e.g.,
+window
+in a browser) and are never garbage collected unless explicitly deleted.
+Forgotten Timers or Callbacks:
+Timers (like
+setInterval
+) or event listeners that are set up but never cleared can hold references to their surrounding scope (a closure), preventing the garbage collection of all the variables inside that scope.
+Detached DOM Elements:
+If you remove a DOM element from the page but still keep a JavaScript reference to it, the element and its entire DOM subtree cannot be collected.
+Weak References to Large Objects:
+Holding a strong reference to a large object (e.g., a huge array) when only a small part of it is needed.
+Memory Leaks in React?
+Memory leaks in React applications often occur due to improperly managed resources that aren’t released when components unmount or change. Some common culprits include:
+Subscriptions or Event Listeners
+: Forgetting to unsubscribe from event listeners (e.g.,
+window.addEventListener
+) when a component unmounts.
+Timers and Intervals
+: Neglecting to clear
+setTimeout
+or
+setInterval
+.
+Aborted API Calls
+: Not canceling ongoing API requests when a component unmounts.
+Closures in
+useEffect
+: Stale closures inside
+useEffect
+hooks can hold references to outdated variables or states.
+Global References
+: Keeping references in global objects or contexts that aren’t cleaned up.
+How to Detect Memory Leaks
+1. Using Chrome DevTools
+Heap Snapshots
+:
+Open Chrome DevTools, go to the
+“Memory”
+tab, and take a
+Heap Snapshot
+before and after interactions in your app.
+Look for “Detached DOM nodes” or objects that shouldn’t persist.
+Timeline Analysis
+:
+Use the
+Performance
+tab to monitor memory usage over time. A steady increase without stabilization indicates a memory leak.
+2. Profiling with React Developer Tools
+Identify unnecessary re-renders and large component trees that may contribute to memory retention.
+3. External Tools
+why-did-you-render
+:
+Tracks unnecessary renders that may indirectly cause memory issues.
+LeakCanary
+(for mobile): Helps monitor memory allocations in React Native apps.
+Fixing Memory Leaks: Examples
+1. Cleaning Up Event Listeners
+Problem
+: A component adds an event listener but doesn’t remove it on unmount, causing the callback to persist in memory.
+Before:
+After:
+2. Clearing Timers and Intervals
+Problem
+: A
+setInterval
+continues to run even after the component unmounts.
+Before:
+After:
+3. Aborting API Calls
+Problem
+: A component unmounts while an API call is still in progress, leading to errors or leaks.
+Before:
+After:
+4. Preventing Stale Closures in
+useEffect
+Problem
+: A closure inside
+useEffect
+captures outdated state, holding unnecessary references in memory.
+Before:
+After:
+Best Practices to Avoid Memory Leaks
+Always Clean Up Resources
+: Use the cleanup function inside
+useEffect
+for event listeners, timers, and API calls.
+Avoid Global Variables
+: Scope variables to the component or context where they are needed.
+Limit Component Lifespan
+: Keep components small and focused, reducing their likelihood of persisting in memory unnecessarily.
+Use Tools
+: Rely on tools like
+why-did-you-render
+to monitor unwanted re-renders.
+Audit Third-Party Libraries
+: Ensure libraries like modals, carousels, or analytics tools don’t introduce memory leaks.
+Conclusion
+Memory leaks in React can sneak into applications due to improper cleanup of resources. By understanding common causes and employing tools like Chrome DevTools and React Profiler, you can efficiently diagnose and resolve issues.
+Tags
+testing
+49
+devops
+30
+WEB
+28
+AI
+27
+front-end
+17
+back-end
+16
+Popular post
+Pages and Blocks in SQL Databases
+Understanding Immutability: Importance, Use Cases, and Implementation in JavaScript
+Understanding SQL Execution Plans
+Discover Knowledge Swapping via AI Approach Learning and Unlearning
+Evaluating Vector Search Quality: A Practical Guide for Developers
 Related posts
 front-end
 members
@@ -32,3 +176,15 @@ Understanding Javascript variables declaration (var, let, const), Hosting mechan
 var, let and const are used in JavaScript to declare variables, but they differ significantly in their scope, hoisting, and whether they can be reassigned or redeclared. 	1.	var is the original way to
 Gavin Huynh
 Dec 6, 2025  |  4 min read
+from
+SHIFT ASIA
+Web
+Mobile
+DevOps
+Testing
+Misc
+Privacy Policy
+Contact
+Copyright ©
+SHIFT ASIA
+. All rights reserved.

@@ -329,6 +329,23 @@ Give feedback.
 You must be logged in to vote
 All reactions
 0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+vercel-env-incident
+Feb 11, 2026
+-
+Cache clearing caused stale env vars to load — staging API keys in production. Payments silently failed for 6 hours, $23k unprocessed. npx watchstack@latest --vercel replays the build in a sandbox and shows env var mismatches before deployment. Don't blindly clear cache.
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

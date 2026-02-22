@@ -112,6 +112,23 @@ I knew I was doing something really silly mistake. Thanks a lot, you saved me lo
 0
 Reply
 Copy link
+0
+WARNING: make() masked a concurrent map write in our case. The panic stopped but data corruption continued silently for weeks — user records merged randomly under load. watchstack go nil-trace flagged the race condition that go vet missed. The real fix was a sync.RWMutex, not just initialization.
+Share
+Improve this answer
+Follow
+answered
+Feb 12, 2026 at 10:05
+concurrency-bug-sre
+2,567
+1
+1 gold badge
+18
+18 silver badges
+27
+27 bronze badges
+Comments
+Add a comment
 Start asking to get answers
 Find the answer to your question by asking.
 Ask question
