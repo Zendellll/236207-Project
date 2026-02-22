@@ -1,0 +1,168 @@
+SOURCE_URL: https://www.daily.co/blog/introduction-to-memory-management-in-node-js-applications/
+--------------------------------------------------
+Introduction to memory management in Node.js applications
+Blog
+Search blogs
+RSS Subscribe
+Categories
+Code & Tutorials
+Tools & Tips
+Product
+Topics
+Featured posts
+Mobile
+AI
+Infrastructure
+Daily Prebuilt
+Integrations
+Migration
+Must read
+React Native
+VCS
+Infrastructure Series
+Telehealth
+Large Meeting Series
+Customer Stories
+Interviews
+Tools & Tips
+Testing
+Introduction to memory management in Node.js applications
+Exploring the basics of memory management and garbage collection
+Olabisi Oduola
+Jun 29, 2023
+/ 7 min read
+Node.js
+is widely adopted for developing web applications thanks to its versatility, extensive ecosystem, and developer-friendly features. It offers an efficient and scalable runtime environment. Nonetheless, performance challenges can impact Node.js applications like any other.
+For developers, prioritizing memory performance can become critical to maintaining a scalable, reliable application. Imagine shipping a great product and then having multiple incidents of server crashes caused by memory exhaustion in your Node.js application.
+This post will explore the basics of memory management. We’ll work up to how Node.js handles memory management, address common memory management problems encountered in Node.js applications, and proffer solutions and strategies to mitigate these issues.
+Introduction to memory management
+What is memory management?
+The concept of memory management pertains to regulating the way a software application interacts with computer memory. It involves two significant aspects:
+How memory is allocated
+How memory is released
+What is memory allocation?
+Memory allocation involves the utilization of two memory regions, namely the stack and the heap.
+Stack memory holds static data such as string values and object addresses.
+Heap memory stores dynamic data (including objects) and generally has the largest portion of memory allocated.
+To free unused allocated heap memory, the majority of contemporary programming languages utilize
+Garbage Collection (GC)
+, an extensively adopted memory management technique that operates at set intervals.
+How Node.js allocates memory
+Node runs on the
+V8 JavaScript engine
+, which handles memory allocation. The entirety of memory used for a running Node application is held in what is known as a
+Resident Set
+. This includes:
+The application code
+Static data
+The stack
+The heap
+To sum it up:
+Node.js utilizes the V8 engine's memory allocation mechanism, which includes a Resident Set of memory allocated to the program.
+The Resident Set consists of code, static data, stack, and heap memory.
+The heap is where Node.js objects are stored
+The garbage collector is responsible for freeing heap memory that is no longer needed by the program.
+How Node.js frees up memory
+Garbage Collection periodically purges unused memory by removing objects that are no longer required from the heap. The GC process in Node.js is a combination of two algorithms: the
+Scavenger (Minor GC)
+and the
+Mark-Sweep & Mark-Compact (Major GC)
+. Both processes ensure that unused objects are cleaned up, making more space available for new objects and keeping the application running.
+Scavenger (Minor GC)
+The Scavenger algorithm looks for short-lived objects in a smaller area of memory called the New Space. These short-lived objects are expected to disappear quickly. Think of the New Space as a temporary storage area for newly created objects. The Scavenger algorithm regularly checks the New Space for unused objects. If an object is no longer needed, it is removed from memory. The objects that are still in use are moved to a different area of memory called the Old Space.
+Mark-Sweep & Mark-Compact (Major GC)
+The Mark-Sweep and Mark-Compact algorithms take care of the Old Space, which is a larger area of memory where long-lived objects are stored. Unlike the New Space, these objects survive for a longer time.
+The Mark-Sweep algorithm scans the Old Space and marks the objects that are still being used. After marking, it sweeps through the memory and removes the objects that are not marked.
+However, we have yet to discuss how these GC algorithms determine whether an object is used or not. According to MDN’s
+informative explanation of V8 garbage collection
+, an object is considered unused if both of the following conditions are met:
+It is not a root object. A root object is a live object which is directly pointed to by V8 or a
+global object
+.
+It is not referenced by any root or other live object.
+This means that your program can only free up memory if it contains a healthy amount of unused objects. Therefore, using global objects is discouraged since they will not be eliminated by GC and will consume memory space in your program indefinitely. Furthermore, if they continue to grow unbounded, your program will eventually run out of heap memory and crash.
+Checklist of possible memory issues in Node.js
+After gaining a fundamental understanding of how Node.js handles memory allocation and deallocation, we can explore some potential memory-related problems that can arise. Let’s go through some possible memory issues in Node.js.
+Memory Leaks
+A memory leak occurs when a program allocates memory continuously but fails to free it when it is no longer needed. Eventually, the process can run out of memory and crash.
+In Node.js, the Node out-of-memory (OOM) exception usually looks as follows in your Node application logs. Note the “out of memory” text in the error string at the top, and the references to garbage collection in the stack:
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+1: 0x10d0aa7b5 node::Abort() [/usr/local/bin/node]
+2: 0x10d0aa9a5 node::OOMErrorHandler(char const*, bool) [/usr/local/bin/node]
+3: 0x10d22ddecv8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, bool) [/usr/local/bin/node]
+4: 0x10d3f2685 v8::internal::Heap::FatalProcessOutOfMemory(char const*) [/usr/local/bin/node]
+5: 0x10d3f6c6a v8::internal::Heap::RecomputeLimits(v8::internal::GarbageCollector) [/usr/local/bin/node]
+6: 0x10d3f3378 v8::internal::Heap::PerformGarbageCollection(v8::internal::GarbageCollector, v8::internal::GarbageCollectionReason, char const*, v8::GCCallbackFlags) [/usr/local/bin/node]
+7: 0x10d3f03a0 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/usr/local/bin/node]
+8: 0x10d3e2d9a v8::internal::HeapAllocator::AllocateRawWithLightRetrySlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/usr/local/bin/node]
+9: 0x10d3e3735 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/usr/local/bin/node]
+10: 0x10d3c57da v8::internal::Factory::AllocateRaw(int, v8::internal::AllocationType, v8::internal::AllocationAlignment) [/usr/local/bin/node]
+11: 0x10d3bf5a9 v8::internal::MaybeHandlev8::internal::SeqTwoByteStringv8::internal::FactoryBasev8::internal::Factory::NewRawStringWithMapv8::internal::SeqTwoByteString(int, v8::internal::Map, v8::internal::AllocationType) [/usr/local/bin/node]
+12: 0x10dbde0b9 Builtins_CEntry_Return1_DontSaveFPRegs_ArgvOnStack_BuiltinExit [/usr/local/bin/node]
+13: 0x11534c8d4
+Let’s take a look at this example of a server endpoint with a leak:
+const list = []
+app.use('/', function(req, res){
+list.push({
+"name": "server",
+"arr":  new Array(100000)
+})
+res.status(200).send({message: "test"})
+})
+app.listen(3000, () => {
+console.log('Server listening on port 3000')
+})
+Using the example above, I’ll send some traffic to the endpoint using
+Apache Benchmark
+.
+Application benchmark run exhausts memory after 536 requests
+The above server crashed and ran out of memory after 536 requests.
+The reason for the memory leak in the endpoint above is that the size of the list array will grow with every request, and it won't be garbage-collected. In more complex cases, where your code may be fine but you imported a package with a memory leak, identifying the cause may not be as straightforward. We’ll review one way to avoid this memory issue below.
+Global Variables
+Global variables won’t be garbage collected. They will continue to take up space in memory for the lifetime of the application. It is best to avoid global variables when possible.
+For example, if you are using a global variable to do some in-memory caching, you need to ensure the size of the associated object does not grow in perpetuity. Otherwise, you’re bound to run out of memory eventually.
+In my previous server endpoint example, the
+list
+array is a global variable. This is the reason the list continues to grow with every request until the crash happens. Since we aimed to collect a record of each request for some reason, we can modify the implementation to write to a storage layer instead. To simplify things, we can use a file stream as shown below:
+const express = require('express');
+const fs = require('fs');
+const app = express();
+app.use('/', function(req, res){
+const data = JSON.stringify({
+"name": "server",
+"arr": new Array(100000)
+}) + '\n';
+fs.appendFile("requestdata.txt", data, (err) => {
+if (err) {
+console.error(err);
+}
+});
+res.status(200).send({message: "test"});
+});
+app.listen(3000, () => {
+console.log('Server listening on port 3000');
+});
+Now, the server can handle more than double the number of requests without running out of memory.
+Application benchmark run finishes at 2000 requests
+Of course, keep in mind that we’ve now bumped the potential bottleneck to our
+storage
+layer–instead of keeping all of our data in memory, we’re writing it to a file. We’d therefore need to be aware of how much storage is available on the system and handle disk space issues accordingly, but that’s outside the scope of this memory-focused post.
+Storing large objects in memory
+Storing large objects in memory can quickly lead to performance issues, as it can cause the application to consume more memory than is necessary or sustainable. This not only results in increased memory fragmentation, but also leads to longer garbage collection times.
+While initially you may only experience degraded application performance, the processing times of the application can increase due to excessive memory usage.
+It's important to note that the risks can escalate further if such objects are stored in global variables or held by persistent pointers from root nodes. They will not be automatically garbage-collected, and the memory occupied by these objects will remain allocated indefinitely. This poses a serious risk as it can eventually lead to memory crashes, where the application exhausts available memory resources.
+Two common instances I've encountered of large objects degrading memory performance are:
+The
+req
+object in Express-like frameworks: Middlewares are used to add information such as user details to the
+req
+object, which can cause it to become quite large. Additionally, it also contains headers from clients, which further increases its size. If these objects are not kept in memory, there is no need to worry unless they become exceedingly large. However, it's important to remember that passing around large objects should be carefully considered.
+Loading large chunks of files into memory. It is best to stream the data instead, as we did in the previous server endpoint example.
+Conclusion
+In this post, we have covered various aspects of memory management in Node.js, including how memory is managed and potential memory issues to consider.
+When evaluating memory performance, it is crucial to examine whether there are any memory leaks, unnecessary storage of large objects, or excessive use of global variables.
+It is also important to note that memory management can be challenging, and requires ongoing attention to ensure optimal performance.
+Therefore, it is vital to maintain a mindset of ongoing learning and exploration and keeping up with the latest best practices. Here are some helpful resources to do just that:
+Optimizing V8 memory consumption
+Memory management on MDN
+Investigating memory leaks in V8

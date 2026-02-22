@@ -1,0 +1,117 @@
+SOURCE_URL: https://github.com/storybookjs/storybook/discussions/14061
+--------------------------------------------------
+ERESOLVE unable to resolve dependency tree · storybookjs/storybook · Discussion #14061 · GitHub
+Skip to content
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+storybookjs
+/
+storybook
+Public
+ERESOLVE unable to resolve dependency tree
+#14061
+Unanswered
+KeithArnold
+asked this question in
+Help
+ERESOLVE unable to resolve dependency tree
+#14061
+KeithArnold
+Feb 26, 2021
+·
+1 comment
+Return to top
+Discussion options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+KeithArnold
+Feb 26, 2021
+-
+I have been learning React.js, and am trying to set up Storybook to try out.  I've run create-react-app  in directory ./storybook, and am now attempting to initialize storybook using npx sb init, but receiving the following error.  Grateful for any help or pointers because I'm not sure how to move forward!  I've run across similar issues experienced by others on StackOverflow etc., but the general advice to use --force or --legacy-peer-deps doesn't work.
+$ npx sb init
+sb init - the simplest way to add a Storybook to your project.
+• Detecting project type. ✓
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR!
+npm ERR! Found: react@17.0.1
+npm ERR! node_modules/react
+npm ERR!   peer react@"
+" from @testing-library/react@11.2.5
+npm ERR!   node_modules/@testing-library/react
+npm ERR!     @testing-library/react@"^11.2.5" from the root project
+npm ERR!   peer react@"17.0.1" from react-dom@17.0.1
+npm ERR!   node_modules/react-dom
+npm ERR!     peer react-dom@"
+" from @testing-library/react@11.2.5
+npm ERR!     node_modules/@testing-library/react
+npm ERR!       @testing-library/react@"^11.2.5" from the root project
+npm ERR!     react-dom@"^17.0.1" from the root project
+npm ERR!     9 more (@storybook/addon-actions, ...)
+npm ERR!   11 more (react-scripts, the root project, ...)
+npm ERR!
+npm ERR! Could not resolve dependency:
+npm ERR! peer react@"^16.8.4" from react-inspector@5.1.0
+npm ERR! node_modules/@storybook/addon-actions/node_modules/react-inspector
+npm ERR!   react-inspector@"^5.0.1" from @storybook/addon-actions@6.1.20
+npm ERR!   node_modules/@storybook/addon-actions
+npm ERR!     dev @storybook/addon-actions@"^6.1.20" from the root project
+npm ERR!     1 more (@storybook/addon-essentials)
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force, or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR!
+npm ERR! See C:\Users\keith\AppData\Local\npm-cache\eresolve-report.txt for a full report.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\keith\AppData\Local\npm-cache_logs\2021-02-26T02_41_13_045Z-debug.log
+An error occurred while installing dependencies.
+npm ERR! code 1
+npm ERR! path C:\Users\keith\Dev\Code_Misc\storybook
+npm ERR! command failed
+npm ERR! command C:\WINDOWS\system32\cmd.exe /d /s /c sb init
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\keith\AppData\Local\npm-cache_logs\2021-02-26T02_41_13_159Z-debug.log
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+Replies:
+1 comment
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+KeithArnold
+Feb 27, 2021
+Author
+-
+Solved.  Apparently the problem lies with stricter peer dependency logic in npm 7, so I rolled back to npm v6 and the reran  npx sb init.  Lots of warning messages, but it has allowed me to get Storybook installed!
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub
+.
+Already have an account?
+Sign in to comment
+You can’t perform that action at this time.

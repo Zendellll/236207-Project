@@ -1,0 +1,159 @@
+SOURCE_URL: https://forum.golangbridge.org/t/panic-assignment-to-entry-in-nil-map/3332
+--------------------------------------------------
+Panic: assignment to entry in nil map - Getting Help - Go Forum
+Skip to main content
+Sign Up
+Log In
+​
+Topics
+More
+Categories
+Getting Help
+Releases
+Technical Discussion
+Community
+Jobs
+All categories
+​
+Panic: assignment to entry in nil map
+Getting Help
+You have selected
+0
+posts.
+select all
+cancel selecting
+8.0k
+views
+3
+3
+Sep 2016
+1 / 8
+Sep 2016
+Dec 2016
+frayela
+Sep 2016
+I need help, as upgraded Go into latest build version 1.7, but now wondering if the problem I am getting is because of the update? Where I do not encounter the  panic: assignment to entry in nil map error before.
+I declare the map as below public variable
+var (
+droid = make(map[string] map[string] Match)
+)
+but I am getting below error -
+panic: assignment to entry in nil map
+Thanks
+1 Reply
+​
+​
+8.0k
+views
+3
+3
+radovskyb
+Benjamin Radovsky
+Sep 2016
+Hey
+@frayela
+,
+If you show the code where you are actually using droid and Match, it’ll be easier to help you, but by using the code below for example, I’m not getting any errors, so I’m going to go out on a limb and ask if Match itself contains a map?
+package main
+type Match bool
+var (
+droid = make(map[string]map[string]Match)
+)
+func main() {
+droid["r2d2"] = map[string]Match{"one": true}
+}
+​
+​
+calmh
+Jakob Borg
+Sep 2016
+frayela:
+droid = make(map[string] map[string] Match)
+I’m guessing (which is all we can do in the absence of actual code) that you’re then doing something like
+droid["hello"]["banana"] = whatever
+. While
+droid
+is an initialized map,
+droid["hello"]
+will be nil unless you’ve assigned something to it, hence you would get the above panic.
+​
+​
+frayela
+1
+Sep 2016
+Thanks for looking into my query and for trying to understand my problem below is the code snippet -
+package match
+type Match struct {
+Match 	int
+Points 	int
+}
+var (
+droid = make(map[string] map[string] Match)
+)
+.
+.
+func AssessPlayerSet(matchId, droidId) bool {
+invalid := false
+setResult := “M”
+.
+.
+droid[matchId][droidId] = Match{1, 100} <-- this is line trown the Panic: assignment to entry in nil map
+return invalid
+}
+The above code is being called from main
+​
+​
+radovskyb
+Benjamin Radovsky
+Sep 2016
+frayela:
+droid[matchId][droidId] = Match{1, 100} <– this is line trown the Panic: assignment to entry in nil map
+Hey
+@frayela
+, you need to replace that line with the following for it to work:
+droid[matchId] = map[string]Match{droidId: Match{1, 100}}
+This is saying, initialize the map[string] of a map[string]Match type, to the key matchId and the map to a new map with the key droidId and the value of a Match object.
+1
+​
+​
+3 months later
+Reply
+New & Unread Topics
+Topic list, column headers with buttons are sortable.
+Topic
+Replies
+Views
+Activity
+Avira blocking main.exe problem
+Getting Help
+5
+60
+Jan 22
+I need help please
+Getting Help
+2
+40
+25d
+Live streaming using golang
+Getting Help
+0
+53
+Jan 20
+Is This Auth Stack Satisfactory?
+Getting Help
+4
+113
+Dec 2025
+Passing array as args (robotgo keytoggle)
+Code Review
+14
+120
+Nov 2025
+Want to read more? Browse other topics in
+Getting Help
+or
+view latest topics
+.
+Powered by Discourse
+Invalid date
+Invalid date

@@ -1,0 +1,340 @@
+SOURCE_URL: https://stackoverflow.com/questions/79041162/how-to-efficiently-handle-large-datasets-in-python-using-pandas
+--------------------------------------------------
+How to efficiently handle large datasets in Python using Pandas? - Stack Overflow
+How to efficiently handle large datasets in Python using Pandas?
+Ask Question
+Asked
+1 year, 4 months ago
+Modified
+1 year, 4 months ago
+Viewed
+5k times
+3
+I am working with a large dataset (approximately 1 million rows) in Python using the Pandas library, and I am experiencing performance issues when performing operations such as filtering and aggregating data.
+Here is a simplified version of my code:
+import pandas as pd
+# Load the dataset
+df = pd.read_csv('large_dataset.csv')
+# Example operation: Filtering and aggregating
+result = df[df['column_name'] > threshold_value].groupby('another_column').mean()
+I've tried using
+df.memory_usage(deep=True)
+to analyze memory usage and
+pd.read_csv()
+with the
+chunksize
+parameter to load the data in chunks, but I still face slow performance.
+**What are some best practices for optimizing data processing with Pandas for large datasets?
+**
+Any suggestions on techniques, alternative libraries, or specific functions that could help improve performance would be greatly appreciated!
+What I Tried:
+Memory Analysis: I used
+df.memory_usage(deep=True)
+to understand memory consumption and found that certain columns were using a lot of memory due to their data types.
+Loading Data in Chunks: I attempted to load the dataset in chunks using the chunksize parameter with
+pd.read_csv()
+. This allowed me to work with smaller parts of the dataset, but my filtering and aggregation operations remained slow.
+Data Type Optimization: I experimented with changing data types of certain columns to more memory-efficient types (e.g., converting float64 to float32), which helped reduce memory usage but didn’t significantly improve the processing time.
+What I Was Expecting: I expected that by analyzing memory usage and optimizing data types, along with loading data in chunks, I would see a noticeable improvement in the speed of my filtering and aggregation operations. However, the performance remains suboptimal, especially with the large size of the dataset.
+python
+pandas
+dataframe
+performance
+data-analysis
+Share
+Improve this question
+Follow
+edited
+Oct 1, 2024 at 0:47
+user4136999
+asked
+Sep 30, 2024 at 22:12
+hotnoob
+41
+1
+1 silver badge
+3
+3 bronze badges
+7
+1
+For the particular operations you're looking at, it seems like the computation is parallelizable. You can use the multiprocessing module to get aggregate counts and means for each "chunk", then use those results to get overall means for each group
+Ben Grossmann
+–
+Ben Grossmann
+2024-09-30 22:37:24 +00:00
+Commented
+Sep 30, 2024 at 22:37
+You might also want to consider
+using Numba
+Ben Grossmann
+–
+Ben Grossmann
+2024-09-30 22:40:03 +00:00
+Commented
+Sep 30, 2024 at 22:40
+2
+@BenGrossmann Multiprocessing (with Pandas) is generally slow due to inter-process communication. This is especially true here regarding the target operations. For example, it is faster to filter things serially than copy the whole dataframe on workers so to filter lines, especially if most of them are filtered out... As for multithreading, it is useless due to the GIL (unless released). (C)Python parallelism sucks for that...
+Jérôme Richard
+–
+Jérôme Richard
+2024-09-30 23:10:06 +00:00
+Commented
+Sep 30, 2024 at 23:10
+2
+We need
+more information
+to really help you (without wild guesses). Can you provide an example of (realistic) dataframe so we can: know the number of columns, they types and the distribution of probability of the values? The later is especially important so to know the probability of
+df['column_name'] > threshold_value
+to be true (number of filtered lines). We can also use that so to profile the code and know if the proposed solution is faster or not.
+Jérôme Richard
+–
+Jérôme Richard
+2024-09-30 23:14:46 +00:00
+Commented
+Sep 30, 2024 at 23:14
+1
+You said you wanted to improve slow performance, but most of your attention is focused on memory usage. Is there a reason for this? Like running out of RAM?
+ken
+–
+ken
+2024-10-01 08:31:26 +00:00
+Commented
+Oct 1, 2024 at 8:31
+|
+Show
+2
+more comments
+4 Answers
+4
+Sorted by:
+Reset to default
+Highest score (default)
+Trending (recent votes count more)
+Date modified (newest first)
+Date created (oldest first)
+1
+It's difficult to say what exactly is the bottleneck without having access to the current file, columns and types (eg. dtypes) and memory usage statistics and profiles. But we can at least consider some options.
+Toy dataset with 1M rows
+First lets create some dummy dataset to illustrate some key points:
+import numpy as np
+import pandas as pd
+import duckdb as db
+N = 1_000_000
+data = pd.DataFrame({
+"c": np.random.choice(["a", "b", "c"], size=N),
+"x": np.random.uniform(size=N),
+"y": np.random.normal(size=N)
+})
+data.to_csv("blob.csv")  # File is about 45 Mb
+data.memory_usage()      # Memory fingerprint is about 22 Mb
+Therefore 1M rows with 3 columns of interest should be bearable.
+Creating a subset of columns
+will reduce your memory fingerprint to some acceptable amount.
+Explicitly select columns you want to aggregate
+Now we will perform the aggregation as you suggested:
+%timeit -r 10 -n 10
+data[data["x"] > 0.5].groupby("c")["y"].mean()
+# 137 ms ± 11.5 ms per loop (mean ± std. dev. of 10 runs, 10 loops each)
+Notice the indexation
+["y"]
+on specific columns before aggregation to prevent means to apply on all columns left by the group by operation. Indexing will reduce the volumetry of the answer and the intensity of computation.
+Alternative to pandas
+There is a nice package called
+duckdb
+that allow to perform such operation on large dataset while limiting footprint wrt pandas.
+The equivalent query can then be stated in SQL directly from the CSV file:
+%timeit -r 10 -n 10
+db.query("SELECT c, MEAN(y) FROM blob.csv WHERE x > 0.5 GROUP BY c;")
+# 89.3 ms ± 1.01 ms per loop (mean ± std. dev. of 10 runs, 10 loops each)
+Going further
+Don't hesitate to provide give us more grain to grind (reference dataset, link to file, file sample, dtypes, actual statistics and profiles) in order to reproduce your issue.
+Share
+Improve this answer
+Follow
+edited
+Oct 1, 2024 at 19:03
+answered
+Oct 1, 2024 at 18:56
+jlandercy
+11.7k
+3
+3 gold badges
+49
+49 silver badges
+73
+73 bronze badges
+Comments
+Add a comment
+0
+for info ....
+using a subset of NYC taxi data  (yellow_tripdata_2009-10) (1.5million rows) (which perversely for this is already in parquet format ... so rolled that back to a csv for this exercise and took 1.5million rows from tha)
+I didn't try any aggregation, this was merely to show a potential alternative
+# Convert CSV to Parquet
+timerS=timer()
+df = pd.read_csv(csvFile)
+timerE=timer()
+print( 'csv to df:', timerE - timerS)
+timerS=timer()
+df.to_parquet(pFile, engine='pyarrow')
+timerE=timer()
+print( 'df to parquet:', timerE - timerS)
+csv to df: 49.38248022104381
+df to parquet: 33.50898619799409
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1499999 entries, 0 to 1499998
+Data columns (total 19 columns):
+#   Column                 Non-Null Count    Dtype
+---  ------                 --------------    -----
+0   Unnamed: 0             1499999 non-null  int64
+1   vendor_name            1499999 non-null  object
+2   Trip_Pickup_DateTime   1499999 non-null  object
+3   Trip_Dropoff_DateTime  1499999 non-null  object
+4   Passenger_Count        1499999 non-null  int64
+5   Trip_Distance          1499999 non-null  float64
+6   Start_Lon              1499999 non-null  float64
+7   Start_Lat              1499999 non-null  float64
+8   Rate_Code              0 non-null        float64
+9   store_and_forward      673295 non-null   float64
+10  End_Lon                1499999 non-null  float64
+11  End_Lat                1499999 non-null  float64
+12  Payment_Type           1499999 non-null  object
+13  Fare_Amt               1499999 non-null  float64
+14  surcharge              1499999 non-null  float64
+15  mta_tax                283086 non-null   float64
+16  Tip_Amt                1499999 non-null  float64
+17  Tolls_Amt              1499999 non-null  float64
+18  Total_Amt              1499999 non-null  float64
+dtypes: float64(13), int64(2), object(4)
+memory usage: 217.4+ MB
+#
+# file size substantially reduced
+#
+ll -tralh yellow_tripdata_2009-10.*
+-rw-rw-r-- 1 tester tester 198M Oct  1 00:07 yellow_tripdata_2009-10.csv
+-rw-rw-r-- 1 tester tester  57M Oct  1 00:44 yellow_tripdata_2009-10.parquet
+Share
+Improve this answer
+Follow
+edited
+Oct 1, 2024 at 6:41
+answered
+Sep 30, 2024 at 23:47
+ticktalk
+1,215
+1
+1 gold badge
+4
+4 silver badges
+9
+9 bronze badges
+3 Comments
+Add a comment
+Jérôme Richard
+Jérôme Richard
+Over a year ago
+The OP problem is the filtering and aggregating while your answer does not address this (but shows how to load the dataframe faster). To quote the OP:
+"filtering and aggregation operations remained slow"
+.
+2024-10-01T00:16:51.977Z+00:00
+0
+Reply
+Copy link
+ticktalk
+ticktalk
+Over a year ago
+The suggestion to convert the to parquet was to see if there was any performance advantage gains in using parquet's columnar storage, compression and (potential) memory usage and for the OP to time their aggregation ops on that. As the OP had not supplied any data or supporting schema it would be fruitless to show aggregation based on a dataset that bares no resemblance to the OP's.
+2024-10-01T07:05:56.397Z+00:00
+0
+Reply
+Copy link
+Jérôme Richard
+Jérôme Richard
+Over a year ago
+Pandas has its own in-memory representation internally which mainly relies on basic Numpy arrays. It is independent of how the file is loaded. Thus, changing the way the file is loaded should have no impact on computation (which is the problem of the OP). It is still an interesting improvement but better as a comment (like you did). Regarding data, I agree, and this is why we should add a comment requesting a MRE instead of providing an answer based on missing important information.
+2024-10-01T10:38:23.607Z+00:00
+0
+Reply
+Copy link
+Add a comment
+0
+If you have already optimized by using better dtypes and ensured that every function is really vectorized (so not apply or np.vectorize which are syntactic sugar), you can work on your chunks.
+Indeed, as already said by other comments, if you have chunks, if should be possible to parallelize.
+Personally, I prefer using joblib for that instead of standard lib features : easier and more flexible.
+Then, numba can also help and, obviously, but more complex… cython
+Share
+Improve this answer
+Follow
+answered
+Oct 1, 2024 at 18:16
+mhooreman
+61
+1
+1 silver badge
+6
+6 bronze badges
+Comments
+Add a comment
+-2
+You can reduce memory usage by changing the datatypes.
+change to categorical types
+change to smaller datatypes just like you mentioned, convert float64 to float32 or int64 to int32 where possible but there might be some precision loss.
+Also there is a extend function from pandas -- Dask, which provides parallel computing library for larger datasets by splitting data into chunks and parallelizing operations.
+Share
+Improve this answer
+Follow
+answered
+Oct 1, 2024 at 3:18
+江雨柔
+1
+1
+1 bronze badge
+1 Comment
+Add a comment
+Jérôme Richard
+Jérôme Richard
+Over a year ago
+The OP explicitly stated this has been done and did not fix the problem. Here is a quote from the OP:
+"Data Type Optimization: I experimented with changing data types of certain columns to more memory-efficient types (e.g., converting float64 to float32), which helped reduce memory usage but didn’t significantly improve the processing time."
+.
+2024-10-01T10:32:58.2Z+00:00
+4
+Reply
+Copy link
+Start asking to get answers
+Find the answer to your question by asking.
+Ask question
+Explore related questions
+python
+pandas
+dataframe
+performance
+data-analysis
+See similar questions with these tags.
+Hot Network Questions
+From a formalist perspective what is an interpretation?
+How to measure distance from center of curling stone to center of target when the stone covers the center
+When I use \hl inside of a longtable, the file says it's building forever but never builds
+Book about 3 main characters who gain powers from injection from crazy scientist
+How do you write helpless screaming in dialogue?
+Biblical interpretation of 1 Corinthians 14:31
+How does Arthur Hastings end up with the other Duveen twin?
+What's the cost to remove an ally from a restraining spell?
+Employer is not providing me with HR onboarding
+Mary Renault's describing the island of Keos as "a stern land" in "The Praise Singer"
+Seeming inconsistency between methods in derivation of equations for physical pendulum
+Why are articles used (or not used) in these contexts?
+Is computation and information part of epistemology?
+How to construct two compact, uncountable, disjoint subsets of an uncountable compact metric space?
+Where is the center of mass of a donut-shaped object?
+Python fraction class
+Leibniz on what is reasoning
+How to modify the contents of the initrd image in-place?
+How to issue SSL certificate with HTTP probe when well-known folder can't be created?
+How to calculate a solution with Mittag-Leffler function
+Five sequences of five entries each
+What are the types of random signals?
+Create a directed graph
+Replace parent or child of a symbol
+more hot questions
+Question feed
+lang-py

@@ -1,0 +1,301 @@
+SOURCE_URL: https://komodor.com/learn/how-to-fix-crashloopbackoff-kubernetes-error/
+--------------------------------------------------
+How to Fix CrashLoopBackOff in Kubernetes? - Komodor
+How to Fix CrashLoopBackOff in Kubernetes?
+Mickael Alliel, DevOps Tech Lead
+9 min read
+January 28th, 2026
+Kubernetes
+Troubleshooting
+With
+67% of organizations delaying deployments
+and misconfigurations affecting 40% of Kubernetes environments, understanding and resolving CrashLoopBackOff errors maintains production reliability and avoids the costly business impacts that plague 90% of organizations running Kubernetes workloads.
+What is Kubernetes CrashLoopBackOff?
+When a Kubernetes container repeatedly fails to start, it enters a ‘CrashLoopBackOff’ state, indicating a persistent restart loop within a pod. This error often occurs due to various issues preventing the container from launching properly.
+Common causes include insufficient memory or resource overload, deployment errors, third-party service issues like DNS errors, missing dependencies, or container failures due to port conflicts.
+To confirm this error, execute ‘kubectl get pods’ and verify if the pod status is ‘CrashLoopBackOff’. Addressing the root cause, whether by adjusting resources, resolving dependencies, or updating configurations, is essential for resolving the error and stabilizing the pod.
+How Does CrashLoopBackOff Work?
+By default, a pod’s restart policy is Always, meaning it should always restart on failure (other options are Never or OnFailure). Depending on the restart policy defined in the pod template, Kubernetes might try to restart the pod multiple times. When a Pod state is displaying CrashLoopBackOff, it means that it’s currently waiting the indicated time before restarting the pod again.
+Every time the pod is restarted, Kubernetes waits for a longer and longer time, known as a “backoff delay”. The delay between restarts is exponential (10s, 20s, 40s, …) and is capped at five minutes. During this process, Kubernetes displays the CrashLoopBackOff error.
+This is part of an extensive series of guides about
+kubernetes troubleshooting
+.
+Common Causes of CrashLoopBackOff and How to Fix Them
+“CrashLoopBackOff” can occur when a pod fails to start for some reason, because a container fails to start up properly and repeatedly crashes. Let’s review the common causes of repeated container crashes.
+Quick Diagnosis: Symptom → Likely Cause → Fix
+Start with kubectl describe pod (Events) and kubectl logs –previous (last crash), then match what you see to the table below.
+Symptom (what you see in Events/logs)
+Likely cause
+Fix (specific remediation)
+Probe failed
+Examples:
+Liveness probe failed
+Readiness probe failed
+Startup probe failed
+Back-off restarting failed container
+Probe config is too aggressive (timeouts/period), wrong path/port, app needs longer warm-up, or dependency not ready yet.
+– Increase timeoutSeconds / failureThreshold or reduce probe frequency (periodSeconds).
+– Use
+startupProbe
+for slow-starting apps, so liveness does not kill them early.
+– Fix probe endpoint/command (path, port, auth).
+OOMKilled / Exit code 137
+Examples:
+Reason: OOMKilled
+Exit Code: 137
+Container killed by OOM
+Container exceeded memory limit, node memory pressure, memory leak, or bursts during startup causing a spike.
+– Raise memory resources.limits and set realistic requests.
+– Reduce concurrency / batch size / cache size.
+– Investigate leaks and tune JVM/Node/Python memory settings.
+– If node pressure: spread replicas, scale nodes, or reduce other workloads.
+Permission denied
+Examples:
+permission denied
+mkdir: can’t create directory
+open /path/file: permission denied
+Running as non-root without correct permissions, volume mount ownership mismatch, read-only filesystem, or restrictive security context/policies.
+– Set securityContext.runAsUser, runAsGroup, and fsGroup to match volume needs.
+– Add an init container to chown/chmod the mounted path.
+– Write to a writable path (e.g., /tmp) or mount an emptyDir for writable storage.
+– Fix file ownership in the image (Dockerfile) if needed.
+ConfigMap/Secret missing (often CreateContainerConfigError)
+Examples:
+configmap “<name>” not found
+secret “<name>” not found
+CreateContainerConfigError
+Referenced ConfigMap/Secret does not exist in the namespace, name typo, wrong key, or wrong mount/envFrom reference.
+– Create the missing ConfigMap/Secret in the
+same namespace
+.
+– Fix the reference name/key in YAML (envFrom, valueFrom, or volumes).
+– Redeploy rollout: kubectl rollout restart deploy/<name> -n <ns>.
+Bad command / entrypoint
+Examples:
+exec: “<cmd>”: executable file not found in $PATH
+standard_init_linux.go: …
+No such file or directory
+Wrong command/args, missing binary, incorrect working directory, wrong shell, or image built without expected files.
+– Fix command/args to match the image (or remove overrides).
+– Ensure the binary/script exists and is executable (chmod +x).
+– Use absolute paths, correct shebang (#!/bin/sh), and correct working dir.
+– Rebuild/push the image, then redeploy.
+Init container failure
+Examples:
+Init:CrashLoopBackOff
+Init container terminated (non-zero exit code)
+Main container never starts
+Init container script fails, dependency unavailable (DB/DNS), bad credentials, missing tools in init image, or permissions issue on shared volumes.
+– Fix the init script/command and make it idempotent (safe to re-run).
+– Add retries with backoff inside init logic for external dependencies.
+– Verify credentials/Secrets and DNS resolution from init container.
+– Ensure init image includes required tools (curl, sh, etc.).
+CrashLoopBackOff Quick Diagnosis
+Resource Overload or Insufficient Memory
+One of the common causes of the CrashLoopBackOff error is resource overload or insufficient memory. Kubernetes allows setting memory and CPU usage limits for each pod, which means your application might be crashing due to insufficient resources. This might happen due to memory leaks in your program, misconfigured resource requests and limits, or simply because your application requires more resources than are available on the node.
+When the node that the pod is running on doesn’t have enough resources, the pod can be evicted and moved to a different node. If none of the nodes have sufficient resources, the pod can go into a CrashLoopBackOff state.
+To resolve this issue, you need to understand the resource usage of your application and set the appropriate resource requests and limits. You can use the kubectl describe pod [pod_name] command to check if the pod was evicted due to insufficient memory.
+You can also monitor the memory and CPU usage of your pods using Kubernetes metrics server or other monitoring tools like Prometheus. If your application is consistently using more resources than allocated, you might need to optimize your application, allocate more resources, or change resources:limits in the Container’s resource manifest.
+Errors When Deploying Kubernetes
+In Kubernetes v1.24+, the kubelet talks to a CRI runtime (most commonly containerd or CRI-O). If the node runtime is misconfigured, unhealthy, or mismatched with kubelet expectations, containers may fail to start and end up in restart loops.
+If you see docker://… on a cluster running Kubernetes v1.24+, that’s a red flag. Plan a migration to a supported CRI runtime.
+Issue with Third-Party Services (DNS Error)
+Sometimes, the
+CrashLoopBackOff
+error is caused by an issue with one of the third-party services. If this is the case, upon starting the pod you’ll see the message:
+send request failure caused by: Post
+Check the syslog and other container logs to see if this was caused by any of the issues we mentioned as causes of CrashLoopBackoff (e.g., locked or missing files). If not, then the problem could be with one of the third-party services.
+To verify this, you’ll need to use a debugging container. A debug container works as a shell that can be used to login into the failing container. This works because both containers share a similar environment, so their behaviors are the same. Here is a link to one such shell you can use:
+ubuntu-network-troubleshooting
+.
+Using the shell, log into your failing container and begin debugging as you normally would. Start with checking
+kube-dns
+configurations, since a lot of third-party issues start with incorrect DNS settings.
+Missing Dependencies
+The CrashLoopBackOff status can activate when Kubernetes cannot locate runtime dependencies (i.e., the var, run, secrets, kubernetes.io, or service account files are missing). This might occur when some containers inside the pod attempt to interact with an API without the default access token.
+This scenario is possible if you manually create the pods using a unique API token to access cluster services. The missing service account file is the declaration of tokens needed to pass authentication.
+You can fix this error by allowing all new –mount creations to adhere to the default access level throughout the pod space. Ensure that new pods using custom tokens comply with this access level to prevent continuous startup failures.
+Changes Caused by Recent Updates
+If you constantly update your clusters with new variables that spark resource requirements, they will likely encounter CrashLoopBackOff failures.
+Suppose you have a shared master setup and run an update that restarts all the pod services. The result is several restart loops because Kubernetes must choose a master from the available options. You can fix this by changing the update procedure from a direct, all-encompassing one to a sequential one (i.e., applying changes separately in each pod). This approach makes it easier to troubleshoot the cause of the restart loop.
+In some cases, CrashLoopBackOff can occur as a settling phase to the changes you make. The error resolves itself when the nodes eventually receive the right resources for a stable environment.
+Container Failure due to Port Conflict
+To identify the failure, start with Kubernetes-native logs:
+kubectl logs <pod-name> -c <container-name> --previous --tail=50
+kubectl describe pod <pod-name> | sed -n '/Events/,$p'
+If you need to debug at the node runtime layer (containerd/CRI-O), use crictl (CRI tools).
+For port conflicts specifically, prefer diagnosing inside the pod (what is trying to bind which port) rather than killing random host processes. If you truly suspect a host-level port conflict, confirm on the node (tooling varies by distro), then fix the underlying host service or daemonset using that port.
+Tips from the expert
+Itiel Shwartz
+Co-Founder & CTO
+Itiel is the CTO and co-founder of Komodor. He’s a big believer in dev empowerment and moving fast, has worked at eBay, Forter and Rookout (as the founding engineer). Itiel is a backend and infra developer turned “DevOps”, an avid public speaker that loves talking about things such as cloud infrastructure, Kubernetes, Python, observability, and R&D culture.
+In my experience, here are tips that can help you better manage and resolve CrashLoopBackOff errors in Kubernetes:
+Analyze pod events
+Use `kubectl describe pod
+` to inspect events and error messages for root causes.
+Optimize startup and liveness probes
+Ensure probes are correctly configured to avoid premature restarts.
+Limit resource contention
+Use resource requests and limits to prevent resource starvation and over-allocation.
+Check init containers
+Ensure init containers complete successfully, as their failure can cause the main container to crash.
+Leverage StatefulSets
+For stateful applications, use StatefulSets for better pod management and recovery.
+How to Troubleshoot CrashLoopBackOff
+The best way to identify the root cause of the error is to start going through the list of potential causes and eliminate them one by one, starting with the most common ones first.
+Note (Kubernetes v1.24+)
+: Kubernetes no longer includes dockershim, so nodes typically run a CRI runtime like containerd or CRI-O. Use kubectl logs for application logs and crictl for node runtime debugging when needed.
+1. Check for “Back Off Restarting Failed Container”
+Run
+kubectl describe pod [name]
+.
+If you get a
+Liveness probe failed
+and
+Back-off restarting failed container
+messages from the kubelet, as shown below, this indicates the container is not responding and is in the process of restarting.
+From       Message -----      ----- kubelet    Liveness probe failed: cat: can’t open ‘/tmp/healthy’: No such file or directory kubelet    Back-off restarting failed container
+If you get the
+back-off restarting failed container
+message this means that you are dealing with a temporary resource overload, as a result of an activity spike. The solution is to adjust
+periodSeconds
+or
+timeoutSeconds
+to give the application a longer window of time to respond.
+If this was not the issue, proceed to the next step.
+2. Check Logs From Previous Container Instance
+If Kubernetes pod details didn’t provide any clues, your next step should be to pull information from the previous container instance.
+You originally ran
+kubectl get pods
+to identify the Kubernetes pod that was exhibiting the
+CrashLoopBackOff
+error. You can run the following command to get the last ten log lines from the pod:
+kubectl logs --previous --tail 10
+Search the log for clues showing why the pod is repeatedly crashing. If you cannot resolve the issue, proceed to the next step.
+3. Check Deployment Logs
+Run the following command to retrieve the kubectl deployment logs:
+kubectl logs -f deploy/ -n
+This may also provide clues about issues at the application level. For example, below you can see a log file that shows
+./ibdata1
+can’t be mounted, likely because it’s already in use and locked by a different container.
+[ERROR] [MY-012574] [InnoDB] Unable to lock ./ibdata1 error:11 [ERROR] [MY-012574] [InnoDB] Unable to lock ./ibdata1 error:11
+Failing all the above, the next step is to bash into the CrashLoop container to see exactly what happened.
+Why Fix CrashLoopBackOff When You Can Prevent It? 5 Tips for Prevention
+In most cases, restarting the pod and deploying a new version will resolve the problem and keep the application online. However, it is important to identify the root cause of the CrashLoopBackOff error and prevent it in the first place. Here is a list of best practices that can help you prevent the CrashLoopBackOff error.
+1. Configure and Recheck Your Files
+A misconfigured or missing configuration file can cause the
+CrashLoopBackOff
+error, preventing the container from starting correctly. Before deployment, make sure all files are in place and configured correctly.
+Most CrashLoopBackOff “missing file” problems come from volume mounts (ConfigMaps, Secrets, PVCs) or an incorrect mountPath. First, confirm what Kubernetes intended to mount:
+kubectl describe pod | sed -n '/Mounts:/,/Conditions:/p'
+Then verify the file exists inside the container at the mount path:
+kubectl exec -it -c -- ls -la
+kubectl exec -it -c -- cat /
+2. Be Vigilant With Third-Party Services
+If an application uses a third-party service and calls made to a service fail, then the service itself is the problem. Most errors are usually due to an error with the SSL certificate or network issues, so make sure those are functioning correctly. You can log into the container and manually reach the endpoints using
+curl
+to check.
+3. Check Your Environment Variables
+Incorrect environment variables are a common cause of the
+CrashLoopBackOff
+error. A common occurrence is when containers require Java to run, but their environment variables are not set properly. Use env to inspect the environment variables and make sure they’re correct.
+4. Check Kube-DNS
+The application may be trying to connect to an external service, but the
+kube-dns
+service is not running. Here, you just need to restart the
+kube-dns
+service so the container can connect to the external service.
+5. Check File Locks
+As mentioned before, file locks are a common reason for the
+CrashLoopBackOff
+error. Ensure you inspect all ports and containers to see that none are being occupied by the wrong service. If they are, kill the service occupying the required port.
+Troubleshoot CrashLoopBackoff – The Easy Way With Komodor
+Komodor
+is a
+Kubernetes troubleshooting platform
+that turns hours of guesswork into actionable answers in just a few clicks. Using Komodor, you can monitor, alert and troubleshoot
+CrashLoopBackOff
+events.
+For each K8s resource, Komodor automatically constructs a coherent view, including the relevant deploys, config changes, dependencies, metrics, and past incidents. Komodor seamlessly integrates and utilizes data from cloud providers, source controls, CI/CD pipelines, monitoring tools, and incident response platforms.
+Discover the root cause automatically with a
+timeline that tracks all changes
+in your application and infrastructure.
+Quickly tackle the issue, with easy-to-follow
+remediation instructions
+.
+Give your entire team a way to troubleshoot
+independently without escalating
+.
+Book a Demo
+FAQs About CrashLoopBackOff
+These are the most common questions people ask while debugging CrashLoopBackOff. Each answer includes the fastest command(s) to confirm what’s happening.
+What does CrashLoopBackOff mean in Kubernetes?
+CrashLoopBackOff
+means a container is repeatedly crashing and Kubernetes is applying an increasing delay (“backoff”) before trying to restart it again. It’s a symptom, not the root cause. Start by checking Events and the previous container logs.
+kubectl describe pod <pod-name>  kubectl logs <pod-name> -c <container-name> --previous --tail=50
+How do I see why the container restarted?
+Use
+kubectl describe
+to read the
+Events
+(often the quickest root-cause hint), then use
+kubectl logs --previous
+to see logs from the container instance that just crashed.
+kubectl describe pod <pod-name>  kubectl logs <pod-name> -c <container-name> --previous
+What does “Back-off restarting failed container” mean?
+This message is emitted when Kubernetes sees repeated container failures and starts delaying restarts using an exponential backoff. It typically appears alongside CrashLoopBackOff and often shows up in the Pod’s Events.
+kubectl describe pod <pod-name>
+How do liveness/readiness/startup probes cause CrashLoopBackOff?
+If a
+liveness probe
+fails repeatedly, the kubelet restarts the container, which can create a crash loop. If your app is slow to start, add a
+startupProbe
+so liveness doesn’t kill it during warm-up, or relax probe timeouts/thresholds.
+kubectl get pod <pod-name> -o yaml   # inspect probes  kubectl describe pod <pod-name>      # see probe failures in Events
+How do I debug init container failures (Init:CrashLoopBackOff)?
+If an init container fails, the main container may never start. Check the init container status in
+describe
+, then read the init container logs directly.
+kubectl describe pod <pod-name>  kubectl logs <pod-name> -c <init-container-name> --previous --tail=200
+How do I confirm it’s an OOMKilled / Exit Code 137 issue?
+OOMKilled
+(often exit code
+137
+) indicates the container was killed due to memory limits or node memory pressure. Look for “OOMKilled” in the container status and Events, then adjust memory requests/limits and investigate memory spikes or leaks.
+kubectl describe pod <pod-name>      # look for Reason: OOMKilled / Exit Code: 137  kubectl logs <pod-name> -c <container-name> --previous
+What does “CreateContainerConfigError” with configmap/secret not found mean?
+This usually means the Pod references a
+ConfigMap
+or
+Secret
+that doesn’t exist (wrong name, wrong namespace, or missing key). The exact missing object is typically listed in Events.
+kubectl describe pod <pod-name>  kubectl get configmap,secret -n <namespace>
+What does “exec: executable file not found in $PATH” mean?
+This points to a bad
+command
+/
+args
+, a missing binary inside the image, or a path issue. Confirm by checking the previous crash logs, then verify the container command/args in the Pod spec (or remove overrides).
+kubectl logs <pod-name> -c <container-name> --previous --tail=100  kubectl get pod <pod-name> -o yaml
+Why are the logs “empty” when I run kubectl logs?
+If the container crashes quickly, the current instance may not have logs yet. Use
+--previous
+to fetch logs from the last crashed instance, and include
+-c
+if the Pod has multiple containers.
+kubectl logs <pod-name> -c <container-name> --previous
+What’s the fastest way to get a useful root-cause hint?
+In practice:
+Events
+plus
+previous logs
+. Events tell you what Kubernetes observed (probe failures, missing secrets, image errors). Previous logs tell you what the app did right before it died.
+kubectl describe pod <pod-name>  kubectl logs <pod-name> -c <container-name> --previous --tail=50
+Share:
+Latest Articles
+Complete Guide for Kubernetes Cost Optimization
+Your cloud bill tripled after migrating to Kubernetes? Learn Kubernetes cost optimization strategies that cut 30-50% waste.
+Complete Guide to EKS Cost Optimization at Enterprise Scale
+EKS Cost Optimization without the hype: eliminate wasted compute, tune autoscaling, and stop paying for YAML guesses from Stack Overflow.
+How AI SRE Agent Reduces MTTR and Operational Toil at Scale
+AI SRE agent reduces MTTR from hours to minutes by automating incident investigation. Learn how platform teams eliminate TicketOps.

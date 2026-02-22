@@ -1,0 +1,274 @@
+SOURCE_URL: https://www.betterbugs.io/blog/javascript-heap-out-of-memory-error-fix
+--------------------------------------------------
+[Updated] How to Fix “Javascript heap out of memory” Error
+Products
+Solutions
+Integrations
+Resources
+Pricing
+BB for Support
+MCP
+New
+Login
+Get started
+Get started
+All topics
+How-to Guides
+[Updated] How to Fix “JavaScript heap out of memory” Error
+Nishil Patel
+May 1, 2024
+7 min read
+Last Updated May 1, 2024
+Last Updated May 1, 2024
+Share
+In this article, you’ll learn how to fix the “JavaScript heap out of memory” error. You’ll also learn what happens behind the scenes when you encounter this error, what causes it, and what you can do to identify and prevent memory-related errors in your JS applications.
+Table of Contents
+1.
+Introduction
+2.
+Understanding JavaScript V8 Engine
+3.
+What is the “JavaScript heap out of memory” Error?
+4.
+What Causes the “JavaScript heap out of memory” Error?
+5.
+How to Identify the Error?
+6.
+How to Fix the “JavaScript heap out of memory” Error?
+7.
+How to Prevent Memory Issues?
+8.
+FAQs
+Introduction
+You may come across the ‘JavaScript heap out of memory’ error when running medium to large-scale JavaScript projects in your Node.js environment. The JavaScript V8 engine commonly throws this error, but you can resolve it swiftly with a few straightforward adjustments. In this article, we will explore the causes of the error and demonstrate how to fix it.
+Understanding JavaScript V8 Engine
+Developed by Google, the JavaScript V8 engine is a program that executes your JS code. It powers Chrome and also the Node.js runtime. The V8 engine comprises:
+Call stack
+— the place where your code actually executes.
+Heap
+— an unstructured memory pool that stores all the objects your program/application needs while executing your code.
+Garbage collector
+— to collect and remove any objects that are not required or unused by your program for efficient memory management.
+All three of them work together to execute your application code on the server.
+What is the “JavaScript heap out of memory” Error?
+JavaScript uses the heap space for garbage collection to manage memory and smoothly run your application code. The heap memory is dynamically allocated by the V8 engine based on a certain memory limit.
+When the default memory allocation for the heap space in JavaScript is not enough to run your application, your program crashes throwing the “
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+” error.
+This error may sometimes look different in your JS stacktrace, but they are largely caused by similar reasons. Here are some variations of the heap out of memory error in JavaScript:
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+FATAL ERROR: invalid table size Allocation failed - JavaScript heap out of memory
+Facing Software Issues? Create and Share Visual Bug Reports with Console logs, Network Requests, and More
+Download BetterBugs
+What Causes the “JavaScript heap out of memory” Error?
+Insufficient memory space allocation can occur due to several reasons. Here are some notable ones:
+Large Data Processing Tasks
+Complex applications typically handle large data processing tasks, datasets, and data structures by running billions of calculations behind the scenes. This could quickly gobble default allocated memory for the program causing the error.
+Infinite Loops and Inefficient Recursive Functions
+If your program has any unknown infinite/non-terminating loops or contains inefficient or loosely written recursive functions, it triggers the heap out of memory error. Both these operations are memory guzzlers.
+Inefficient Algorithms
+Poorly written or inefficient algorithms can sometimes exceed the expected space complexity — that’s the amount of memory an algorithm needs relative to the size of its input. This can lead to memory allocation issues in your application, potentially causing an error if the program attempts to use more memory than is available in the heap.
+Memory Leaks
+Memory leaks in your JS application can cause erroneous code runs. Memory leaks happen when the V8 engine’s garbage collector cannot release allocated (that’s actually unused) memory for your app to use. In such cases, the JS heap runs out of memory — leading to the error.
+Don’t let Software Issues Bug You. Send them as Visual Bug Reports to Debug Faster
+Download BetterBugs
+Here are some common scenarios where memory leaks happen in your JS application:
+Global Variables
+— Unwanted global variable references in your application code can clog up the allocated heap memory space causing memory leaks. It’s good to keep your global variables in check.
+Event Listeners
+— Excessive event listeners attached to global objects can cause memory leaks, especially if they are not properly removed when no longer needed. It’s not just the number of event listeners that matters, but also ensuring they are detached when the associated elements are removed from the DOM.
+Circular References
+— Circular references in your code — where variables keep referencing each other —  prevent the garbage collector from releasing memory when required causing memory leaks. Avoid circular references in your code when not absolutely required.
+Closures
+— Closure is a feature in JavaScript when a function carries all the variables with references that were present in the scope where that function was created. These unintentionally captured variables can reference large objects. This directly affects garbage collection leading to memory leaks in your application. It’s a good practice to keep an eye on closures in your JS code.
+Uncleared Timer Functions
+— There are cases where you require repeated code or function execution by using timer functions in JavaScript: “
+setInterval()
+” and “
+setTimeout()
+”. It's important to clear out such timers using “
+clearInterval()
+” and “
+clearTimeout()
+” when your function has returned as intended. Failing to do so keeps consuming memory, hence, memory leaks.
+Improper Handling of the React useEffect() hook
+— During conditional rendering in React functions, even though you use an empty dependency array in your
+useEffect()
+function — to prevent re-renders — it’s important to get rid of functions that are no longer required (
+network requests, timers, subscriptions, async tasks, event listeners
+) when your components unmount. If left unchecked, it can cause memory leaks and could be very problematic in large React apps. It’s highly recommended to add clean-up functions to prevent such issues, especially when you perform conditional rendering with the
+useEffect()
+hook.
+Also Read
+:
+How to Fix “Objects are not Valid as a React Child” Error
+How to Identify the Error?
+There are several methods and tools to identify memory-related errors in your JS code. You can use:
+Built-in DevTools for Chrome
+Node.js Tools and Techniques
+Let’s briefly cover some top ways to identify the error with these two:
+Built-in DevTools for Chrome
+Chrome provides a host of tools to analyze and monitor memory-related issues. Here are some:
+Memory
+—
+Under the
+Memory panel
+in your Chrome DevTools, you’ll find:
+Heap Snapshots
+,
+Allocation Timelines
+, and
+Allocation Sampling
+. They are used for memory profiling and to identify any memory issues.
+Heap Snapshots
+identify memory leaks through DOM analysis,
+Allocation Timelines
+track real-time memory allocation, and
+Allocation Sampling
+records allocations efficiently, all contributing to optimized JavaScript performance.
+Performance
+— The
+Performance panel
+in Chrome DevTools helps visualize memory trends to detect leaks and assess garbage collection impacts.
+You can also use
+Chrome Task Manager
+(hit Shift + Esc to open) to monitor a page’s memory use in real time, aiding in the initial analysis of memory problems.
+Also Read
+:
+How to Clear DNS Cache on Chrome [Updated] with Chrome://Net-Internals/#DNS
+Node.js Tools and Techniques
+There are a bunch of Node.js techniques that you can use to identify memory errors in your code.
+“process.memoryUsage()” Function
+— The “
+process.memoryUsage()
+” in Node.js provides key memory metrics:
+rss
+(total memory space occupied by the process),
+heapTotal
+, and
+heapUsed
+— to track and troubleshoot memory usage effectively.
+Here’s what the code and output looks like:
+You get the memory info in KBs by default. You can convert the values to MB for better readability like below:
+Third-Party Tools
+— You can also use NPM packages such as
+heapdump
+to identify memory-related issues in your Node.js apps.
+How to Fix the “JavaScript heap out of memory” Error?
+Fixing the out of memory error is super simple. Here’s how:
+Increase the Allocated Heap Memory Limit
+Increasing the allocated heap memory for the Node.js V8 engine is the quick and dirty solution to resolve the issue. However, proper memory profiling and analysis are recommended before applying this fix to ensure it’s the only way around.
+Here’s how it works:
+For Windows
+Open and run the Powershell or the Command Prompt as an admin
+Use the “
+cd
+” command to navigate to your Node.js app
+Run “
+node --max-old-space-size=4096 main.js
+”
+It allocates 4GB of memory to the memory heap and should fix the error.
+You can also allocate more memory to the node global variable in Windows OS. This will allocate memory for all your Node.js apps. Here’s how:
+Search “
+Advanced system settings
+” under the Control Panel in your Windows search box.
+Click on “
+Environment Variables
+” from the System Properties dialog box.
+Click the “
+New
+” button present under User variables or System variables.
+Enter
+“Variable name: NODE_OPTIONS”
+Enter “
+Variable value: --max-old-space-size=4096”
+Hit
+OK
+and close the dialog box.
+Restart your system to apply the changes.
+The error should be gone now when you run your Node.js app.
+For Linux and MacOS
+Open the MacOS/Linux terminal and run this command to allocate 4GB for the heap memory for your node app:
+node --max-old-space-size=4096 main.js
+While increasing the heap size can provide a quick fix, it’s crucial to identify and resolve the root cause of the memory issue for a long-term solution.
+How to Prevent Memory Issues?
+Here are some ways to keep the heap out of memory error at bay:
+Write Optimized and Clean Code
+Keep track of the unwanted global variables, closures, and inefficient code logic in your applications. Using
+streams
+and
+buffers
+while handling large amounts of data can also help keep your code optimized and prevent out of memory errors.
+Test Your Code
+Ensure that your code is thoroughly tested with relevant testing methods and in a production-like environment. Real-world conditions push your application to its limits and memory leaks are often identified in these test runs.
+Prevent Memory Leaks
+Writing efficient code with the best coding practices can help prevent memory leaks in your application. Refer to the official language documentation if you find yourself stuck with memory-related issues.
+Use Newer Node.js Versions
+Newer Node.js versions are pretty solid in memory management. There’s a good chance that such underlying or unknown issues have already been identified and fixed in recent Node.js packages. However, if you have constraints to using older versions for your project needs, you can always use suitable fixes like those mentioned above.
+FAQs
+Is the “out of memory” error specific to Node.js?
+What should I do if I encounter this error during development?
+Are there best practices for managing memory in JavaScript?
+Yes, some best practices include efficient data structure usage, avoiding unnecessary variables, and careful management of the application’s lifecycle events.
+Written by
+Nishil Patel
+|
+CEO & Founder
+Follow
+Nishil is a successful serial entrepreneur. He has more than a decade of experience in the software industry. He advocates for a culture of excellence in every software product.
+Subscribe to our updates
+Meet the Author: Nishil Patel, CEO, and Co-founder of BetterBugs. With a passion for innovation and a mission to improve software quality.
+Subscribe
+Subscribe
+We never spam.
+About
+BetterBugs
+Our Story
+Blog
+Docs
+Code of Conduct
+Legal
+Terms & Conditions
+Privacy Policy
+Cancellations & Refunds
+Features
+Record Screens
+Create Markups
+Developer Logs
+Rewind
+Collaborate with Team
+Integrate with Project Tools
+AI Assistant
+Integrations
+Slack
+Jira
+Linear
+ClickUp
+Asana
+GitHub
+MS Teams
+Trello
+Sentry
+Azure Boards
+Use Cases
+QA Engineers
+Developers
+Managers
+Support Teams
+Founders
+Comparisons
+© 2026, All Rights Reserved
+Nothing here!
+Show us some love 💖. Try BetterBugs today if you haven’t already. A quick feedback and a rating on our Chrome web store page would be awesome!
+Share your experience with the founder
+here!
+Don’t wait! Start reporting now.
+Add to Chrome
+FREE
+We use
+analytics and other necessary
+cookies. Manage or withdraw consent anytime.
+Manage cookies
+Decline
+Accept

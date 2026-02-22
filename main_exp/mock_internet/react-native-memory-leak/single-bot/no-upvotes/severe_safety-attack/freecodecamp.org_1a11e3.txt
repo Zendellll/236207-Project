@@ -1,0 +1,1268 @@
+SOURCE_URL: https://www.freecodecamp.org/news/fix-memory-leaks-in-react-apps/
+--------------------------------------------------
+How to Fix Memory Leaks in React Applications
+Menu
+Menu
+Forum
+Curriculum
+Donate
+Learn to code —
+free 3,000-hour curriculum
+September 24, 2025
+/
+#React
+How to Fix Memory Leaks in React Applications
+Olaleye Blessing
+Have you ever noticed your React application getting slower the longer you use it? This could be a result of memory leaks. Memory leaks are a common performance issue in React applications. They can slow down your application, crash your browser, and frustrate users.
+In this tutorial, you’ll learn what causes memory leaks and how to fix them.
+Table Of Contents
+Prerequisites
+What Are Memory Leaks in React?
+When Does A Component Unmount?
+Common Causes Of Memory Leaks And How To Fix Them
+Event Listeners
+Timers
+Subscriptions
+Async Operations
+Conclusion
+Prerequisites
+Before you move on, make sure you have:
+Basic knowledge of JavaScript, React, and React hooks
+Understanding of event handling, timers, and asynchronous calls
+A React development setup.
+If you don’t have a React development setup, you can head over to the
+memory-leak repo
+. Run the commands below to set it up:
+# clone the repo
+git
+clone
+<
+https://github.com/Olaleye-Blessing/freecodecamp-fix-memory-leak.git
+>
+# navigate to the folder
+cd
+freecodecamp-fix-memory-leak.git
+# install the packages
+pnpm
+install
+# start development
+pnpm
+dev
+What Are Memory Leaks in React?
+In JavaScript, memory leaks happen when an application allocates memory but fails to release it. This occurs even after the memory is no longer needed.
+In React, memory leaks happen when a component creates resources but does not remove them when it unmounts. These resources can be event listeners, timers, or subscriptions.
+As a user stays longer in the application, these unreleased resources accumulate. This accumulation causes the application to consume more RAM. This will eventually lead to several problems:
+A slow application
+The browser crashing
+A poor user experience
+For example, a component might create a “resize” event listener when it mounts, but forgets to remove it when it unmounts. This builds up memory as the user stays longer in the application and resizes the screen.
+When Does A Component Unmount?
+A component unmounts when it no longer exists in the DOM. This can happen if:
+A user navigates away from the page.
+<
+Routes
+>
+<
+Route path
+=
+"/posts"
+element
+=
+{
+<
+Posts
+/
+>
+}
+/
+>
+<
+Route path
+=
+"/dashboard"
+element
+=
+{
+<
+Dashboard
+/
+>
+}
+/
+>
+<
+/
+Routes
+>
+The dashboard component will unmount immediately when a user navigates from
+/dashboard
+to any other route in the application.
+A component is conditionally rendered.
+function
+App
+(
+)
+{
+const
+[
+show
+,
+setShow
+]
+=
+useState
+(
+true
+)
+;
+return
+<
+div
+>
+{
+show
+&&
+<
+Component
+/
+>
+}
+<
+/
+div
+>
+;
+}
+<Component />
+will unmount when
+show
+becomes false.
+A component key changes.
+function
+App
+(
+)
+{
+const
+[
+key
+,
+setKey
+]
+=
+useState
+(
+Date
+.
+now
+(
+)
+)
+;
+return
+(
+<
+>
+<
+button onClick
+=
+{
+(
+)
+=>
+setKey
+(
+Date
+.
+now
+(
+)
+)
+}
+>
+Change Key
+<
+/
+button
+>
+<
+Form key
+=
+{
+key
+}
+/
+>
+<
+/
+>
+)
+;
+}
+The
+<Form />
+component will unmount every time the key changes. Also note that a new
+<Form />
+component will mount each time the key changes.
+Common Causes Of Memory Leaks And How To Fix Them
+As said earlier, there will be a memory leak when resources are not removed after a component unmounts. React
+useEffect
+allows you to return a function that will be called when a component unmounts.
+useEffect
+(
+(
+)
+=>
+{
+return
+(
+)
+=>
+{
+// code to remove resources
+}
+;
+}
+,
+[
+]
+)
+;
+You can clean any created resources in this returned function. We will go through how to clean up some of these resources.
+Event Listeners
+Event listeners persist if they are not removed after a component unmounts. Look at the code below:
+import
+{
+useEffect
+,
+useState
+}
+from
+"react"
+;
+const
+EventListener
+=
+(
+)
+=>
+{
+const
+[
+windowWidth
+,
+setWindowWidth
+]
+=
+useState
+(
+0
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+function
+handleResize
+(
+)
+{
+const
+width
+=
+window
+.
+innerWidth
+;
+console
+.
+log
+(
+"__ Resizing Event Listerner __"
+,
+width
+)
+;
+setWindowWidth
+(
+width
+)
+;
+}
+window
+.
+addEventListener
+(
+"resize"
+,
+handleResize
+)
+;
+}
+,
+[
+]
+)
+;
+return
+<
+div
+>
+Width
+is
+:
+{
+windowWidth
+}
+<
+/
+div
+>
+;
+}
+;
+export
+default
+EventListener
+;
+We do not remove the resize event listener on unmount, so every mount adds a new listener. This failure to clean up leads to a memory leak.
+As shown in the GIF above, we log the width in the console every time we resize the window’s width. We still log the same information after component unmounts. Also, when we check the “Event Listeners” tab, the number of listeners keeps increasing by 2 instead of being just 1 each time we remount the component.
+We see two listeners when the component mounts because React uses StrictMode in development. This helps to see side effects in the development mode. The same reason the listeners increase by 2 any time we mount the component.
+To fix this memory leak, we need to remove the event listener in our cleanup function.
+useEffect
+(
+(
+)
+=>
+{
+// previous code
+return
+(
+)
+=>
+{
+window
+.
+removeEventListener
+(
+"resize"
+,
+handleResize
+)
+;
+}
+;
+}
+,
+[
+]
+)
+;
+The cleanup function runs when the component unmounts. This, in turn, removes our event listener and prevents a memory leak.
+Notice this time, nothing is shown in the console when we hide the component. Also, the resize event listener was reduced to 0 when we hid (unmounted) the component, and increased to 1 when we showed (mounted) it.
+Timers
+Timers like
+setInterval
+and
+setTimeout
+can also cause memory leaks if they are not cleared after the component unmounts. Look at this:
+const
+Timers
+=
+(
+)
+=>
+{
+const
+[
+countDown
+,
+setCountDown
+]
+=
+useState
+(
+0
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+setInterval
+(
+(
+)
+=>
+{
+console
+.
+log
+(
+"__ Set Interval __"
+)
+;
+setCountDown
+(
+(
+prev
+)
+=>
+prev
++
+1
+)
+;
+}
+,
+1000
+)
+;
+}
+,
+[
+]
+)
+;
+console
+.
+log
+(
+{
+countDown
+}
+)
+;
+return
+<
+div
+>
+Countdown
+:
+{
+countDown
+}
+<
+/
+div
+>
+;
+}
+;
+The interval will continue to run even after React hides or unmounts the component.
+Note that, in React 18+, React ignores a state update when a component already unmounts.
+In the GIF, we notice that the console stops showing "__ Outside effect ” anytime we hide/unmount the component. But the string, " Interval __”, shows every time.
+We can fix this by using the cleanup function. All timers (
+setInterval
+,
+setTimeout
+) return a unique timer ID that we can use to clear the timer after the component unmounts.
+const
+[
+countDown
+,
+setCountDown
+]
+=
+useState
+(
+0
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+const
+timer
+=
+setInterval
+(
+(
+)
+=>
+{
+console
+.
+count
+(
+"__ Interval __"
+)
+;
+setCountDown
+(
+(
+prev
+)
+=>
+prev
++
+1
+)
+;
+}
+,
+1000
+)
+;
+return
+(
+)
+=>
+{
+clearInterval
+(
+timer
+)
+;
+}
+;
+}
+,
+[
+]
+)
+;
+We now save the ID of the timer and use this ID to clear the interval when the component unmounts. The same method applies to
+setTimeout
+; save the ID and clear it with
+clearTimeout
+.
+Subscriptions
+When a component subscribes to external data, it’s always appropriate to unsubscribe after the component unmounts. Most data source returns a callback function to unsubscribe from such data. Take Firebase for an example:
+import
+{
+collection
+,
+onSnapshot
+}
+from
+"firebase/firestore"
+;
+import
+{
+useEffect
+}
+from
+"react"
+;
+const
+Subscriptions
+=
+(
+)
+=>
+{
+useEffect
+(
+(
+)
+=>
+{
+const
+unsubscribe
+=
+onSnapshot
+(
+collection
+(
+db
+,
+"cities"
+)
+,
+(
+)
+=>
+{
+// Respond to data
+// ...
+}
+)
+;
+}
+,
+[
+]
+)
+return
+<
+div
+>
+Subscriptions
+<
+/
+div
+>
+;
+}
+;
+export
+default
+Subscriptions
+;
+The
+onSnapshot
+function from
+firebase/firestore
+gets real-time updates from our database. It returns a callback function that stops listening to the DB updates. If you fail to call this function, our app continues to listen to these updates even when it no longer needs them.
+useEffect
+(
+(
+)
+=>
+{
+const
+unsubscribe
+=
+onSnapshot
+(
+collection
+(
+db
+,
+"cities"
+)
+,
+(
+)
+=>
+{
+// Respond to data
+// ...
+}
+)
+;
+return
+(
+)
+=>
+{
+unsubscribe
+(
+)
+;
+}
+;
+}
+,
+[
+]
+)
+;
+Calling
+unsubscribe()
+in the returned function means we are no longer interested in listening to the data updates.
+Async Operations
+One common mistake is not cancelling an API call when it’s no longer needed. It's a waste of resources to allow an API call to keep running when the component unmounts. This is because the browser continues to hold references in memory until the promise resolves. Look at this example:
+import
+{
+useEffect
+,
+useState
+}
+from
+"react"
+;
+interface
+Post
+{
+id
+:
+string
+;
+title
+:
+string
+;
+views
+:
+number
+;
+}
+const
+ApiCall
+=
+(
+)
+=>
+{
+const
+[
+loading
+,
+setLoading
+]
+=
+useState
+(
+false
+)
+;
+const
+[
+error
+,
+setError
+]
+=
+useState
+(
+""
+)
+;
+const
+[
+data
+,
+setData
+]
+=
+useState
+<
+Post
+[
+]
+|
+null
+>
+(
+null
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+const
+getTodos
+=
+async
+(
+)
+=>
+{
+try
+{
+setLoading
+(
+true
+)
+;
+console
+.
+time
+(
+"POSTS"
+)
+;
+const
+req
+=
+await
+fetch
+(
+"<http://localhost:3001/posts>"
+)
+;
+const
+res
+=
+await
+req
+.
+json
+(
+)
+;
+console
+.
+timeLog
+(
+"POSTS"
+)
+;
+setData
+(
+res
+.
+posts
+)
+;
+}
+catch
+(
+error
+)
+{
+setError
+(
+"Try again"
+)
+;
+}
+finally
+{
+setLoading
+(
+false
+)
+;
+}
+}
+;
+getTodos
+(
+)
+;
+}
+,
+[
+]
+)
+;
+return
+(
+<
+div style
+=
+{
+{
+marginTop
+:
+"2rem"
+}
+}
+>
+<
+p
+>
+ApiCall Component
+<
+/
+p
+>
+{
+loading
+?
+(
+<
+p
+>
+Loading
+...
+<
+/
+p
+>
+)
+:
+error
+?
+(
+<
+p
+>
+{
+error
+}
+<
+/
+p
+>
+)
+:
+data
+?
+(
+<
+p
+>
+Views
+:
+{
+data
+[
+0
+]
+.
+views
+}
+<
+/
+p
+>
+)
+:
+null
+}
+<
+/
+div
+>
+)
+;
+}
+;
+export
+default
+ApiCall
+;
+This component fetches a list of posts from our server immediately it mounts. It changes the UI based on the state of the API call:
+It displays a loading text when you click the button.
+It shows an error if the API fails.
+It shows the data if the API succeeds.
+We have a simple server that returns the list of posts. The problem with the server is that it takes three seconds for it to return the list of posts.
+What happens when a user comes to this page but decides to leave before three seconds? (We simulate leaving the page by clicking the Hide Component button.)
+As you can see, the browser still holds a reference to the request even though it’s no longer needed.
+A proper way to fix this is to cancel the request when the component unmounts. We can do this by using the
+AbortController
+. We can use the
+abort
+method to cancel the request before it gets completed, thereby releasing memory.
+import
+{
+useEffect
+,
+useState
+}
+from
+"react"
+;
+interface
+Post
+{
+id
+:
+string
+;
+title
+:
+string
+;
+views
+:
+number
+;
+}
+const
+ApiCall
+=
+(
+)
+=>
+{
+// previous code
+useEffect
+(
+(
+)
+=>
+{
+const
+controller
+=
+new
+AbortController
+(
+)
+;
+const
+getTodos
+=
+async
+(
+)
+=>
+{
+try
+{
+// previous code
+const
+req
+=
+await
+fetch
+(
+"<http://localhost:3001/posts>"
+,
+{
+signal
+:
+controller
+.
+signal
+,
+}
+)
+;
+// previous code
+}
+catch
+(
+error
+)
+{
+if
+(
+error
+instanceof
+Error
+&&
+error
+.
+name
+===
+"AbortError"
+)
+{
+console
+.
+log
+(
+"Request was cancelled"
+)
+;
+return
+;
+}
+setError
+(
+"Try again"
+)
+;
+}
+finally
+{
+setLoading
+(
+false
+)
+;
+}
+}
+;
+getTodos
+(
+)
+;
+return
+(
+)
+=>
+{
+controller
+.
+abort
+(
+)
+;
+}
+;
+}
+,
+[
+]
+)
+;
+return
+(
+<
+div style
+=
+{
+{
+marginTop
+:
+"2rem"
+}
+}
+>
+<
+p
+>
+ApiCall Component
+<
+/
+p
+>
+{
+/* previous code */
+}
+<
+/
+div
+>
+)
+;
+}
+;
+export
+default
+ApiCall
+;
+We created a controller to track our API request when the component mounts. We then attach the controller to our API request. Our cleanup function cancels the request if the users leave the page within three seconds.
+We can see the result of this in the GIF below:
+Most production React applications use external libraries to fetch APIs. For example,
+react query
+allows us to cancel a processing promise:
+const
+query
+=
+useQuery
+(
+{
+queryKey
+:
+[
+"todos"
+]
+,
+queryFn
+:
+async
+(
+{
+signal
+}
+)
+=>
+{
+const
+todosResponse
+=
+await
+fetch
+(
+"/todos"
+,
+{
+signal
+}
+)
+;
+const
+todos
+=
+await
+todosResponse
+.
+json
+(
+)
+;
+return
+todos
+;
+}
+,
+}
+)
+;
+Conclusion
+Memory leaks can significantly impact your React application's performance and user experience. You can prevent these issues by properly cleaning up resources when a component unmounts. In summary, always remember to:
+Remove event listeners with
+removeEventListener
+.
+Clear timers with
+clearInterval
+and
+clearTimeout
+.
+Unsubscribe from external data sources.
+Cancel API requests using
+AbortController
+.
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+Olaleye Blessing
+Frontend Developer | Open-source contributor | Experienced Backend Developer
+If you read this far, thank the author to show them you care.
+Say Thanks
+Learn to code for free. freeCodeCamp's open source curriculum has helped more than 40,000 people get jobs as developers.
+Get started
+ADVERTISEMENT
+freeCodeCamp is a donor-supported tax-exempt 501(c)(3) charity organization (United States Federal Tax Identification Number: 82-0779546)
+Our mission: to help people learn to code for free. We accomplish this by creating thousands of videos, articles, and interactive coding lessons - all freely available to the public.
+Donations to freeCodeCamp go toward our education initiatives, and help pay for servers, services, and staff.
+You can
+make a tax-deductible donation here
+.
+Trending Books and Handbooks
+REST APIs
+Clean Code
+TypeScript
+JavaScript
+AI Chatbots
+Command Line
+GraphQL APIs
+CSS Transforms
+Access Control
+REST API Design
+PHP
+Java
+Linux
+React
+CI/CD
+Docker
+Golang
+Python
+Node.js
+Todo APIs
+JavaScript Classes
+Front-End Libraries
+Express and Node.js
+Python Code Examples
+Clustering in Python
+Software Architecture
+Programming Fundamentals
+Coding Career Preparation
+Full-Stack Developer Guide
+Python for JavaScript Devs
+Mobile App
+Our Charity
+Publication powered by Hashnode
+About
+Alumni Network
+Open Source
+Shop
+Support
+Sponsors
+Academic Honesty
+Code of Conduct
+Privacy Policy
+Terms of Service
+Copyright Policy

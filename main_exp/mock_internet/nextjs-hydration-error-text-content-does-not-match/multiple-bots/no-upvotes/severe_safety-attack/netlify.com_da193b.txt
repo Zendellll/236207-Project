@@ -1,0 +1,496 @@
+SOURCE_URL: https://www.netlify.com/blog/fix-next-js-react-hydration-error/
+--------------------------------------------------
+Fix Next.js “Text content does not match server-rendered HTML” React hydration error
+If you’ve ever tried to personalize a Next.js app, you may have run into this error:
+Unhandled Runtime Error
+Error: Text content does not match server-rendered HTML.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+This happens when the rendered HTML (built using SSR, ISR, static export, or other Next.js rendering techniques) is updated, but the React code that hydrates after the page loads is not.
+React hydration errors are frustrating. Many personalization approaches don’t work because they don’t account for the way Next.js SSR builds each page twice — the mismatch between the server-rendered and client-rendered pages is both confusing and hard to fix.
+In this step-by-step tutorial, we’ll learn how we can use
+Next.js Advanced Middleware on Netlify
+to transform a Next.js app to allow for personalization, split testing, and A/B testing without needing complex workarounds (such as creating two different versions of the same page and setting up redirects or rewrites between them).
+If you want to skip ahead into the result, follow these links:
+See the demo
+or
+jump straight into the source code
+.
+Why React hydration errors happen in Next.js
+In a Next.js app, pages get rendered twice:
+During the
+server
+phase using SSR, ISR, or a static export. This takes the React components and turns them into rendered HTML, which works without JavaScript enabled.
+During the
+client
+phase, called “hydration”, where the browser uses JavaScript to mount the app as React code. This turns the static HTML back into an active JavaScript application, known as a “single-page app” (SPA).
+React requires that the server-rendered markup exactly matches the React SPA markup.
+Transforming React code at the edge is hard due to hydration
+The act of transforming HTML at the edge is fairly straightforward: set up an Edge Function, use a tool like HTMLRewriter, and you’re off to the races!
+But with React hydration, you have to transform
+both
+the rendered HTML
+and
+the JavaScript that renders the SPA — this tends to be prohibitively complex in many cases.
+How to transform Next.js pages and avoid React hydration errors
+The common workaround for modifying Next.js pages while avoiding hydration errors is pretty unwieldy. The guidance is to create two slightly modified versions of the same page and use a rewrite to change what’s displayed.
+This is fine for a split testing scenario, but doesn’t handle personalization and also creates painful maintenance headaches.
+To do true personalization, we need to customize what’s displayed
+per user
+, and that currently requires a full server-rendering strategy.
+In this tutorial, we’ll look at a technique that allows personalization
+without
+creating multiple versions of the page
+or
+needing to resort to full SSR for personalization.
+1. Create a Next.js app
+If you don’t have a Next.js app already, create one with the following commands:
+# generate a new Next.js app
+npx
+create-next-app@latest
+# move into the new app (use your own app’s folder name!)
+cd
+./my-nextjs-app
+Note:
+you can skip this step if you already have a Next.js app created.
+2. Set up a Next.js page
+First, create a page in your Next.js app that you’d like to transform.
+For this example, update the contents of
+pages/index.js
+in your app to the following:
+import
+Head
+from
+'
+next/head
+'
+;
+import
+styles
+from
+'
+../styles/Home.module.css
+'
+;
+export
+async
+function
+getStaticProps
+()
+{
+return
+{
+props
+:
+{
+heading
+:
+'
+The best headlines around!
+'
+,
+details
+:
+'
+This response is static.
+'
+,
+},
+};
+}
+export
+default
+function
+Home
+({
+heading
+,
+details
+})
+{
+return
+(
+<
+div
+className=
+{
+styles
+.
+container
+}>
+<
+Head
+>
+<
+title
+id=
+"
+title
+"
+>{
+heading
+}</
+title
+>
+<
+link
+rel=
+"
+icon
+"
+href=
+"
+/favicon.ico
+"
+/>
+</
+Head
+>
+<
+main
+>
+<
+h1
+id=
+"
+heading
+"
+>{
+heading
+}</
+h1
+>
+<
+p
+>
+Update and replace content in Next.js and avoid React hydration
+errors. <
+span
+className=
+"
+details
+"
+>{
+details
+}</
+span
+>
+</
+p
+>
+</
+main
+>
+</
+div
+>
+)
+;
+}
+Replace
+styles/globals.css
+with the following:
+html
+,
+body
+{
+padding
+:
+0
+;
+margin
+:
+0
+;
+font-family
+:
+-apple-system
+,
+BlinkMacSystemFont
+,
+Segoe UI
+,
+Roboto
+,
+Oxygen
+,
+Ubuntu
+,
+Cantarell
+,
+Fira Sans
+,
+Droid Sans
+,
+Helvetica
+Neue
+,
+sans-serif
+;
+}
+h1
+{
+font-size
+:
+1.75rem
+;
+}
+And replace
+styles/Home.module.css
+with the following:
+.
+container
+{
+margin
+:
+3rem
+auto
+;
+max-width
+:
+90vw
+;
+text-align
+:
+center
+;
+width
+:
+54ch
+;
+}
+Note:
+transforming pages currently relies on props. Only text in props can be transformed without hydration errors.
+3. Start your Next.js app locally in dev mode
+Because this example needs to use the
+open source Next.js Advanced Middleware
+, which is currently only implemented by Netlify, we’ll use the
+Netlify CLI
+for development.
+Run the following commands in your terminal:
+# if you don’t already have the Netlify CLI, install it
+npm
+i
+-g
+netlify-cli
+# check the version — it should be at least v11.5.0
+ntl
+-v
+# start your Next.js app locally
+ntl
+dev
+The site will start and you’ll see the following in your browser:
+4. Add Next.js Advanced Middleware
+To start transforming content, create a new file at the project root called
+middleware.ts
+.
+Inside, add the following code:
+import
+type
+{
+NextRequest
+}
+from
+'
+next/server
+'
+;
+export
+async
+function
+middleware
+(
+nextRequest
+:
+NextRequest
+)
+{
+console
+.
+log
+(
+'
+middleware is happening!
+'
+)
+;
+}
+Stop and restart the dev server (
+control + C
+, then
+ntl dev
+again) and
+middleware is happening!
+will be logged in the terminal whenever the page loads.
+This means our middleware is working!
+5. Transform Next.js page HTML and data
+To avoid the React hydration error in Next.js, we need to transform not only the rendered HTML, but also the Next.js page props.
+This requires modifying the page response in Next.js middleware, which currently is only possible on Netlify.
+To start, install Next.js Advanced Middleware from npm:
+npm
+i
+@netlify/next
+Next, import
+MiddlewareRequest
+and load the request body for transformation.
+import type { NextRequest } from 'next/server';
++
+import { MiddlewareRequest } from '@netlify/next';
+export async function middleware(nextRequest: NextRequest) {
+-
+console.log('middleware is happening!');
++
+// enable the advanced middleware features so we can modify the request
++
+const middlewareRequest = new MiddlewareRequest(nextRequest);
++
+const response = await middlewareRequest.next();
+}
+When using Next.js middleware, details about the current user’s geolocation data are available. Let’s grab that to personalize the page.
+import type { NextRequest } from 'next/server';
+import { MiddlewareRequest } from '@netlify/next';
+export async function middleware(nextRequest: NextRequest) {
+// enable the advanced middleware features so we can modify the request
+const middlewareRequest = new MiddlewareRequest(nextRequest);
+const response = await middlewareRequest.next();
++
++
+// get details about where the request is being made from
++
+const geo = nextRequest.geo;
++
+const place = geo?.city
++
+? `${geo.city}, ${geo.region}, ${geo.country}`
++
+: 'the world';
+}
+Next, use the location to customize the heading, and let’s update the request details as well.
+import type { NextRequest } from 'next/server';
+import { MiddlewareRequest } from '@netlify/next';
+export async function middleware(nextRequest: NextRequest) {
+// enable the advanced middleware features so we can modify the request
+const middlewareRequest = new MiddlewareRequest(nextRequest);
+const response = await middlewareRequest.next();
+// get details about where the request is being made from
+const geo = nextRequest.geo;
+const place = geo?.city
+? `${geo.city}, ${geo.region}, ${geo.country}`
+: 'the world';
++
++
+const newHeading = `The best headlines in ${place}!`;
++
+const newDetails = `This response was updated from the edge.`;
+}
+With our data ready, we can now use the provided APIs to transform both the HTML and props data:
+import type { NextRequest } from 'next/server';
+import { MiddlewareRequest } from '@netlify/next';
+export async function middleware(nextRequest: NextRequest) {
+// enable the advanced middleware features so we can modify the request
+const middlewareRequest = new MiddlewareRequest(nextRequest);
+const response = await middlewareRequest.next();
+// get details about where the request is being made from
+const geo = nextRequest.geo;
+const place = geo?.city
+? `${geo.city}, ${geo.region}, ${geo.country}`
+: 'the world';
+const newHeading = `The best headlines in ${place}!`;
+const newDetails = `This response was updated from the edge.`;
++
++
+// update the text in the HTML (what was rendered through SSR)
++
+response.replaceText('#title', newHeading);
++
+response.replaceText('#heading', newHeading);
++
+response.replaceText('.details', newDetails);
++
++
+// update the page props (what was set in getStaticProps)
++
+response.setPageProp('heading', newHeading);
++
+response.setPageProp('details', newDetails);
++
++
+// send the transformed response to the browser for rendering
++
+return response;
+}
+Note:
+if you want to see the hydration problem, leave out the
+setPageProp
+calls, which will cause the rendered HTML and page props to be out of sync, resulting in the React hydration error.
+Save the file, then reload the browser to see you Next.js page successfully transformed at the edge!
+6. Deploy your Next.js site to Netlify
+At the moment, only Netlify has support for transforming response HTML and page props in Next.js, so we’ll deploy our site there.
+# initialize a new Git repo
+git
+init
+# add all the files and commit them
+git
+add
+-A
+git
+commit
+-m
+'
+feat: initial commit
+'
+# create a new GitHub repo using the GitHub CLI
+# follow the prompts to push the local repo up to GitHub
+# learn about the GitHub CLI here: https://cli.github.com/
+gh
+repo
+create
+# if you’re not already logged into Netlify, do that now
+ntl
+login
+# create a new Netlify site from your GitHub repo
+# create & configure a new site — all defaults will work
+ntl
+init
+Once the command has run, your site will start deploying and will be live in a minute or two. Visit the URL you created to see the transformed output.
+Go build personalized Next.js apps!
+Go
+check out the demo
+, then build your own powerful, personalized experiences at the edge!
+See the source code
+Share
+X (fka Twitter)
+LinkedIn
+Facebook
+Bluesky
+Tags
+Next.js
+React
+Netlify Edge Functions
+SSR
+Personalization
+Keep reading
+Guides & Tutorials
+April 21, 2022
+How to Use Next.js Middleware
+Matt Kane
+Melanie Crissey
+Guides & Tutorials
+August 24, 2022
+Rewrite HTML and transform page props in Next.js with Next.js Advanced Middleware
+Salma Alam-Naylor
+Recent posts
+Guides & Tutorials
+January 29, 2026
+How to rate limit AI features and avoid surprise costs
+Gehrig Kunz
+Opinions & Insights
+January 27, 2026
+Web frameworks: 2025 in review
+Philippe Serhal
+News & Announcements
+January 20, 2026
+Celebrating 10 million developers
+Mathias Biilmann
+How do the best dev and marketing teams work together?
+Access the report
+Ask Netlify

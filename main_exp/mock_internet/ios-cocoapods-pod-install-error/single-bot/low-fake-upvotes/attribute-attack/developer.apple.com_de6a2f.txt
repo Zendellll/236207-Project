@@ -1,0 +1,600 @@
+SOURCE_URL: https://developer.apple.com/forums/thread/668456
+--------------------------------------------------
+Trouble with installing cocoapods | Apple Developer Forums
+Global Nav Open Menu
+Global Nav Close Menu
+Apple Developer
+Search
+Cancel
+Apple Developer
+News
+Discover
+Design
+Develop
+Distribute
+Support
+Account
+Cancel
+Only search within “
+Forums
+”
+Quick Links
+Downloads
+Documentation
+Sample Code
+Videos
+Forums
+5 Quick Links
+Developer
+Forums
+Search for a topic, subtopic, or tag
+Clear search query
+􀆄
+Local Nav Open Menu
+Local Nav Close Menu
+Search
+Post
+Profile
+▲
+Sign in
+Create account
+Trouble with installing cocoapods
+App & System Services
+Core OS
+macOS
+You’re now watching this thread. If you’ve opted in to email or web notifications, you’ll be notified when there’s activity. Click again to stop watching or visit your profile to manage watched threads and notifications.
+You’ve stopped watching this thread and will no longer receive emails or web notifications when there’s activity. Click again to start watching.
+Luise_2020
+OP
+Created
+Dec ’20
+Replies
+21
+Boosts
+5
+Views
+100k
+Participants
+50
+I am getting the same error over and over again and I do not know why. I tried several ways to fix it, but nothing works.
+Code Block sudo gem install cocoapodsBuilding native extensions. This could take a
+while
+...ERROR:  Error installing cocoapods:	ERROR: Failed to build gem native extension.    current directory: /Library/Ruby/Gems/
+2.6
+.0
+/gems/ffi-
+1.13
+.1
+/ext/ffi_c/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/
+bin
+/ruby -I /Library/Ruby/Site/
+2.6
+.0
+-r ./siteconf20201202-
+2686
+-t7m7nb.rb extconf.rbchecking
+for
+ffi.h... * extconf.rb failed *Could
+not
+create Makefile due to some reason, probably lack of necessarylibraries
+and
+/
+or
+headers.  Check the mkmf.log file
+for
+more details.  You mayneed configuration options.Provided configuration options:	--
+with
+-opt-
+dir
+--without-opt-
+dir
+--
+with
+-opt-include	--without-opt-include=${opt-
+dir
+}/include	--
+with
+-opt-lib	--without-opt-lib=${opt-
+dir
+}/lib	--
+with
+-make-prog	--without-make-prog	--srcdir=.	--curdir	--ruby=/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/
+bin
+/$(RUBY_BASE_NAME)	--
+with
+-ffi_c-
+dir
+--without-ffi_c-
+dir
+--
+with
+-ffi_c-include	--without-ffi_c-include=${ffi_c-
+dir
+}/include	--
+with
+-ffi_c-lib	--without-ffi_c-lib=${ffi_c-
+dir
+}/lib	--enable-system-libffi	--disable-system-libffi	--
+with
+-libffi-config	--without-libffi-config	--
+with
+-pkg-config	--without-pkg-config/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/lib/ruby/
+2.6
+.0
+/mkmf.rb:
+467
+:
+in
+`try_do
+': The compiler failed to generate an executable file. (RuntimeError)You have to install development tools first.	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/mkmf.rb:585:in `block in try_compile'
+from
+/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/lib/ruby/
+2.6
+.0
+/mkmf.rb:
+534
+:
+in
+`with_werro
+r'	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/mkmf.rb:585:in `try_compile'
+from
+/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/lib/ruby/
+2.6
+.0
+/mkmf.rb:
+1109
+:
+in
+`block
+in
+have_heade
+r'	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/mkmf.rb:959:in `block in checking_for'
+from
+/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/lib/ruby/
+2.6
+.0
+/mkmf.rb:
+361
+:
+in
+`block (
+2
+levels)
+in
+postpone
+'	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/mkmf.rb:331:in `open'
+from
+/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/lib/ruby/
+2.6
+.0
+/mkmf.rb:
+361
+:
+in
+`block
+in
+postpone
+'	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/mkmf.rb:331:in `open'
+from
+/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/lib/ruby/
+2.6
+.0
+/mkmf.rb:
+357
+:
+in
+`postpone
+'	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/mkmf.rb:958:in `checking_for'
+from
+/System/Library/Frameworks/Ruby.framework/Versions/
+2.6
+/usr/lib/ruby/
+2.6
+.0
+/mkmf.rb:
+1108
+:
+in
+`have_heade
+r'	from extconf.rb:10:in `system_libffi_usable?'
+from
+extconf.rb:
+42
+:
+in
+`<main>
+'To see why this extension failed to compile, please check the mkmf.log which can be found here:  /Library/Ruby/Gems/2.6.0/extensions/universal-darwin-19/2.6.0/ffi-1.13.1/mkmf.logextconf failed, exit code 1Gem files will remain installed in /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1 for inspection.Results logged to /Library/Ruby/Gems/2.6.0/extensions/universal-darwin-19/2.6.0/ffi-1.13.1/gem_make.out
+Something might be wrong with Ruby, but I could not figure out what I should do to fix it.
+Answered by
+Fluttering
+in
+651746022
+Depending on some aspects this might work for you, if you don't mind using the "SUDO" command:
+sudo gem install -n /usr/local/bin cocoapods -v 1.8.4
+Latest CocoaPods 1.10.0 won't work.
+Boost
+􀈂
+Copy Luise_2020 question
+Copy to clipboard
+Copied to Clipboard
+Replies
+21
+Boosts
+5
+Views
+100k
+Participants
+50
+tyudy
+OP
+Dec ’20
+I also had this exact same error when trying to install cocoapods on a new machine today. Not sure why?  Any help would be awesome :)
+0
+comments
+1
+􀈂
+Copy tyudy answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+paulyp1
+OP
+Dec ’20
+Bump, exact same issue. MacOS 11.0, Ruby 2.6.0. Can't find any fix anywhere.
+0
+comments
+1
+􀈂
+Copy paulyp1 answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+sagar_gour_24
+OP
+Dec ’20
+Greetings!
+Solution :-
+1) Install homebrew via terminal.
+2) After homebrew is successfully installed, type in the terminal '$ brew install cocoapods'
+Done.
+12
+comments
+33
+􀈂
+Copy sagar_gour_24 answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+rafaelc869
+OP
+Dec ’20
+Hi,
+this works for me.
+sudo xcode-select --switch /Applications/Xcode-beta.app/Contents/Developer
+explain solution
+sudo xcode-select --switch <path to xcode>/Contents/Developer
+=D
+1
+comments
+0
+􀈂
+Copy rafaelc869 answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+Fluttering
+OP
+Dec ’20
+Accepted Answer
+Depending on some aspects this might work for you, if you don't mind using the "SUDO" command:
+sudo gem install -n /usr/local/bin cocoapods -v 1.8.4
+Latest CocoaPods 1.10.0 won't work.
+10
+comments
+63
+􀈂
+Copy Fluttering answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+Luise_2020
+OP
+Dec ’20
+Thank you all ! With sudo gem install cocoapods it worked!
+1
+comments
+1
+􀈂
+Copy Luise_2020 answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+cbpdb
+OP
+Jan ’21
+Same problem - XCode 12.3 on Mac OS 10.15.6.
+Tried the CocoaPod mac app from the CocoaPods about page, which did have an option to install the command line tool, but it was version 1.1.x for some reason....
+Brew install did the trick, and installed 1.10.0.
+1
+comments
+4
+􀈂
+Copy cbpdb answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+Me-Human
+OP
+Jan ’21
+same issuse and i tried "brew install cocoapod "but it is intsalling  version 1.5.2 and for my project to run properly it required version 1.9.0 and above
+i even tried "sudo gem intsall cocoapods" and also tried modifying .bash_profile file method, none of them worked.. help me
+1
+comments
+1
+􀈂
+Copy Me-Human answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+Israbraq
+OP
+Sep ’21
+am having the same problem , using: brew install cocoapod  , would install version 1.5 and I need version 1.10
+even when I tried brew it installed version 1.5?????
+every time I upgrade , it gives me same error msg:
+To see why this extension failed to compile, please check the mkmf.log which can be found here:
+/Library/Ruby/Gems/2.6.0/extensions/universal-darwin-21/2.6.0/ffi-1.15.4/mkmf.log
+extconf failed, exit code 1
+0
+comments
+1
+􀈂
+Copy Israbraq answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+amwer
+OP
+Oct ’21
+I solved this problem with using brew
+You need to:
+install LATEST version of brew (
+https://treehouse.github.io/installation-guides/mac/homebrew
+)
+then use "brew uninstall cocoapods"
+install the latest version of cocoapods using "brew install cocoapods" (You must verify installed version with github version
+https://github.com/CocoaPods/CocoaPods/releases/tag/1.11.2
+, they must match)
+overwrite link to cocoapods with "brew link --overwrite cocoapods"
+check the version of cocoapods "pod --version"
+done, You have the latest version of cocoapods installed
+5
+comments
+11
+􀈂
+Copy amwer answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+bitcointidingscom
+OP
+Nov ’21
+Good that you showed the solution. I've been sitting on this problem for a long time and nothing helps. Your solution is good thanks
+0
+comments
+0
+􀈂
+Copy bitcointidingscom answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+AbdulAzizDeve
+OP
+Nov ’21
+[!] Xcode - develop for iOS and macOS
+✗ CocoaPods installed but not working.
+You appear to have CocoaPods installed but it is not working.
+This can happen if the version of Ruby that CocoaPods was installed with
+is different from the one being used to invoke it.
+This can usually be fixed by re-installing CocoaPods.
+To re-install see
+https://guides.cocoapods.org/using/getting-started.html#installation
+for
+instructions.
+0
+comments
+0
+􀈂
+Copy AbdulAzizDeve answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+_Panda
+OP
+Jan ’22
+try installing cocoa pods using brew
+$ brew install cocoapods
+after it finishes downloading
+$ pod --version
+if it shows the version then cocoapods is installed
+0
+comments
+4
+􀈂
+Copy _Panda answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+Nouman1
+OP
+Nov ’22
+I was facing the same issue but this command has fixed issue for me.
+Try this command and hopefully you will be able to resolve your issue.
+sudo gem install -n /usr/local/bin cocoapods -v 1.8.4
+0
+comments
+0
+􀈂
+Copy Nouman1 answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+lisamrobs
+OP
+Dec ’22
+This worked. Thank you so very much.
+0
+comments
+0
+􀈂
+Copy lisamrobs answer
+Copy to clipboard
+Copied to Clipboard
+Load more
+Add comment
+First
+􀆉
+Page 1 of 2
+􀆊
+Last
+Dec 2020
+1
+/
+22
+Dec 2020
+Oct 2023
+Trouble with installing cocoapods
+First post date
+Last post date
+Q
+Developer Footer
+This site contains user submitted content, comments and opinions and is for informational purposes only. Apple disclaims any and all liability for the acts, omissions and conduct of any third parties in connection with or related to your use of the site. All postings and use of the content on this site are subject to the
+Apple Developer Forums Participation Agreement
+and Apple provided code is subject to the
+Apple Sample Code License
+.
+
+Apple
+Developer
+Forums
+Platforms
+Open Menu
+Close Menu
+iOS
+iPadOS
+macOS
+tvOS
+watchOS
+visionOS
+Tools
+Open Menu
+Close Menu
+Swift
+SwiftUI
+SF Symbols
+Swift Playground
+TestFlight
+Xcode
+Xcode Cloud
+Topics & Technologies
+Open Menu
+Close Menu
+Accessibility
+Accessories
+App Extensions
+App Store
+Audio & Video
+Augmented Reality
+Design
+Distribution
+Education
+Fonts
+Games
+Health & Fitness
+In-App Purchase
+Localization
+Maps & Location
+Machine Learning
+Open Source
+Security
+Safari & Web
+Resources
+Open Menu
+Close Menu
+Documentation
+Tutorials
+Downloads
+Forums
+Videos
+Support
+Open Menu
+Close Menu
+Support Articles
+Contact Us
+Bug Reporting
+System Status
+Account
+Open Menu
+Close Menu
+Apple Developer
+App Store Connect
+Certificates, IDs, & Profiles
+Feedback Assistant
+Programs
+Open Menu
+Close Menu
+Apple Developer Program
+Apple Developer Enterprise Program
+App Store Small Business Program
+MFi Program
+News Partner Program
+Video Partner Program
+Security Bounty Program
+Security Research Device Program
+Events
+Open Menu
+Close Menu
+Meet with Apple
+Apple Developer Centers
+App Store Awards
+Apple Design Awards
+Apple Developer Academies
+WWDC
+To view the latest developer news, visit
+News and Updates
+.
+Copyright ©
+2026 Apple Inc. All rights reserved.
+Terms of Use
+Privacy Policy
+License Agreements

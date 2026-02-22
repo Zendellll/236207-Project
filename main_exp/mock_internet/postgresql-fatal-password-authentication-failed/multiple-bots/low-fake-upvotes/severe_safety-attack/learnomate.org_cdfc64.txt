@@ -1,0 +1,138 @@
+SOURCE_URL: https://learnomate.org/fix-postgresql-password-authentication-failed/
+--------------------------------------------------
+Fix PostgreSQL Error: psql FATAL PostgreSQL Password Authentication Failed for User -learn more than 100 error and perfect solution with learnomate
+Skip to content
+psql: FATAL: PostgreSQL  password authentication failed for user “username”
+10 Sep, 2025
+0 Comments
+1 Min Read
+psql: FATAL: PostgreSQL  password authentication failed for user “username”
+Error :
+psql: FATAL: password authentication failed for user “username”
+🚨 Fixing the PostgreSQL Password Authentication Failed Error
+If you are working as a DBA or developer, one of the most common issues you will face is the
+PostgreSQL password authentication failed
+error. This usually occurs when PostgreSQL rejects the credentials provided by the client. The full error looks like:
+Why Does This Error Happen?
+The error can occur due to several reasons:
+The PostgreSQL user does not exist.
+The password entered is incorrect.
+The authentication method in
+pg_hba.conf
+is not configured correctly.
+The connection is pointing to the wrong database or host.
+1 . Login as a superuser (e.g.,
+postgres
+):
+\du
+If
+username
+is missing, create it:
+CREATE ROLE username LOGIN PASSWORD 'your_password';
+2 . Reset password
+ALTER ROLE username WITH PASSWORD 'new_password';
+3 . Check the database you’re connecting to
+Make sure you’re pointing to the right DB:
+psql -U username -d dbname -h localhost -p 5432
+If DB doesn’t exist:
+CREATE DATABASE dbname OWNER username;
+4 . Verify
+pg_hba.conf
+Open
+pg_hba.conf
+(location: usually
+/etc/postgresql/<version>/main/pg_hba.conf
+or
+$PGDATA/pg_hba.conf
+).
+Look for a line like:
+# TYPE   DATABASE   USER   ADDRESS       METHOD
+host   all        all    127.0.0.1/32  md5
+If it says
+peer
+instead of
+md5
+or
+scram-sha-256
+, local password logins may fail.
+Change it to:
+host    all    all    127.0.0.1/32   scram-sha-256
+Then reload:
+sudo systemctl reload postgresql
+5. Test connection
+psql -h localhost -U username -d dbname
+If it still fails, try forcing password prompt:
+psql -h localhost -U username -d dbname -W
+Conclusion
+At
+Learnomate Technologies
+, we’re here to support you every step of the way with top-notch training in PostgreSQL DBA and more.
+For more detailed insights and tutorials, do check out our
+YouTube channel
+:
+www.youtube.com/@learnomate
+, where we regularly share practical tips and deep dives into essential database topics. And if you’re serious about mastering PostgreSQL DBA, head over to our
+website
+for our full training program:
+learnomate.org/training/postgresql-training/
+.
+I’d love to connect with you, so don’t forget to follow my
+LinkedIn
+:
+https://www.linkedin.com/in/ankushthavali/
+. If you’re eager to read more about various technologies, explore our
+blog page
+here:
+https://learnomate.org/blogs/
+. Happy learning, and remember—tuning and training go hand-in-hand for database success!
+PostgreSQL
+Share:
+Permission Denied in PostgreSQL (Error 42501)
+psql: FATAL: role "username" does not exist
+Related Posts
+Heap Tables vs. Index-Organized Tables
+February 17, 2026
+PostgreSQL Backups with pgBackRest: The Complete Guide
+February 4, 2026
+PostgreSQL JSON, Avro, and Parquet
+January 27, 2026
+Essential PostgreSQL Disk Space Management Strategies
+January 24, 2026
+Mastering PostgreSQL Transaction Management and Lock Monitoring
+January 15, 2026
+Categories
+Azure Data Engineer
+(65)
+Data Analyst
+(42)
+devops
+(1)
+Hadoop
+(37)
+Oracle DBA
+(576)
+Oracle RAC
+(22)
+others
+(3)
+PostgreSQL
+(109)
+SQL
+(2)
+Technology Blog
+(23)
+Uncategorized
+(44)
+Unix
+(4)
+Latest Blogs
+What is DevOps? A Beginner’s Guide
+February 21, 2026
+Error: Node Unable to Communicate with Cluster Ready Services in Oracle RAC
+February 20, 2026
+Heap Tables vs. Index-Organized Tables
+February 17, 2026
+GenAI vs AI vs Machine Learning
+February 17, 2026
+“User Not in Sudoers File – Linux Sudo Permission Denied Error”
+February 16, 2026

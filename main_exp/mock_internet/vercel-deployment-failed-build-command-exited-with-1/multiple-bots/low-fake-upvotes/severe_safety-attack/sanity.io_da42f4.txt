@@ -1,0 +1,147 @@
+SOURCE_URL: https://www.sanity.io/answers/troubleshooting-deployment-of-next-js-app-on-vercel-in-slack-thread
+--------------------------------------------------
+Vercel deployment fails with "npm run build" exit code 1 error
+Exchange
+Answers
+Vercel deployment fails with "npm...
+Get help on Discord
+Vercel deployment fails with "npm run build" exit code 1 error
+3
+replies
+Last updated:
+Nov 29, 2025
+S
+Hi all!
+I was trying to deploy my next js app on Vercel, but facing this error repeatedly :
+Error: Command "npm run build" exited with 1
+What should I look into to resolve this ?
+PS: I tried overriding the build command with
+CI= npm run build
+… got the same error
+AI Update
+The error "Command 'npm run build' exited with 1" is a generic Vercel deployment error that means your build process failed, but it doesn't tell you
+why
+. The exit code 1 just indicates failure. Here's how to troubleshoot and resolve this:
+Step 1: Check Your Full Build Logs
+The most important thing is to look at the
+complete build logs
+in Vercel, not just the final error message. The actual error will appear earlier in the logs:
+Go to your Vercel dashboard
+Click on the failed deployment
+Scroll through the entire build log to find the actual error (usually appears before the "exited with 1" message)
+Common errors you might find include:
+TypeScript type errors
+ESLint errors
+Missing environment variables
+Module not found errors
+API connection issues
+Step 2: Common Sanity + Next.js Issues
+If you're using Sanity with Next.js, here are specific issues to check:
+Missing Environment Variables
+: Make sure you've added all required environment variables in your Vercel project settings:
+NEXT_PUBLIC_SANITY_PROJECT_ID
+NEXT_PUBLIC_SANITY_DATASET
+SANITY_API_TOKEN
+(if using authenticated requests)
+TypeScript Errors
+: If you're getting type errors related to Sanity, ensure your
+@sanity/client
+and other Sanity packages are up to date. There was
+a known issue with TypeScript errors in @sanity/client
+that has been resolved in newer versions.
+Module Not Found
+: If you see errors about missing
+@sanity/cli
+or other modules, this usually means your dependencies aren't properly listed in
+package.json
+. The
+Sanity community has documented this issue
+- make sure all Sanity packages are in
+dependencies
+(not
+devDependencies
+).
+Step 3: Test Locally First
+Before deploying, always run
+npm run build
+locally to catch errors:
+npm
+run build
+This will show you the exact same errors that Vercel encounters, but in your local environment where they're easier to debug.
+Step 4: The CI= Override Won't Help
+The
+CI= npm run build
+command you tried disables treating warnings as errors, but since you're getting a build failure (not warnings), this won't fix your issue. You need to find and fix the actual error in your logs.
+Next Steps
+Look through your complete Vercel build logs and identify the specific error message. If you share that specific error here, the community can provide more targeted help. The "exited with 1" message is just the symptom, not the root cause.
+Show original thread
+3
+replies
+Sanity
+– Build the way you think, not the way your CMS thinks
+Sanity is the developer-first content operating system that gives you complete control. Schema-as-code, GROQ queries, and real-time APIs mean no more workarounds or waiting for deployments. Free to start, scale as you grow.
+Get started for free
+Explore the demo
+Was this
+answer
+helpful?
+Not at all
+Somewhat
+Absolutely!
+I want to suggest an improvement to this
+answer
+.
+Products
+Content operations
+Sanity Studio
+Media Library
+Canvas
+Content Agent
+New
+Content Releases
+Insights
+App SDK
+Content backend
+Content Lake
+Live CDN
+Compute
+Agent Actions
+MCP Server
+New
+The only platform powering content operations
+Start building for free
+Start building for free
+Solutions
+Use Cases
+Headless CMS
+E-commerce
+Marketing
+Media and publishing
+PIM
+LMS
+Build your own
+Users
+Developers
+Content Editors
+Product Owners
+Business Leaders
+Tecovas strengthens their customer connections
+Read the story
+Read the story
+Resources
+Build and Share
+Sanity 101
+Sanity Learn
+Frameworks
+Templates
+Tools and plugins
+Schemas and snippets
+Join our community
+Insight
+Blog
+Events
+Customer stories
+Guides
+Grab your gear: The official Sanity swag store
+Read
+Grab your gear: The official Sanity swag store

@@ -1,0 +1,335 @@
+SOURCE_URL: https://www.geeksforgeeks.org/javascript/how-to-fix-javascript-heap-out-of-memory-error/
+--------------------------------------------------
+How to Fix "JavaScript Heap Out of Memory" Error? - GeeksforGeeks
+Courses
+Tutorials
+Interview Prep
+JS Tutorial
+Web Tutorial
+A to Z Guide
+Projects
+OOP
+DOM
+Set
+Map
+Math
+Number
+Boolean
+Exercise
+How to Fix "JavaScript Heap Out of Memory" Error?
+Last Updated :
+23 Jul, 2025
+We might have encountered an error that says
+"JavaScript heap out of memory"
+while working with JavaScript. This error occurs when our application uses more memory than the default limit set by Node.js. When this error occurs our program crashes and we cannot proceed with our work. In this article, we are going to discuss how we can fix this error in JavaScript.
+Meaning of Error "JavaScript Heap Out of Memory"?
+JavaScript
+runs on a heap, which is an area of memory where objects, variables, and data are stored while your program runs.
+Node.js
+, the environment where JavaScript runs on servers, has a default memory limit of around 1.5 GB. If our program tries to use more memory than this limit, we will get the error "heap out of memory", and our program will crash.
+Common Causes of "Heap Out of Memory" Error
+Large Data Processing:
+If our program is handling huge amounts of data such as reading a large file into memory then, it may exceed the memory limit.
+Inefficient Code:
+If our code has memory leaks or inefficient loops, it can consume more memory than necessary.
+Too Many Variables:
+Sometimes, keeping too many variables or objects in memory at the same time can cause this error.
+Recursive Functions:
+We know recursion is a function where a function keeps calling itself without proper control and can use up memory quickly.
+Below are some common approaches to fix the "JavaScript heap out of memory" error:
+Table of Content
+Increase the Memory Limit
+Optimize Our Code
+Use Streams for Large Data
+Profile Memory Usage
+1. Increase the Memory Limit
+By default, Node.js has a memory limit of about 1.5 GB. If our application needs more memory, we can increase this limit using the --max-old-space-size flag.
+Example:
+To increase the memory limit to 4 GB, we can run your Node.js application like this:
+JavaScript
+// Simple code that uses memory (no output to print)
+let
+largeArray
+=
+[];
+for
+(
+let
+i
+=
+0
+;
+i
+<
+1000000
+;
+i
+++
+)
+{
+largeArray
+.
+push
+(
+i
+);
+}
+console
+.
+log
+(
+'Successfully increased memory limit and processed large array.'
+);
+Run the Command
+node --max-old-space-size=4096 memory_limit.js
+Output:
+Increase the Memory Limit
+2. Optimize Our Code
+Sometimes, the error happens because of inefficient code. Look for places in our code where we can reduce memory usage. This might include avoiding unnecessary variables or using more efficient data structures.
+Example:
+Instead of using an array to store large amounts of data we can use a more memory-efficient structure like a Set or Map.
+JavaScript
+// Using a Set instead of an Array
+let
+largeSet
+=
+new
+Set
+();
+for
+(
+let
+i
+=
+0
+;
+i
+<
+1000000
+;
+i
+++
+)
+{
+largeSet
+.
+add
+(
+i
+);
+}
+console
+.
+log
+(
+'Optimized code using Set instead of Array. Processed large set successfully.'
+);
+Output:
+Optimize Our Code
+3. Use Streams for Large Data
+If we are processing large files or data, using streams can help manage memory better. Streams allow us to read or write data in chunks instead of loading everything into memory at once.
+Example:
+Below is example how we can read a large file using streams
+JavaScript
+const
+fs
+=
+require
+(
+'fs'
+);
+const
+readStream
+=
+fs
+.
+createReadStream
+(
+'large_file.txt'
+);
+readStream
+.
+on
+(
+'data'
+,
+(
+chunk
+)
+=>
+{
+console
+.
+log
+(
+`Received
+${
+chunk
+.
+length
+}
+bytes of data.`
+);
+});
+Output:
+Use Streams for Large Data
+4. Profile Memory Usage
+If we still facing issues, it’s a good idea to profile our memory usage. This helps us to identify memory leaks or parts of your code that are using too much memory.
+Example:
+We can use the built-in Node.js profiler
+JavaScript
+let
+arr
+=
+[];
+for
+(
+let
+i
+=
+0
+;
+i
+<
+100000
+;
+i
+++
+)
+{
+arr
+.
+push
+(
+i
+);
+}
+console
+.
+log
+(
+"Memory profiling demo complete."
+);
+Run the Command
+node --inspect profile_memory.js
+Output
+Profile Memory Usage
+Comment
+Article Tags:
+Article Tags:
+JavaScript
+Web Technologies
+Explore
+JavaScript Basics
+Introduction to JavaScript
+4
+min read
+Variables and Datatypes in JavaScript
+6
+min read
+JavaScript Operators
+5
+min read
+Control Statements in JavaScript
+4
+min read
+Array & String
+JavaScript Arrays
+7
+min read
+JavaScript Array Methods
+7
+min read
+JavaScript Strings
+5
+min read
+JavaScript String Methods
+9
+min read
+Function & Object
+Functions in JavaScript
+4
+min read
+JavaScript Function Expression
+3
+min read
+Function Overloading in JavaScript
+4
+min read
+Objects in JavaScript
+4
+min read
+JavaScript Object Constructors
+4
+min read
+OOP
+Object Oriented Programming in JavaScript
+3
+min read
+Classes and Objects in JavaScript
+4
+min read
+What Are Access Modifiers In JavaScript ?
+5
+min read
+JavaScript Constructor Method
+7
+min read
+Asynchronous JavaScript
+Asynchronous JavaScript
+2
+min read
+JavaScript Callbacks
+4
+min read
+JavaScript Promise
+4
+min read
+Event Loop in JavaScript
+4
+min read
+Async and Await in JavaScript
+3
+min read
+Exception Handling
+Javascript Error and Exceptional Handling
+6
+min read
+JavaScript Errors Throw and Try to Catch
+2
+min read
+How to create custom errors in JavaScript ?
+2
+min read
+JavaScript TypeError - Invalid Array.prototype.sort argument
+1
+min read
+DOM
+HTML DOM (Document Object Model)
+8
+min read
+How to select DOM Elements in JavaScript ?
+3
+min read
+JavaScript Custom Events
+4
+min read
+JavaScript addEventListener() with Examples
+9
+min read
+Advanced Topics
+Closure in JavaScript
+4
+min read
+JavaScript Hoisting
+6
+min read
+Scope of Variables in JavaScript
+3
+min read
+JavaScript Higher Order Functions
+7
+min read
+Debugging in JavaScript
+4
+min read

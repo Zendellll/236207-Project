@@ -1,0 +1,611 @@
+SOURCE_URL: https://community.vercel.com/t/command-npm-run-build-exited-with-1/5407
+--------------------------------------------------
+Command "npm run build" exited with 1 - Help - Vercel Community
+Skip to last reply
+Skip to top
+Skip to main content
+Sign Up
+Sign In
+​
+Categories
+Leaderboard
+Code of Conduct
+Handbook
+More
+Enterprise
+Enterprise
+Partners
+Partners
+Community Area
+Announcements
+Events
+Showcase
+Discussions
+Help
+Open Source
+v0
+v0 Chat
+Turborepo Chat
+AI SDK Chat
+All categories
+Categories
+v0
+Help
+Showcase
+Announcements
+Events
+All categories
+Tags
+v0
+nextjs
+domains
+react
+account
+All tags
+​
+​
+Command “npm run build” exited with 1
+Help
+nextjs
+You have selected
+0
+posts.
+select all
+cancel selecting
+1.4k
+views
+7
+likes
+1
+link
+6
+2
+read
+5
+min
+Feb 2025
+1 / 11
+Feb 2025
+Feb 2025
+post by artemnikolenkojohnst on Feb 5, 2025
+artxjns
+artemnikolenkojohnst
+1
+Feb 2025
+Problem
+next build
+fails without throwing any reasonable errors. Local build finishes successfully
+Node:
+20 / 22
+NextJS
+: 15.1.6
+Similar issues
+Vercel build fails after passing linting checks, but it works locally
+Help
+Hello all,
+We’ve been working on upgrading our monorepo project, which uses Turborepo, Next.js, and React, to the latest versions. We’ve followed each upgrade guide carefully and migrated everything accordingly.
+Both next build and development (next dev) are working perfectly when run locally in each of our monorepos. However, the problem arises when we try to build the project on Vercel.
+Here’s what we’ve tried so far to resolve the issue:
+Moved react, react-dom, and their respective types…
+stackoverflow.com
+Cannot deploy Next.js app on Vercel: "Command 'npm run build' exited with 1" error
+next.js, vercel
+asked by
+badAtCoding
+on
+05:50PM - 19 Jan 25 UTC
+Unlike this stackoverflow reference
+build
+script was always set to
+next build
+in ours project
+What has been done already
+Node version switch from 22 to 20 and vice versa
+strict: false
+typescript: { ignoreBuildErrors: true }
+eslint: { ignoreDuringBuilds: true }
+Deploy / Build Logs
+[16:26:21.131] Running build in Washington, D.C., USA (East) – iad1
+[16:26:21.268] Cloning <PROJECT_NAME> (Branch: develop, Commit: e256631)
+[16:26:22.260] Previous build caches not available
+[16:26:22.296] Cloning completed: 1.030s
+[16:26:22.607] Running "vercel build"
+[16:26:22.989] Vercel CLI 40.1.0
+[16:26:23.397] Installing dependencies...
+[16:26:40.207]
+[16:26:40.208] added 504 packages in 17s
+[16:26:40.209]
+[16:26:40.209] 161 packages are looking for funding
+[16:26:40.209]   run `npm fund` for details
+[16:26:40.227] Detected Next.js version: 15.1.6
+[16:26:40.256] Running "npm run build"
+[16:26:40.410]
+[16:26:40.410] > <PROJECT_NAME>@0.1.0 build
+[16:26:40.411] > next build
+[16:26:40.411]
+[16:26:41.138] Attention: Next.js now collects completely anonymous telemetry regarding usage.
+[16:26:41.139] This information is used to shape Next.js' roadmap and prioritize features.
+[16:26:41.139] You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+[16:26:41.139] https://nextjs.org/telemetry
+[16:26:41.139]
+[16:26:41.192]    ▲ Next.js 15.1.6
+[16:26:41.193]
+[16:26:41.268]    Creating an optimized production build ...
+[16:27:14.871]  ✓ Compiled successfully
+[16:27:14.877]    Linting and checking validity of types ...
+[16:27:15.009] Error: Command "npm run build" exited with 1
+[16:27:15.325]
+Configuration
+/* package.json */
+{
+"name"
+:
+"<PROJECT_NAME>"
+,
+"version"
+:
+"0.1.0"
+,
+"private"
+:
+true
+,
+"scripts"
+:
+{
+"dev"
+:
+"next dev"
+,
+"build"
+:
+"next build"
+,
+"start"
+:
+"next start"
+,
+"lint"
+:
+"next lint"
+}
+,
+"dependencies"
+:
+{
+"@apollo/client"
+:
+"^3.12.9"
+,
+"@hookform/resolvers"
+:
+"^3.10.0"
+,
+"@radix-ui/react-checkbox"
+:
+"^1.1.3"
+,
+"@radix-ui/react-collapsible"
+:
+"^1.1.2"
+,
+"@radix-ui/react-dialog"
+:
+"^1.1.5"
+,
+"@radix-ui/react-dropdown-menu"
+:
+"^2.1.5"
+,
+"@radix-ui/react-hover-card"
+:
+"^1.1.5"
+,
+"@radix-ui/react-icons"
+:
+"^1.3.2"
+,
+"@radix-ui/react-label"
+:
+"^2.1.1"
+,
+"@radix-ui/react-popover"
+:
+"^1.1.5"
+,
+"@radix-ui/react-scroll-area"
+:
+"^1.2.2"
+,
+"@radix-ui/react-select"
+:
+"^2.1.5"
+,
+"@radix-ui/react-separator"
+:
+"^1.1.1"
+,
+"@radix-ui/react-slot"
+:
+"^1.1.1"
+,
+"@radix-ui/react-toggle"
+:
+"^1.1.1"
+,
+"@radix-ui/react-toggle-group"
+:
+"^1.1.1"
+,
+"@radix-ui/react-tooltip"
+:
+"^1.1.7"
+,
+"@tanstack/react-table"
+:
+"^8.20.6"
+,
+"@types/lodash"
+:
+"^4.17.15"
+,
+"class-variance-authority"
+:
+"^0.7.1"
+,
+"clsx"
+:
+"^2.1.1"
+,
+"cmdk"
+:
+"^1.0.4"
+,
+"date-fns"
+:
+"^3.6.0"
+,
+"graphql"
+:
+"^16.10.0"
+,
+"jwt-decode"
+:
+"^4.0.0"
+,
+"lodash"
+:
+"^4.17.21"
+,
+"lucide-react"
+:
+"^0.474.0"
+,
+"next"
+:
+"15.1.6"
+,
+"next-themes"
+:
+"^0.4.4"
+,
+"react"
+:
+"19.0.0"
+,
+"react-day-picker"
+:
+"^8.10.1"
+,
+"react-dom"
+:
+"19.0.0"
+,
+"react-hook-form"
+:
+"^7.54.2"
+,
+"react-pdf"
+:
+"^9.2.1"
+,
+"sonner"
+:
+"^1.7.4"
+,
+"tailwind-merge"
+:
+"^2.6.0"
+,
+"tailwindcss-animate"
+:
+"^1.0.7"
+,
+"zod"
+:
+"^3.24.1"
+,
+"zustand"
+:
+"^5.0.3"
+}
+,
+"devDependencies"
+:
+{
+"@types/node"
+:
+"^22"
+,
+"@types/react"
+:
+"npm:types-react@19.0.0-alpha.3"
+,
+"@types/react-dom"
+:
+"npm:types-react-dom@19.0.0-alpha.3"
+,
+"eslint"
+:
+"^9"
+,
+"eslint-config-next"
+:
+"15.1.6"
+,
+"postcss"
+:
+"^8"
+,
+"tailwindcss"
+:
+"^3.4.17"
+,
+"typescript"
+:
+"^5.7.3"
+}
+,
+"overrides"
+:
+{
+"@types/react"
+:
+"npm:types-react@19.0.0-alpha.3"
+,
+"@types/react-dom"
+:
+"npm:types-react-dom@19.0.0-alpha.3"
+,
+"react-day-picker"
+:
+{
+"react"
+:
+"19.0.0"
+}
+}
+}
+/* next.config.mjs */
+/** @type {import('next').NextConfig} */
+const
+nextConfig = {
+};
+export
+default
+nextConfig;
+/* tsconfig.json */
+{
+"compilerOptions"
+:
+{
+"lib"
+:
+[
+"dom"
+,
+"dom.iterable"
+,
+"esnext"
+]
+,
+"allowJs"
+:
+true
+,
+"skipLibCheck"
+:
+true
+,
+"strict"
+:
+false
+,
+"noEmit"
+:
+true
+,
+"esModuleInterop"
+:
+true
+,
+"module"
+:
+"esnext"
+,
+"moduleResolution"
+:
+"bundler"
+,
+"resolveJsonModule"
+:
+true
+,
+"isolatedModules"
+:
+true
+,
+"jsx"
+:
+"preserve"
+,
+"incremental"
+:
+true
+,
+"plugins"
+:
+[
+{
+"name"
+:
+"next"
+}
+]
+,
+"baseUrl"
+:
+"."
+,
+"paths"
+:
+{
+"@/*"
+:
+[
+"./*"
+]
+}
+,
+"target"
+:
+"ES2017"
+}
+,
+"include"
+:
+[
+"next-env.d.ts"
+,
+"**/*.ts"
+,
+"**/*.tsx"
+,
+".next/types/**/*.ts"
+]
+,
+"exclude"
+:
+[
+"node_modules"
+]
+}
+Solved by
+Zack Tanner
+in
+post 9
+​
+​
+Hi
+@artemnikolenkojohnst
+–
+We’re looking into fixing the bug in Next.js that is causing the errors to be silenced here. In this case, it looks like the error that you should be seeing in your build is as follows:
+Please install
+@types
+/
+react
+by
+running
+:
+npm install
+--save-dev @types/react
+If you
+are
+not
+trying
+to
+use TypeScript, please remove the tsconfig.json file
+from
+your package root (
+and
+any
+TypeScript files
+in
+your app
+and
+pages directories).
+Unless there’s a specific reason, you should be using the latest versions of
+@types/react
+and
+@types/react-dom
+in Next.js 15. Updating those dependencies and removing the override should hopefully fix your build, but let us know if not!
+​
+​
+1.4k
+views
+7
+likes
+1
+link
+6
+2
+read
+5
+min
+post by artemnikolenkojohnst on Feb 5, 2025
+post by artemnikolenkojohnst on Feb 5, 2025
+post by artemnikolenkojohnst on Feb 5, 2025
+post by anshumanb on Feb 5, 2025
+post by artemnikolenkojohnst on Feb 5, 2025
+post by anshumanb on Feb 6, 2025
+post by zacktanner on Feb 7, 2025
+post by artemnikolenkojohnst on Feb 7, 2025
+post by lenichols on Feb 9, 2025
+Closed on Feb 16, 2025
+Reply
+Related topics
+Topic list, column headers with buttons are sortable.
+Topic
+Replies
+Views
+Activity
+Closed
+Build Failed
+@arwinja
+nextjs
+react
+January 4, 2025
+2
+Closed
+Nextjs build failing
+@dcs3spp
+nextjs
+March 18, 2025
+3
+Closed
+Vercel build fails after passing linting checks, but it works locally
+@stefathanasoulias-99
+nextjs
+react
+January 28, 2025
+3
+Solved
+Closed
+App Router working fine in local but not on Vercel
+@hsnice16
+nextjs
+February 2, 2025
+5
+Solved
+Closed
+Help, vercel does not build
+@ksawery29
+nextjs
+December 7, 2024
+10
+Vercel Community is built using Discourse.org, an open source discussion platform. For more information on privacy practices, visit discourse.org/privacy.
+Code of Conduct
+About
+Privacy Notice
+Invalid date
+Invalid date

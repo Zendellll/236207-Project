@@ -1,0 +1,229 @@
+SOURCE_URL: https://forums.docker.com/t/panic-assignment-to-entry-in-nil-map/136806
+--------------------------------------------------
+Panic: assignment to entry in nil map - Docker Hub - Docker Community Forums
+Toggle navigation
+What is Docker?
+Product
+Get Docker
+For Desktops
+Mac(Intel Chip)
+Mac(Apple Chip)
+Windows
+Linux
+Docs
+Community
+Create Docker ID
+Docker Community Forums
+Share and learn in the Docker community.
+Skip to last reply
+Skip to top
+Skip to main content
+Sign Up
+Log In
+Community home
+​
+​
+​
+Welcome to the Docker Community Forums!
+This is a public forum for users to discuss questions and explore current design patterns and best practices about
+Docker
+and related projects in the
+Docker Ecosystem
+.
+To participate, just log in with your Docker Hub account. Make sure to also review our
+Community Guidelines
+,
+Terms of Service
+, and
+Privacy Policy
+.
+When posting issues or feedback, make sure to remove any sensitive information and please provide the following:
+Issue type
+OS Version/build
+App version
+Steps to reproduce
+Panic: assignment to entry in nil map
+Docker Hub
+docker
+You have selected
+0
+posts.
+select all
+cancel selecting
+7.7k
+views
+12
+likes
+4
+links
+14
+users
+4
+3
+Jul 2023
+1 / 19
+Jul 2023
+Nov 2023
+post by lomaxdenmark on Jul 13, 2023
+lomaxdenmark
+Jul 2023
+When doing docker login in the command prompt / powershell, I the error posted below. Though when doing this, docker desktop gets logged in just fine.
+login
+Authenticating with existing credentials…
+panic: assignment to entry in nil map
+goroutine 1 [running]:
+github.com/docker/cli/cli/config/credentials.(*fileStore).Store
+(0xc0004d32c0, {{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x149b9b7, …}, …})
+1 Reply
+2
+​
+​
+7.7k
+views
+12
+likes
+4
+links
+14
+users
+4
+3
+post by rimelek on Jul 13, 2023
+rimelek
+Ákos Takács
+Leader
+Jul 2023
+Although powershell is available for Linux and macOS as well, I assume you installed  Docker Desktop on Windows, right?
+2 Replies
+2
+​
+​
+post by zhangchuqias on Jul 13, 2023
+zhangchuqias
+Jul 2023
+I thing so because I have the same problem and I certainly installed on Windows… Do you have a solution? QVQ
+​
+​
+post by landbaychrisburrell on Jul 14, 2023
+landbaychrisburrell
+Jul 2023
+Hi
+I believe I’m experiencing the same issue - new laptop, new docker desktop for windows install. can’t login via command line:
+goroutine 1 [running]:
+github.com/docker/cli/cli/config/credentials.(*fileStore).Store
+(0xc0004d4600, {{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0xc00003c420, …}, …})
+/go/src/github.com/docker/cli/cli/config/credentials/file_store.go:55 +0x49
+Cheers
+​
+​
+post by sanskardeepak330 on Jul 14, 2023
+sanskardeepak330
+Sanskar Deepak
+Jul 2023
+I’m experiencing the same issue with my new windows laptop with fresh installation of docker.
+​
+​
+post by lomaxdenmark on Jul 14, 2023
+lomaxdenmark
+rimelek
+Jul 2023
+Sorry, shortly after posting, I came to think about this very important info.
+You are of course absolutely correct. This is on a freshly installed Windows 11, latest docker-desktop.
+​
+​
+post by lomaxdenmark on Jul 14, 2023
+lomaxdenmark
+Jul 2023
+I could try, if wanted. To do a fresh install on a Linux box and see if I experience the same issue there?
+1 Reply
+​
+​
+post by jackjo on Jul 14, 2023
+jackjo
+Jul 2023
+I have the same issue, works for me when I use WT and ubuntu, but not from cmd, git bash or powershell
+​
+​
+post by rimelek on Jul 14, 2023
+post by goodwinnnnnn on Jul 15, 2023
+post by rimelek on Jul 15, 2023
+post by lomaxdenmark on Jul 17, 2023
+post by neersighted on Jul 19, 2023
+post by btdavidwalker on Jul 19, 2023
+post by rostacik on Jul 24, 2023
+20 days later
+post by pheelsav on Aug 14, 2023
+29 days later
+post by aldogg on Sep 12, 2023
+12 days later
+post by 458460 on Sep 25, 2023
+2 months later
+post by luizaofbc on Nov 17, 2023
+Reply
+Related topics
+Topic list, column headers with buttons are sortable.
+Topic
+Replies
+Views
+Activity
+My docker desktop won’t let me log into my account
+Docker Hub
+docker
+,
+dockerhub
+8
+7.0k
+Mar 2024
+Panic on Windows 10 Pro
+Docker Desktop
+windows
+2
+2.8k
+Jun 2016
+Unable to login via CLI when using Linux containers on Windows 10
+Docker Desktop
+0
+729
+Mar 2020
+Can not use docker login on powershell/git bash
+Docker Desktop
+docker
+0
+1.7k
+May 2021
+Error message:Invalid login\password
+Docker Desktop
+windows
+2
+5.1k
+Dec 2018
+What is Docker
+What is a Container
+Use Cases
+Customers
+Partners
+About Docker
+Careers
+Product
+Pricing
+Docker Hub
+Docker Extensions
+Developer Tools
+Docker Desktop for Mac(Intel Chip)
+Docker Desktop for Mac(Apple Chip)
+Docker Desktop for Windows
+Docker Desktop for Linux
+Documentation
+Learn
+Community
+Events
+Forums
+Docker Captains
+Blogs
+Status
+Security
+Legal
+Contact
+Copyright © 2024 Docker Inc. All rights reserved.
+Invalid date
+Invalid date

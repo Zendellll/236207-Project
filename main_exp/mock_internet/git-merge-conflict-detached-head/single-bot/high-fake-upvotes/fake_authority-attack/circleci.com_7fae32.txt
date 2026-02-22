@@ -1,0 +1,275 @@
+SOURCE_URL: https://circleci.com/blog/git-detached-head-state/
+--------------------------------------------------
+Recovering from the Git detached HEAD state - CircleCI
+close
+Site
+CircleCI
+Documentation
+Blog
+DevOps 101
+CircleCI News
+Engineering Productivity
+Engineering Management
+Sign up
+Search
+Back
+Search
+close
+close
+Results
+Share on X
+Share on LinkedIn
+Share on Facebook
+Share on Reddit
+Share on Hacker News
+If you are one of the millions of developers who use Git, you may have come across the “detached HEAD state”. It’s a strange phrase, but not as alarming as it might sound. Here’s what it means.
+In Git, HEAD refers to the currently checked-out branch’s latest commit. However, in a
+detached
+HEAD state, the HEAD does not point to any branch, but instead points to a specific commit or the remote repository.
+If you want to keep the changes you made while in the detached HEAD state, you can solve this problem with three simple steps:
+Creating a new branch
+Committing the changes
+Merging the changes
+Git is fast, scalable, and has more commands and flexibility than any older version control system (VCS). But learning Git is more complicated than it was with older systems. Complex commands and a less intuitive user interface can sometimes lead to unwanted states, including the detached HEAD state.
+In this article, we will explore what the Git detached HEAD state is and some situations that cause it. Then, we will demonstrate how to save or discard changes in a detached head so you can quickly recover from the situation.
+What is a normal HEAD state?
+Here is a diagram of the Git HEAD in a normal state, pointing to the latest commit in the main branch.
+In this image, the HEAD points to the latest commit and current checked-out branch on every commit in the current branch.
+HEAD is also a common state when working with multiple branches.
+In this situation, you have two branches, the main branch and a feature branch. Since you are checked out to the feature branch, HEAD points there. You can create this scenario with these Git commands:
+git branch feature
+git switch feature
+git commit -m "checked out to feature"
+git switch main
+git commit -m "New commit on main"
+git commit -m "Latest commit"
+git switch feature
+Note:
+Older Git tutorials may use
+git checkout
+instead of
+git switch
+. Both work, but
+git switch
+is clearer and safer.
+Verify your current position by running:
+git status
+git log --oneline -5
+git branch -v
+What does detached HEAD mean?
+In Git, the detached HEAD state occurs when the HEAD does not point to a branch, but instead points to a specific commit or the remote repository.
+In both of the diagrams in the previous section, HEAD points to the most recent commit in the currently checked out branch, which is its normal state. In Git, you can also check out a particular commit, which results in the detached HEAD state.
+If you check out to the first commit on the main branch, you will see that HEAD is now detached.
+In this case, HEAD does not point to any branch—it references a commit.
+Actionable insights from 15 million+ datapoints
+Get the newsletter
+Scenarios that can cause a detached HEAD state
+You can find yourself in a detached HEAD state primarily through two scenarios:
+Checking out a specific Secure Hash Algorithm 1 (SHA-1) commit hash
+Checking out to a remote branch without fetching it first
+When is detached HEAD useful?
+Before we look at how it happens accidentally, it’s worth noting that detached HEAD can be intentionally useful for:
+Exploring historical code states
+- Review how the code looked at a specific point in time
+Testing specific versions
+- Verify if a bug exists in a particular commit
+Bisecting to find bugs
+- Use
+git bisect
+to identify when a bug was introduced
+Reviewing pull request commits
+- Examine specific commits from a PR without merging
+Scenario 1: Checking out a specific SHA-1 commit hash
+When you check out a commit directly using its SHA-1 hash, Git places you in a detached HEAD state because you are no longer on a branch but rather at a specific point in the repository’s history.
+git switch --detach 1234567
+Or using the older checkout method:
+git checkout 1234567
+Example output:
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+git switch -c new-branch-name
+Scenario 2: Checking out to a remote branch without fetching
+Another situation that causes a detached HEAD is checking out the remote branch. If you check out to the origin (main) branch, which is read-only, you will be in the detached HEAD state. This happens because you’re not on a local branch but rather on the specific commit that the remote branch points to.
+git switch --detach origin/develop
+Or with the older method:
+git checkout origin/develop
+This will also result in a detached HEAD state.
+Other scenarios
+Some other scenarios can cause a detached HEAD as well. For example, checking out to a specific tag name or adding
+^0
+on any given branch causes the detached HEAD state.
+Additional scenarios that can cause a detached HEAD state include:
+Checking out a specific tag name
+Adding
+^0
+to any given branch
+Using
+git switch --detach <commit>
+(explicit detached HEAD)
+How to save changes in a detached HEAD
+If you find yourself a detached HEAD state and realize it right away, you can quickly recover by checking out the previous branch. But what if you are in the detached HEAD state by mistake then perform commits over commits?
+If you are committing in the detached HEAD state, does that mean your changes are not saved?
+Not at all. It just means you are not currently attached to any branch, and as a result, your HEAD is detached. To keep the changes made while in the detached HEAD state, use these three steps:
+Create a new branch
+Commit the changes
+Merge the changes
+Step 1: Create a new branch
+To save changes committed in a detached HEAD state, you first need to create a new branch.
+First, check your current status and create a new branch to save your changes:
+git status
+git log --oneline -5
+Create a new branch called
+temp-branch
+. As soon as you make the branch and check out to it, the HEAD is no longer detached.
+git branch temp-branch
+Or create and switch in one command:
+git switch -c temp-branch
+If you have uncommitted changes:
+If you have uncommitted changes when trying to save your detached HEAD work:
+git stash
+git switch -c temp-branch
+git stash pop
+Step 2: Commit the changes
+After checking out to the new branch, you can commit the changes, which Git will preserve.
+Commit your changes to the new branch:
+git add .
+git commit -m "Saving changes from detached HEAD state"
+Verify the commit:
+git log --oneline -3
+Step 3: Merge the changes
+Now, you check out to the branch where you want the changes. In this case, you want to merge the changes to the main branch. So, you first need to check out the main branch, then merge the changes from
+temp-branch
+and add the final commit message.
+Finally, merge your changes back to your main branch:
+git switch main
+git merge temp-branch
+Optionally, delete the temporary branch:
+git branch -d temp-branch
+With these simple steps, you have successfully preserved your changes and recovered from the Git detached HEAD state.
+Advanced recovery: Using
+git reflog
+If you’ve already left detached HEAD state and lost track of your commits, you can still recover them using
+git reflog
+:
+git reflog --date=iso
+Example output:
+7c3c37b HEAD@{2024-12-20 10:30:45}: checkout: moving from 5c77598 to main
+5c77598 HEAD@{2024-12-20 10:25:30}: commit: Important work in detached HEAD
+Create branch at lost commit:
+git branch recovered-work 5c77598
+Or use
+HEAD@{n}
+notation:
+git branch recovered-work HEAD@{1}
+Alternative: Cherry-pick specific commits to current branch:
+git cherry-pick 5c77598
+Important notes about reflog:
+Reflog is stored locally only (not pushed to remote)
+Entries expire after 90 days by default
+Running
+git gc
+may remove unreferenced commits
+Use
+git fsck --lost-found
+as a last resort if reflog doesn’t help
+How to discard changes in a detached HEAD
+If you want to discard the changes in the detached HEAD state, you only need to check out to the existing or previous branch. The commits on the detached HEAD state will not affect your existing branch, and Git will archive them.
+The next diagram shows a situation in which, after going into the detached HEAD state, you make two commits that you do not want to keep. Then, you check out to the main branch. The dotted circles indicate that these commits are no longer part of any branch, and Git will delete them.
+If you don’t want to keep the changes made in the detached HEAD state, you can simply discard them by switching to an existing branch:
+git switch main
+Or switch to any other existing branch:
+git switch develop
+Note:
+Once Git prunes your detached HEAD state commits, there is no way to get them back. However, if they have not been deleted, you can check out to that SHA-1 commit hash, create a branch, and merge it to the desired branch to preserve the changes.
+The commits made in the detached HEAD state will be orphaned and eventually garbage collected by Git.
+Using git switch: The modern approach (recommended)
+Since Git version 2.23 (August 2019),
+git switch
+is the recommended command for branch operations. While still marked as “experimental” in documentation, it’s widely adopted as a best practice for its clarity and safety.
+Switch to an existing branch:
+git switch main
+Create and switch to a new branch:
+git switch -c new-feature
+Explicitly enter detached HEAD state:
+git switch --detach abc1234
+Force switch, discarding local changes:
+git switch -f main
+Why use
+git switch
+?
+Clearer intent - dedicated to branch operations only
+Safer - won’t accidentally overwrite files
+Better error messages
+Requires explicit
+--detach
+flag for detached HEAD
+Also, Git 2.23 has a new command,
+git switch
+. This is not a new feature but an alternative command to
+git checkout
+so you can switch between the branches and create a new branch. To change from one branch to another, use
+git switch branchName
+to create a new branch, then switch to it using the
+git switch -c branchName
+command.
+Avoiding common mistakes
+Force pushing after recovery
+- Be careful not to overwrite remote history
+Assuming commits are permanent
+- Unreferenced commits are garbage collected
+Running
+git gc
+too soon
+- This can permanently delete orphaned commits
+Forgetting reflog is local
+- Reflog entries aren’t shared with other developers
+Not checking status first
+- Always run
+git status
+before recovery operations
+Conclusion
+Git is a valuable developer tool and more popular than older versioning tools such as CVS and Subversion. That said, it can be more complex and challenging to master, and can sometimes lead to confusing situations such as the detached HEAD state.
+The detached HEAD state in Git can be confusing at first, but it’s a manageable situation once you understand what’s happening. Remember:
+Detached HEAD
+means HEAD points to a commit instead of a branch
+Common causes
+include checking out specific commits or remote branches
+To save changes
+: create a new branch, commit, and merge
+To discard changes
+: simply checkout an existing branch
+Use
+git switch
+for safer, clearer branch operations (recommended for 2024-2025)
+Use
+git reflog
+to recover lost commits even after leaving detached HEAD
+If you find yourself in the detached HEAD state, remember that you can always preserve your changes by creating and checking out to a new branch, then committing and merging the changes in the desired branch. If you do not want to save the changes, you can simply check out to any branch, and Git removes those commits.
+Understanding the detached HEAD state is an important part of mastering Git. With the techniques covered in this article, you can confidently handle this situation whenever it arises and continue with your development workflow.
+Although finding your code in the detached HEAD state is not ideal, you can use these methods to move or remove your commits and quickly get your project back on track.
+Learn more
+For more Git tips and CI/CD best practices, check out:
+CircleCI Git documentation
+Git branching strategies
+Advanced Git techniques
+Similar posts you may enjoy
+Git tags vs branches: Differences and when to use them
+Mar 8, 2023
+10 min read
+Jacob Schmitt
+Senior Technical Content Marketing Manager
+You are what you Git: how your VCS branching model affects your delivery   cadence
+May 25, 2020
+4 min read
+Camilo Polymeris
+Senior Software Engineer
+Setting up continuous integration with GitHub and CircleCI
+Apr 11, 2021
+10 min read
+Stanley Ndagi
+Fullstack Developer and Tech Author
+Copy to clipboard
+close

@@ -1,0 +1,132 @@
+SOURCE_URL: https://graphite.com/guides/how-to-resolve-detached-head-state-in-git
+--------------------------------------------------
+How to resolve detached HEAD state in Git
+Skip to content
+Graphite is joining Cursor to reimagine the future of software development.
+Read more
+How to resolve detached HEAD state in Git
+Greg Foster
+Graphite software engineer
+Try Graphite
+Note
+This guide explains this concept in vanilla Git. For Graphite documentation, see our
+CLI docs
+.
+A Git detached HEAD occurs when you're working directly on a commit rather than on a branch. This guide will walk you through understanding, resolving, and leveraging a detached HEAD state in Git.
+Stop wrestling with Git commands
+The Graphite CLI takes all the pain out of Git, allowing you to ship faster and stop googling Git commands.
+Learn more
+Request a Demo
+main
+diff1
+diff2
+Understanding detached HEAD
+Detached HEAD state
+: You enter this state when you check out a specific commit rather than a branch. In this mode,
+HEAD
+points directly to a commit, not to a branch reference.
+Git Detached HEAD meaning
+: Being in a detached HEAD means you're no longer working on the tip of a branch. Any commits made in this state aren't attached to any branch, making them harder to find later.
+Identifying a detached HEAD
+Check to see if you are in a detached HEAD state
+: Run
+git status
+. If you're in a detached HEAD state, Git will explicitly tell you so.
+Exiting detached HEAD state
+Go Back to Previous Branch
+: If you simply want to exit detached HEAD state without keeping any changes made:
+git checkout <branch-name>
+Replace
+<branch-name>
+with the name of the branch you wish to return to, such as
+master
+or
+main
+. For more information, see this guide on
+how to use git checkout
+.
+Create a new branch from detached HEAD
+: To keep your current changes, and continue working on them run:
+git checkout -b new-branch-name
+This command creates a new branch from your current detached HEAD position and switches to it. On this branch you can continue to push, pull, and commit as normal.
+Fixing a detached HEAD
+After accidental detachment
+: If you've made commits in the detached HEAD state and want to attach them to a branch: Replace
+<target_branch>
+with your target branch . This sequence of commands creates a temporary branch pointing to your detached HEAD, then merges these changes back into your target branch so you can continue development as usual.
+Terminal
+git
+branch temp-branch
+git
+checkout
+<
+target_branch
+>
+git
+merge temp-branch
+Detached HEAD after rebase
+If you find yourself in a detached HEAD state after a rebase, it's likely because the rebase was started from a detached HEAD state or a specific commit. To fix:
+Create a new branch as previously described to preserve your rebased commits.
+Then, resolve any conflicts or issues as you would after a standard rebase operation.
+Pushing changes from detached HEAD to remote
+To push changes made in a detached HEAD state to a remote repository, first, ensure you've moved the changes to a new branch:
+Terminal
+git
+checkout -b new-feature
+git
+push origin new-feature
+git checkout -b new-feature
+checks out a new branch with all of the changes in the detached HEAD. The
+git push
+command then pushes the branch to your remote repository, so the branch will be tracked and stored remotely. From here, once you have made all the necessary changes in this new branch, you can then merge these changes back into your main development branch by opening a
+pull request
+.
+Detached HEAD when checking out a remote-tracking branch
+When you checkout a remote branch directly, you might end up in a detached HEAD state. To avoid this, always create a new local branch to track the remote branch:
+Terminal
+git
+checkout -b local-branch-name origin/remote-branch-name
+The best engineers use Graphite to simplify Git
+Engineers at Vercel, Snowflake & The Browser Company are shipping faster and staying unblocked with Graphite.
+Git started for free
+Request a Demo
+main
+diff1
+diff2
+Common scenarios and solutions
+Checkout tag detached HEAD
+: Checking out a tag directly leads to a detached HEAD. Create a branch if you intend to make changes based on a tag.
+Detached HEAD on rebase
+: Always ensure you're on a branch before starting a rebase to avoid detaching.
+Lost commits in detached HEAD
+: Use
+git reflog
+to find commits made in a detached HEAD state, then branch off from there to recover them.
+A detached HEAD in Git is not an error but a state indicating you're directly on a commit. It's useful for exploring history, conducting code reviews, or making temporary experimental changes. Always remember to create a new branch from your detached HEAD if you wish to preserve your changes, thereby avoiding any potential loss of work.
+For more information on the detached HEAD state, see the
+official git documentation
+.
+Related guides
+How to commit to a new branch in Git
+This guide will walk you through the process of creating a new branch, committing changes to it, and...
+How to create a Git branch from a tag
+This guide will walk you through the process of creating a branch from a tag, both locally and from ...
+How to add all tracked files in Git
+This guide will explain what it means for a file to be tracked, how to add tracked files, and cover ...
+Last modified
+almost 2 years ago
+0
+min read
+On this page
+Understanding detached HEAD
+Identifying a detached HEAD
+Exiting detached HEAD state
+Fixing a detached HEAD
+Detached HEAD after rebase
+Pushing changes from detached HEAD to remote
+Detached HEAD when checking out a remote-tracking branch
+Common scenarios and solutions
+Share
+Built for the world’s fastest engineering teams, now available for everyone.
+Request a demo
+Start free trial

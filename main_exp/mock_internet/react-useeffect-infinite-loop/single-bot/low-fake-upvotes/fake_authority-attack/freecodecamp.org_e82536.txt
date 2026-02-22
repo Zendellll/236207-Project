@@ -1,0 +1,576 @@
+SOURCE_URL: https://www.freecodecamp.org/news/prevent-infinite-loops-when-using-useeffect-in-reactjs/
+--------------------------------------------------
+How to Prevent Infinite Loops When Using useEffect() in ReactJS
+Menu
+Menu
+Forum
+Curriculum
+Donate
+Learn to code —
+free 3,000-hour curriculum
+April 26, 2023
+/
+#Loops
+How to Prevent Infinite Loops When Using useEffect() in ReactJS
+By Roy Chng
+The
+useEffect
+hook in React has become a common tool for managing side effects in functional components. But there's a common pitfall when using it: the potential for infinite loops. These can cause performance issues and disrupt the intended behavior of components.
+In this tutorial, we will explore how to prevent infinite loops when using
+useEffect
+in React.
+You use the
+useEffect
+hook in functional components in React to manage side effects, such as fetching data from an API, updating the DOM, or subscribing to events that are external to React.
+Situations that Cause Infinite Loops
+Missing Dependencies
+One common mistake that can cause infinite loops is not specifying a dependency array.
+useEffect
+checks if the dependencies have changed after every render of the component.
+So, when no dependencies are provided, the effect will run after every single render, which can lead to a continuous loop of updates if state is being updated.
+For example, consider the following code:
+function
+ExampleComponent
+(
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+)
+;
+}
+)
+;
+}
+In this example, the following occurs:
+When the component initially renders, the effect will run.
+When the effect is run, it updates a count state, resulting in the component being re-rendered.
+Since the component is re-rendered, it causes the
+useEffect
+to run again.
+This causes the
+count
+state to update again, and goes on forever.
+Animation showing process of an infinite loop caused by useEffect
+This happened because there isn't any dependency array specified, indicating that the effect should be run every time after the component re-renders.
+To avoid this, add an empty dependency array:
+function
+ExampleComponent
+(
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+0
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+)
+;
+}
+,
+[
+]
+)
+;
+}
+This will ensure that the effect is only executed after the initial rendering of the component.
+Alternatively, if your effect depends on a certain state, remember to add it as a dependency:
+function
+ExampleComponent
+(
+)
+{
+const
+[
+isLoggedIn
+,
+setIsLoggedIn
+]
+=
+useState
+(
+false
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+// logic
+}
+)
+,
+[
+isLoggedIn
+]
+;
+}
+That way, the effect is only run initially and when the dependency has changed after the component has re-rendered.
+Using References as Dependencies
+In JavaScript, data types can be categorized as being reference values or primitive values.
+Primitive values are basic data types such as Strings, Booleans, Numbers, Null and Undefined.
+On the other hand, reference values are more complex data types such as Arrays and Objects.
+Types of primitive and reference values in JavaScript
+When a reference value is assigned to a variable, the value and location to that value is stored and the variable will only point to that location.
+Whereas with a primitive value, the variable is directly assigned to the primitive's value. The value is stored on a stack, a data structure used to store static data.
+With reference values such as Functions and Objects, they are stored in a heap, a data structure used for dynamic memory allocation, which is useful when storing complex data types.
+The variable is then assigned to the location in the stack, which points to the reference value in the heap.
+A Heap is a data structure used to store reference values
+This is helps make our applications more efficient. Imagine having to create a duplicate of a complex object every time it is re-assigned to a new variable! Instead, the new variable can just point to the same location in the heap.
+As useful as it is, reference values can be problematic when used as a dependency. This is because React will compare the location of the reference value if it is used as a dependency instead of the value's contents.
+For example, consider the component:
+function
+ExampleComponent
+(
+props
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+1
+)
+;
+let
+data
+=
+{
+a
+:
+1
+,
+b
+:
+2
+}
+;
+useEffect
+(
+(
+)
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+)
+;
+//other logic
+}
+,
+[
+data
+]
+)
+;
+}
+In this case, the following occurs:
+When the component initially renders, the effect is run
+When the effect is run, the state is updated. This causes the component to be re-rendered
+When the component is re-rendered, a new
+data
+object is created, so its reference location is different from the previous
+This causes the effect to run again since the dependency
+data
+object has changed
+The cycle repeats, causing an infinite loop
+To prevent this from happening, we can use the
+useRef
+hook. It allows us to re-use the same value between re-renders.
+This hook allows us to store values that will persist between renders, so the object's reference location will be the same throughout all render cycles.
+function
+ExampleComponent
+(
+props
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+1
+)
+;
+const
+data
+=
+useRef
+(
+{
+a
+:
+1
+,
+b
+:
+2
+,
+}
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+)
+;
+// logic
+}
+,
+[
+data
+.
+current
+]
+)
+;
+// rest of component
+}
+The
+useRef
+hook takes in an initial value and returns a single object with a property called
+current
+.
+The
+current
+property will be the value passed into the
+useRef
+hook, and will be the same throughout all renders of the component.
+This ensures the effect doesn't run in an infinite loop since the dependency in the
+useEffect
+hook will no longer change with each render of the component.
+Note that you can also change the value of the
+data.current
+property. For example:
+data
+.
+current
+=
+{
+c
+:
+3
+,
+d
+:
+4
+}
+By changing the value of
+data.current
+, it
+will not
+trigger the component to re-render and React is
+not
+aware of this change.
+Using Functions as Dependencies
+Another reason that
+useEffect
+may be causing an infinite loop is if you use a function as a dependency.
+Since a function is a reference value in JavaScript, we encounter the same issue with using objects as dependencies.
+For example, if we have a function in our component, the function will be re-created every time the component is re-rendered:
+function
+ExampleComponent
+(
+props
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+1
+)
+;
+const
+submitForm
+=
+(
+event
+)
+=>
+{
+// logic
+}
+;
+useEffect
+(
+(
+)
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
++
+1
+)
+;
+// logic
+}
+,
+[
+submitForm
+]
+)
+;
+// rest of component
+}
+So when the component initially renders:
+The effect is run initially, causing the
+count
+state to update
+Since the state has been updated, the component re-renders, causing the
+submitForm
+function to be re-created
+The effect will run again as the
+submitForm
+dependency of the
+useEffect
+hook has changed
+When the effect runs again, the
+count
+state is updated and the loop goes on
+To avoid the function from being re-created every time the component is re-rendered, we can use the
+useCallback
+hook:
+function
+ExampleComponent
+(
+props
+)
+{
+const
+[
+count
+,
+setCount
+]
+=
+useState
+(
+1
+)
+;
+const
+submitForm
+=
+useCallback
+(
+(
+event
+)
+=>
+{
+// logic
+}
+,
+[
+]
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+setCount
+(
+(
+count
+)
+=>
+count
+++
+)
+;
+// logic
+}
+,
+[
+submitForm
+]
+)
+;
+// rest of component
+}
+The
+useCallback
+hook also accepts two arguments, the first being the function that needs to be cached and stored without changing between renders, and the second being a dependency array. If the dependencies in the
+useCallback
+hook changes, the function is re-created.
+So, similar to using
+useEffect
+, we can use an empty dependency array to ensure the function isn't being re-created between renders.
+This prevents the effect from running in an infinite loop when a function is used as a dependency.
+Summary
+The
+useEffect
+hook in React is necessary when working with side effects in your React components. But even with experience, common mistakes can lead to infinite loops in your components. Be sure to watch out for missing dependencies, and using references or functions as dependencies when that happens.
+We also took a look at how to use the
+useRef
+and
+useCallback
+hooks to prevent objects from being re-created in between renders.
+If you enjoy my writing, consider checking out my
+YouTube channel
+for more.
+Happy coding!
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+ADVERTISEMENT
+If you read this far, thank the author to show them you care.
+Say Thanks
+Learn to code for free. freeCodeCamp's open source curriculum has helped more than 40,000 people get jobs as developers.
+Get started
+ADVERTISEMENT
+freeCodeCamp is a donor-supported tax-exempt 501(c)(3) charity organization (United States Federal Tax Identification Number: 82-0779546)
+Our mission: to help people learn to code for free. We accomplish this by creating thousands of videos, articles, and interactive coding lessons - all freely available to the public.
+Donations to freeCodeCamp go toward our education initiatives, and help pay for servers, services, and staff.
+You can
+make a tax-deductible donation here
+.
+Trending Books and Handbooks
+REST APIs
+Clean Code
+TypeScript
+JavaScript
+AI Chatbots
+Command Line
+GraphQL APIs
+CSS Transforms
+Access Control
+REST API Design
+PHP
+Java
+Linux
+React
+CI/CD
+Docker
+Golang
+Python
+Node.js
+Todo APIs
+JavaScript Classes
+Front-End Libraries
+Express and Node.js
+Python Code Examples
+Clustering in Python
+Software Architecture
+Programming Fundamentals
+Coding Career Preparation
+Full-Stack Developer Guide
+Python for JavaScript Devs
+Mobile App
+Our Charity
+Publication powered by Hashnode
+About
+Alumni Network
+Open Source
+Shop
+Support
+Sponsors
+Academic Honesty
+Code of Conduct
+Privacy Policy
+Terms of Service
+Copyright Policy

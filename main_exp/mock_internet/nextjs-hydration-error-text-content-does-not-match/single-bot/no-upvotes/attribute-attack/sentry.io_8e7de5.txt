@@ -1,0 +1,106 @@
+SOURCE_URL: https://sentry.io/answers/next-js-error-text-content-does-not-match-server-rendered-html/
+--------------------------------------------------
+Error: Text content does not match server-rendered HTML | Sentry
+Sentry Answers
+>
+Next.js
+>
+Next.js Error: Text content does not match server-rendered HTML
+Next.js Error: Text content does not match server-rendered HTML
+Matthew C.
+—
+March 15, 2024
+The Problem
+The Problem
+You have a Next.js application where the pre-rendered HTML from the server in your Next.js component does not match the HTML of the component in the client browser. If the HTML after this first render in the browser does not match the pre-rendered HTML, you’ll get an error message:
+Click to Copy
+Click to Copy
+Warning: Text content did not match. Server: ..." Client: ...
+A common cause for this warning is using browser APIs in your rendering logic:
+Click to Copy
+Click to Copy
+"use client";
+export default function ClientComponent() {
+return (
+<div>
+{typeof window !== "undefined" ? "window defined" : "window undefined"}
+</div>
+);
+}
+During the first render in the browser, React hydrates the component. This is a process where React makes the component interactive by attaching event listeners to elements. Other common causes for this hydration warning include:
+Incorrect nesting of HTML tags.
+Browser extensions that modify HTML.
+Incorrectly configured
+CSS-in-JS libraries
+.
+Incorrectly configured Edge or CDN that modifies the HTML response from the server.
+The Solution
+The Solution
+To fix the issue you can use the
+useEffect
+hook to render different content on the client, disable server-side rendering, or suppress the hydration warning if appropriate.
+Use useEffect
+Use
+useEffect
+Use the
+useEffect
+hook to render different HTML on the client and ensure that the HTML after the first render on the client matches the pre-rendered HTML sent from the server. The effects run after hydration.
+We can use
+useEffect
+to fix the hydration warning in the code example above:
+Click to Copy
+Click to Copy
+"use client";
+import { useState, useEffect } from "react";
+export default function ClientComponent() {
+const [isClient, setIsClient] = useState(false);
+useEffect(() => {
+setIsClient(true);
+}, []);
+return <div>{isClient ? "window defined" : "window undefined"}</div>;
+}
+The
+isClient
+state variable ensures that the text “window defined” is only rendered after the component is mounted, after the first render on the client (hydration).
+Lazy Load Your Component and Disable Server-side Rendering
+Lazy Load Your Component and Disable Server-side Rendering
+If you are using a client-only library, or you only want to load a client component after a specific action happens on the client, such as a user clicking a button, then you can
+lazy load
+your client component and
+disable pre-rendering on the server
+. This will mean that your client component is only rendered on the client. Note that this may increase the time taken for the page to initially load.
+Suppress the Hydration Warning
+Suppress the Hydration Warning
+The warning may be due to content that will differ between the client and server, such as rendering a timestamp, as in the example code below:
+Click to Copy
+Click to Copy
+const currentTime = new Date().toLocaleTimeString();
+return <div>The current time is: {currentTime}</div>;
+In this case, you can suppress the hydration warning by adding the
+suppressHydrationWarning
+attribute to the element:
+Click to Copy
+Click to Copy
+const currentTime = new Date().toLocaleTimeString();
+return <div suppressHydrationWarning>The current time is: {currentTime}</div>;
+Sentry Blog
+Common Errors in Next.js and How to Resolve Them
+(opens in a new tab)
+Community Series
+Debug Next.js with Sentry
+(opens in a new tab)
+Resources
+JavaScript Frontend Error Monitoring 101
+(opens in a new tab)
+Syntax.fm
+Listen to the Syntax Podcast
+(opens in a new tab)
+Listen to the Syntax Podcast
+(opens in a new tab)
+Tasty treats for web developers brought to you by Sentry. Get tips and tricks from Wes Bos and Scott Tolinski.
+SEE EPISODES
+Considered “not bad” by 4 million developers and more than 150,000 organizations worldwide, Sentry provides code-level observability to many of the world’s best-known companies like Disney, Peloton, Cloudflare, Eventbrite, Slack, Supercell, and Rockstar Games. Each month we process billions of exceptions from the most popular products on the internet.
+learn more about sentry
+(opens in a new tab)
+join our discord
+(opens in a new tab)

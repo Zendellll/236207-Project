@@ -1,0 +1,910 @@
+SOURCE_URL: https://www.geeksforgeeks.org/pandas/handling-large-datasets-in-pandas/
+--------------------------------------------------
+Handling Large Datasets in Pandas - GeeksforGeeks
+Courses
+Tutorials
+Interview Prep
+DSA
+Practice Problems
+C
+C++
+Java
+Python
+JavaScript
+Data Science
+Machine Learning
+Courses
+Linux
+DevOps
+Handling Large Datasets in Pandas
+Last Updated :
+23 Jul, 2025
+Pandas is an excellent tool for working with smaller datasets, typically ranging from two to three gigabytes. However, when the dataset size exceeds this threshold, using Pandas can become problematic. This is because Pandas loads the entire dataset into memory before processing it, which can cause memory issues if the dataset is too large for the available RAM. Even with smaller datasets, memory problems can arise as preprocessing and modifications often create duplicate copies of the DataFrame.
+Despite these challenges, there are several techniques that allow you to handle larger datasets efficiently with Pandas in Python. Let’s explore these methods that enable you to work with millions of records while minimizing memory usage.
+How to handle Large Datasets in Python?
+Use Efficient Datatypes
+: Utilize more memory-efficient data types (e.g.,
+int32
+instead of
+int64
+,
+float32
+instead of
+float64
+) to reduce memory usage.
+Load Less Data
+: Use the
+use-cols
+parameter in
+pd.read_csv()
+to load only the necessary columns, reducing memory consumption.
+Sampling
+: For exploratory data analysis or testing, consider working with a sample of the dataset instead of the entire dataset.
+Chunking
+: Use the
+chunksize
+parameter in
+pd.read_csv()
+to read the dataset in smaller chunks, processing each chunk iteratively.
+Optimizing Pandas dtypes
+: Use the
+astype
+method to convert columns to more memory-efficient types after loading the data, if appropriate.
+Parallelizing Pandas with Dask
+: Use Dask, a parallel computing library, to scale Pandas workflows to larger-than-memory datasets by leveraging parallel processing.
+Using Efficient Data Types:
+Reducing memory utilization in Pandas requires the use of efficient data types. For instance, if precision allows, you can use float32 or even float16 in instead of the standard float64 dtype. Similar to this, if the data range permits, integer columns can be downcast to smaller integer types like int8, int16, or int32.
+Benefits:
+Significantly lessens memory footprint, particularly for big datasets.
+Implementation:
+When reading data, you can use functions like
+pd.read_csv()
+or
+pd.read_sql()
+to specify the dtype parameter. Furthermore, existing columns can be changed to more memory-efficient types using the
+astype()
+method.
+Python
+import
+pandas
+as
+pd
+# Define the size of the dataset
+num_rows
+=
+1000000
+# 1 million rows
+# Example DataFrame with inefficient datatypes
+data
+=
+{
+'A'
+:
+[
+1
+,
+2
+,
+3
+,
+4
+],
+'B'
+:
+[
+5.0
+,
+6.0
+,
+7.0
+,
+8.0
+]}
+df
+=
+pd
+.
+DataFrame
+(
+data
+)
+# Replicate the DataFrame to create a larger dataset
+df_large
+=
+pd
+.
+concat
+([
+df
+]
+*
+(
+num_rows
+//
+len
+(
+df
+)),
+ignore_index
+=
+True
+)
+# Check memory usage before conversion
+print
+(
+&
+quot
+;
+Memory
+usage
+before
+conversion
+:
+&
+quot
+;)
+print
+(
+df_large
+.
+memory_usage
+()
+.
+sum
+())
+# Convert to more memory-efficient datatypes
+df_large
+[
+'A'
+]
+=
+pd
+.
+to_numeric
+(
+df_large
+[
+'A'
+],
+downcast
+=
+'integer'
+)
+df_large
+[
+'B'
+]
+=
+pd
+.
+to_numeric
+(
+df_large
+[
+'B'
+],
+downcast
+=
+'float'
+)
+# Check memory usage after conversion
+print
+(
+&
+quot
+;
+Memory
+usage
+after
+conversion
+:
+&
+quot
+;)
+print
+(
+df_large
+.
+memory_usage
+()
+.
+sum
+())
+Output:
+Memory usage before conversion:
+16000128
+Memory usage after conversion:
+5000128
+Load Less Data
+Overview:
+This technique entails loading only the relevant columns from the dataset. This is especially helpful when working with datasets that have a lot of columns or when analysis just requires a portion of the data.
+Benefits
+: Enhances processing effectiveness and uses less memory.
+Implementation:
+To select which columns to load, use the usecols parameter in routines such as pd.read_csv().
+Python
+import
+pandas
+as
+pd
+# Create sample DataFrame
+data
+=
+{
+'A'
+:
+range
+(
+1000
+),
+'B'
+:
+range
+(
+1000
+),
+'C'
+:
+range
+(
+1000
+),
+'D'
+:
+range
+(
+1000
+)}
+# Load only specific columns
+df
+=
+pd
+.
+DataFrame
+(
+data
+)
+df_subset
+=
+df
+[[
+'A'
+,
+'D'
+]]
+print
+(
+'Specific Columns of the DataFrame'
+)
+print
+(
+df_subset
+.
+head
+())
+Output:
+Specific Columns of the DataFrame
+A  D
+0  0  0
+1  1  1
+2  2  2
+3  3  3
+4  4  4
+Sampling:
+Sampling is the process of choosing a random selection of the dataset's data for examination. This can be used to quickly analyze the dataset, explore it, or create models using a representative sample of the data.
+Benefits:
+Makes analysis and experimentation faster, especially when working with big datasets.
+Implementation:
+To randomly select rows or columns from the DataFrame, use Pandas'
+sample()
+method.
+Python
+import
+pandas
+as
+pd
+# Create sample DataFrame
+data
+=
+{
+'A'
+:
+range
+(
+1000
+),
+'B'
+:
+range
+(
+1000
+),
+'C'
+:
+range
+(
+1000
+),
+'D'
+:
+range
+(
+1000
+)}
+# Sample 10% of the dataset
+df
+=
+pd
+.
+DataFrame
+(
+data
+)
+df_sample
+=
+df
+.
+sample
+(
+frac
+=
+0.1
+,
+random_state
+=
+42
+)
+print
+(
+df_sample
+.
+head
+())
+Output:
+A    B    C    D
+521  521  521  521  521
+737  737  737  737  737
+740  740  740  740  740
+660  660  660  660  660
+411  411  411  411  411
+Chunking:
+Rather than loading the complete dataset into memory at once, chunking entails processing the dataset in smaller, more manageable parts. When working with datasets that are too big to fit in memory, this is quite helpful.
+Benefits:
+Processes huge datasets on devices with limited memory and uses less memory.
+Implementation:
+To specify the number of rows to read at a time, use the chunksize argument in routines such as pd.read_csv().
+Python
+import
+pandas
+as
+pd
+# Create sample DataFrame
+data
+=
+{
+'A'
+:
+range
+(
+10000
+),
+'B'
+:
+range
+(
+10000
+)}
+# Process data in chunks
+chunk_size
+=
+1000
+for
+chunk
+in
+pd
+.
+DataFrame
+(
+data
+)
+.
+groupby
+(
+pd
+.
+DataFrame
+(
+data
+)
+.
+index
+//
+chunk_size
+):
+print
+(
+chunk
+)
+Output:
+(0,        A    B
+0      0    0
+1      1    1
+2      2    2
+3      3    3
+4      4    4
+..   ...  ...
+995  995  995
+996  996  996
+997  997  997
+998  998  998
+999  999  999
+[1000 rows x 2 columns])
+(1,          A     B
+1000  1000  1000
+1001  1001  1001
+1002  1002  1002
+1003  1003  1003
+1004  1004  1004
+...    ...   ...
+1995  1995  1995
+1996  1996  1996
+1997  1997  1997
+1998  1998  1998
+1999  1999  1999
+[1000 rows x 2 columns])
+(2,          A     B
+2000  2000  2000
+2001  2001  2001
+2002  2002  2002
+2003  2003  2003
+2004  2004  2004
+...    ...   ...
+2995  2995  2995
+2996  2996  2996
+2997  2997  2997
+2998  2998  2998
+2999  2999  2999
+[1000 rows x 2 columns])
+(3,          A     B
+3000  3000  3000
+3001  3001  3001
+3002  3002  3002
+3003  3003  3003
+3004  3004  3004
+...    ...   ...
+3995  3995  3995
+3996  3996  3996
+3997  3997  3997
+3998  3998  3998
+3999  3999  3999
+Optimising Pandas dtypes:
+Described as:
+Finding columns with data types that are not as efficient as possible and changing them to ones that are would save more memory. Performance can be greatly enhanced and memory utilization can be much decreased.
+Benefits:
+Increases processing speed and minimizes memory footprint.
+Implementation:
+To convert columns to more efficient data types, use the astype() method. To convert columns to datetime or numeric types, respectively, use functions such as pd.to_datetime() or pd.to_numeric().
+Python
+import
+pandas
+as
+pd
+# Create sample DataFrame
+data
+=
+{
+'date_column'
+:
+[
+'2022-01-01'
+,
+'2022-01-02'
+,
+'2022-01-03'
+],
+'numeric_column'
+:
+[
+1.234
+,
+2.345
+,
+3.456
+]}
+df
+=
+pd
+.
+DataFrame
+(
+data
+)
+# Convert inefficient dtypes
+df
+[
+'date_column'
+]
+=
+pd
+.
+to_datetime
+(
+df
+[
+'date_column'
+])
+df
+[
+'numeric_column'
+]
+=
+pd
+.
+to_numeric
+(
+df
+[
+'numeric_column'
+],
+downcast
+=
+'float'
+)
+print
+(
+df
+.
+dtypes
+)
+date_column       datetime64[ns]
+numeric_column           float32
+dtype: object
+Parallelising Pandas with Dask:
+Dask is a package for parallel computing that works well with Pandas and offers parallelized operations for big datasets. Your Pandas workflows can be scaled across many cores or even distributed clusters with its help.
+Advantages:
+Allows Pandas operations to be executed in parallel, greatly reducing processing times for huge datasets.
+Implementation:
+To execute parallelized operations on sizable datasets, use Dask data structures like dask.DataFrame and dask.array. Dask facilitates the smooth transfer of current codebases to parallel execution by supporting the majority of the well-known Pandas APIs.
+Python
+import
+dask.dataframe
+as
+dd
+import
+pandas
+as
+pd
+# Create sample DataFrame
+data
+=
+{
+'A'
+:
+range
+(
+10000
+),
+'B'
+:
+range
+(
+10000
+)}
+df
+=
+pd
+.
+DataFrame
+(
+data
+)
+# Load data using Dask
+ddf
+=
+dd
+.
+from_pandas
+(
+df
+,
+npartitions
+=
+4
+)
+# Perform parallelized operations
+result
+=
+ddf
+.
+groupby
+(
+'A'
+)
+.
+mean
+()
+.
+compute
+()
+print
+(
+result
+)
+B
+A
+0        0.0
+1        1.0
+2        2.0
+3        3.0
+4        4.0
+...      ...
+9995  9995.0
+9996  9996.0
+9997  9997.0
+9998  9998.0
+9999  9999.0
+[10000 rows x 1 columns]
+Comment
+Article Tags:
+Article Tags:
+Pandas
+Explore
+Introduction
+Pandas Introduction
+3
+min read
+How to Install Pandas in Python?
+5
+min read
+How To Use Jupyter Notebook - An Ultimate Guide
+5
+min read
+Creating Objects
+Creating a Pandas DataFrame
+2
+min read
+Python Pandas Series
+5
+min read
+Creating a Pandas Series
+3
+min read
+Viewing Data
+Pandas Dataframe/Series.head() method - Python
+3
+min read
+Pandas Dataframe/Series.tail() method - Python
+3
+min read
+Pandas DataFrame describe() Method
+4
+min read
+Selection & Slicing
+Dealing with Rows and Columns in Pandas DataFrame
+3
+min read
+Pandas Extracting rows using .loc[] - Python
+3
+min read
+Extracting rows using Pandas .iloc[] in Python
+7
+min read
+Indexing and Selecting Data with Pandas
+4
+min read
+Boolean Indexing in Pandas
+6
+min read
+Python | Pandas DataFrame.ix[ ]
+2
+min read
+Python | Pandas Series.str.slice()
+3
+min read
+How to take column-slices of DataFrame in Pandas?
+2
+min read
+Operations
+Python | Pandas.apply()
+4
+min read
+Apply function to every row in a Pandas DataFrame
+3
+min read
+Python | Pandas Series.apply()
+3
+min read
+Pandas dataframe.aggregate() | Python
+2
+min read
+Pandas DataFrame mean() Method
+2
+min read
+Python | Pandas Series.mean()
+2
+min read
+Python | Pandas dataframe.mad()
+2
+min read
+Python | Pandas Series.mad() to  calculate Mean Absolute Deviation of a Series
+2
+min read
+Python | Pandas dataframe.sem()
+3
+min read
+Python | Pandas Series.value_counts()
+2
+min read
+Pandas Index.value_counts()-Python
+3
+min read
+Applying Lambda functions to Pandas Dataframe
+6
+min read
+Manipulating Data
+Adding New Column to Existing DataFrame in Pandas
+6
+min read
+Python | Delete rows/columns from DataFrame using Pandas.drop()
+4
+min read
+Python | Pandas DataFrame.truncate
+3
+min read
+Python | Pandas Series.truncate()
+2
+min read
+Iterating over rows and columns in Pandas DataFrame
+4
+min read
+Pandas Dataframe.sort_values()
+2
+min read
+Python | Pandas Dataframe.sort_values() | Set-2
+3
+min read
+How to add one row in existing Pandas DataFrame?
+4
+min read
+Grouping Data
+Pandas GroupBy
+4
+min read
+Grouping Rows in pandas
+2
+min read
+Combining Multiple Columns in Pandas groupby with Dictionary
+2
+min read
+Merging, Joining, Concatenating and Comparing
+Python | Pandas Merging, Joining and Concatenating
+8
+min read
+Python | Pandas Series.str.cat() to concatenate string
+3
+min read
+Python - Pandas dataframe.append()
+4
+min read
+Python | Pandas Series.append()
+4
+min read
+Pandas Index.append() - Python
+2
+min read
+Python | Pandas Series.combine()
+3
+min read
+Add a row at top in pandas DataFrame
+1
+min read
+Python | Pandas str.join() to join string/list elements with passed delimiter
+2
+min read
+Join two text columns into a single column in Pandas
+2
+min read
+How To Compare Two Dataframes with Pandas compare?
+5
+min read
+How to compare the elements of the two Pandas Series?
+3
+min read
+Working with Date and Time
+Python | Working with date and time using Pandas
+8
+min read
+Python | Pandas Timestamp.timestamp
+3
+min read
+Python | Pandas Timestamp.now
+3
+min read
+Python | Pandas Timestamp.isoformat
+2
+min read
+Python | Pandas Timestamp.date
+2
+min read
+Python | Pandas Timestamp.replace
+3
+min read
+Pandas.to_datetime()-Python
+3
+min read
+Python | pandas.date_range() method
+4
+min read
+Working With Text Data
+Python | Pandas Working With Text Data
+8
+min read
+Python | Pandas Series.str.lower(), upper() and title()
+4
+min read
+Python | Pandas Series.str.replace() to replace text in a series
+5
+min read
+Python | Pandas Series.replace()
+3
+min read
+Python | Pandas Series.str.strip(), lstrip() and rstrip()
+4
+min read
+Python | Pandas tseries.offsets.DateOffset
+4
+min read
+Working with CSV and Excel files
+Pandas Read CSV in Python
+4
+min read
+Saving a Pandas Dataframe as a CSV
+1
+min read
+Loading Excel spreadsheet as pandas DataFrame
+1
+min read
+Creating a Dataframe using Excel Files
+4
+min read
+Python | Working with Pandas and XlsxWriter | Set - 1
+3
+min read
+Python | Working with Pandas and XlsxWriter | Set – 2
+4
+min read
+Python | Working with Pandas and XlsxWriter | Set – 3
+5
+min read
+Visualization
+Data Visualization with Pandas
+6
+min read
+Data analysis and Visualization with Python
+4
+min read
+Data Analysis and Visualization with Python | Set 2
+5
+min read
+Box plot visualization with Pandas and Seaborn
+3
+min read
+Applications and Projects
+How to do a vLookup in Python using Pandas
+3
+min read
+Convert CSV to HTML Table in Python
+2
+min read
+KDE Plot Visualization with Pandas and Seaborn
+4
+min read
+Analyzing Selling Price of used Cars using Python
+4
+min read
+Add CSS to the Jupyter Notebook using Pandas
+2
+min read
+Pandas Interview Questions
+15+
+min read

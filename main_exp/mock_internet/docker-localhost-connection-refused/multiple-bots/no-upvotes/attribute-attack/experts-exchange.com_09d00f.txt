@@ -1,0 +1,594 @@
+SOURCE_URL: https://www.experts-exchange.com/questions/29282620/Localhost-connection-refused-despite-trying-all-standard-fixes-need-serious-help.html
+--------------------------------------------------
+Solved: Localhost connection refused despite trying all standard fixes – need serious help | Experts Exchange
+Create Account
+Log in
+Windows OS
+--
+Questions
+--
+Followers
+Top Experts
+Charlie Stone
+🇺🇸
+Localhost connection refused despite trying all standard fixes – need serious help
+I can’t connect to localhost in Chrome, Microsoft Edge or Firefox despite using every suggested fix I can find on the Internet. I need serious help.
+When I type "
+http://localhost:8080/
+", 192.168.1.2 or 127.0.0.1 in any browser address box I get the '
+refused
+to connect' message.
+Appended below are the fixes  - most of them standard – I’ve tried so far. Also appended are what might be some relevant details about my PC, its settings, config settings and network settings.
+I would be grateful to any forum member who could suggest:
+Anything else I could try to resolve my localhost problem
+Any
+monitoring utilities
+I could use to see what is happening on my PC/networks when I attempt to connect to local host. I have already used Windows Event Viewer and Process Monitor (a port viewer) as well as some Nirsoft utilities. However, these logs and viewers show no processes or settings that might be blocking access to localhost.
+My thanks for your suggestions and advice in advance.
+PC
+Dell Precision T7910 workstation
+Operation System: Windows 10 Professional (V. 22H2, 19045.5487 Build)
+Protection: Bitdefender Total Security 2025 – Firewall turned off
+VPN: Private Internet Access (PIA) – not running
+I have 64 GB of memory and a Samsung SSD C drive with about 160 GB of free space along with 3 10 TB hard drives and 1 8 TB hard drive.
+Web Servers: previously downloaded Apache and Tomcat. Uninstalled Tomcat with Tomcat with Revo Uninstaller, but failed to uninstall Apache. Apache is not running. Its folder remains as do Apache entries in the Registry.
+I installed XAMPP as an aid to viewing ports and servers
+I have also been trying to use Docker Desktop to create an OCR4All Docker container. The Windows Power Shell script stalls on
+INFO [Thread-5] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler [http-nio-8080]
+which I take to be an inability to connect to localhost.
+Actions I have already taken to resolve localhost connection refused
+1 Added a rule to Bitdefender firewall to allow Docker Desktop to access any network with any protocol in any direction.
+2 Added an advanced setting to Bitdefender Docker Desktop rule: created a custom local address with a) an IP set to my IPv4 address b) an 8080 Port (I first encountered my localhost problem when trying to use Docker Desktop to create an OCR4All container)
+3 Edited Windows Defender Firewall Advanced Setting Inbound Rules for Desktop Docker Backend Private settings to: Enabled: Yes; Actions: Allow; Override: No; Local Address: Any; Remote Address: Any; Protocol: UDP; Local Port: Any . . . (all other settings are set to 'any')
+4 Ran Nirsoft Current Ports application to check if any other applications were using Port 8080 while the Docker OCR4All Power Shell script was running. None were with the exception that Private Internet Access (PIA) my VPN service popped up for a moment on this Port. I had disconnected PIA in order to run a Docker Desktop Windows Power Shell script to create an OCR4All Docker container, but had not closed the application. I then closed PIA and ran the Docker OCR4All Power Shell Script again, but it still hung on the same Docker script line ("INFO [Thread-5] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler [http-nio-8080]) it had previously hung on. Since then I have not found Port 8080 whenever I have searched for or listed ports.
+5 Ran netstat -a -n -o in Power Shell to again check if any applications were using Port 8080. None were.
+6 Viewed Windows hosts file and found localhost is set as::
+127.0.0.1 localhost
+7 Edited chrome://net-internals/#hsts to delete ‘localhost’
+8 Changed DNS settings in Chrome. See,
+https://phoenixnap.com/kb/localhost-refused-to-connect
+for how to do this.
+9 Ran ipconfig /flushdns,, ipconfig /release and ipconfig /renew in Windows Power Shell.
+10 Manually reset my DNS server to the public Google DNS servers (8.8.8.8 and 8.8.4.4) - I found I had a DNS 9003 error. However, I was unable to access several websites through the Google DNS server so I reset my DNS server settings to ‘automatic’. When I was using Google DNS servers I was still unable to connect to localhost.
+11 Turned off my VPN service, Private Internet Access (PIA)
+12 Checked if I am running a proxy - I'm not.
+13 Cleared my Google Chrome cache
+Additional Information
+I don’t know if they are relevant, but here are a) some details of my PC configuration that might be relevant a) listeniing ports (as displayed by XAMMP) b) my Intel(R) Ethernet Connection I217-LM settings and c) my IP Configuration settings: d) ping results for localhost ips e) excluded ports.
+Listening Ports (as displayed by XAMMP)
+Intel(R) Ethernet Connection I217-LM settings
+Client for Microsoft Networks – enabled
+File and Printer Sharing for Microsoft Networks – enabled
+VirtualBox NDIS6 Bridged Networking Driver – enabled
+Npcap Packet Driver (NPCAP) – enabled
+QoS Packet Scheduler – enabled
+Bridge Driver – Enabled
+Internet Protocol Version 4 (TCP/IPv4) - enabled Microsoft Network Adapter Multiplexor Portocol – Not enabled
+Microsoft LLDP Protocol Driver – enabled
+Internet Protocol Version 6 (TCP/IPv6) - enabled
+Link-Layer Topology Discovery Responder – enabled
+Link-Layer Topology Discovery Mapper I/O Driver – enabled
+Hyper-V Extenable Virtual Switch – Not enabled
+IP Configuration settings
+Ethernet adapter Ethernet:
+Connection-specific DNS Suffix  . : mynetworksettings.com
+IPv6 Address. . . . . . . . . . . : 2600:4041:5926:7400:d640:d6d2:1381:7867
+Temporary IPv6 Address. . . . . . : 2600:4041:5926:7400:8111:e995:795a:1a55
+Link-local IPv6 Address . . . . . : fe80::ddbd:5944:a53c:6a8b%9
+IPv4 Address. . . . . . . . . . . : 192.168.1.2
+Subnet Mask . . . . . . . . . . . : 255.255.255.0
+Default Gateway . . . . . . . . . : fe80::6a2:22ff:fec4:ebe%9
+192.168.1.1
+Ethernet adapter VirtualBox Host-Only Network:
+Connection-specific DNS Suffix  . :
+Link-local IPv6 Address . . . . . : fe80::a21c:cab8:79bb:78b6%15
+Autoconfiguration IPv4 Address. . : 169.254.205.166
+Subnet Mask . . . . . . . . . . . : 255.255.0.0
+Default Gateway . . . . . . . . . :
+Ethernet adapter vEthernet (WSL):
+Connection-specific DNS Suffix  . :
+Link-local IPv6 Address . . . . . : fe80::44e8:4d5:f0be:7672%37
+IPv4 Address. . . . . . . . . . . : 172.21.16.1
+Subnet Mask . . . . . . . . . . . : 255.255.240.0
+Ping Results
+Pinging 127.0.0.1 with 32 bytes of data:
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+Ping statistics for 127.0.0.1:
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+Minimum = 0ms, Maximum = 0ms, Average = 0ms
+Pinging 192.168.1.2 with 32 bytes of data:
+Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
+Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
+Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
+Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
+Ping statistics for 192.168.1.2:
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+Minimum = 0ms, Maximum = 0ms, Average = 0ms
+Excluded Ports
+C:\WINDOWS\system32>netsh interface ipv4 show excludedportrange protocol=tcp
+Protocol tcp Port Exclusion Ranges
+Start Port    End Port
+----------    --------
+2869        2869
+8883        8883
+8884        8884
+50000      50059     *
+* - Administered port exclusions.
+Zero AI Policy
+We believe in
+human
+intelligence. Our moderation policy strictly prohibits the use of LLM content in our Q&A threads.
+skullnobrains
+few things come to mind.
+the container could be listening on port 8080 of the machine address.
+localhost might be distinct in the container context. no idea in windows as i hardly ever used docker on windows. bridged containers typically use distinct network stacks and the loopbacks are not shared with the system's
+localhost usually resolves as iov6 ::1 rather than 127.0.0.1 and your app or docker might not be using ipv6
+--
+i would try 127… and the lan ip of the machine as a debugging first step.
+David Johnson, CD
+🇨🇦
+docker run -p 1476:8080 --name ocr4all -v C:\Users\Public\ocr4all\data:/var/ocr4all/data -v C:\Users\Public\ocr4all\models:/var/ocr4all/models/custom -it uniwuezpd/ocr4all
+from the ocr4all website.  What is the docker run that you are using?
+skullnobrains
+if the above options ard the ones you use, you need to connect to port 1476
+EARN REWARDS FOR ASKING, ANSWERING, AND MORE.
+Earn free swag for participating on the platform.
+Charlie Stone
+🇺🇸
+ASKER
+Thanks for your suggestions. I very much appreciate them.
+Can I take it that “
+i
+o
+v6
+” in “
+localhost usually resolves as iov6 ::1
+” is a typo for”
+i
+p
+v6
+”?
+I’m running Docker Desktop in Windows Subsystem for Linux (WSL). According to Google AI, “even when using WSL 2, [Docker Desktop] defaults to using IPv4 for its internal networking, including services like the DNS server and HTTP proxy, and doesn't currently support IPv6.”
+I’m not sure what you mean by, “
+i would try 127…
+and the lan ip of the machine as a debugging first step”.
+If by my lan ip you mean my ipv4 address as shown by ipconfig then in my Ethernet adapter vEthernet (WSL) network it is 172.21.16.1. In my Ethernet adapter Ethernet network it is 192.168.1.2. The ip address 127.0.0.1 does not appear anywhere in my ip configuration settings. This is despite my Windows hosts file having my localhost set as: “
+127.0.0.1 localhost”
+(When I enter 172.21.16.1 in a browser address box nothing happens. 172.21.16.1 and 192.168.1.2 result in a connection refused error).
+What do you make of this?
+What is switching my localhost from 127.0.0.1 to 172.21.16.1 in my WSL network? What is switching my localhost from127.0.0.1 to 192.168.1.2 in my Ethernet adapter Ethernet network? (I hope this is not a foolish question – I’m a novice, unfortunately, when it comes PC network issues).
+Could this be the cause of my localhost problem?
+Finally, I’m not sure what you mean by “
+i would try 127…
+”. In what way should I try it?
+With regard to Docker Desktop I am again a novice. I am trying to create the Docker OCR4All container by following the instruction in the OCR4All
+Guide
+. This is to run the following script in Windows Power Shell:
+docker run -p 1476:8080 --name ocr4all -v C:\Users\XXXX\ocr4all\data:/var/ocr4all/data -v C:\Users\XXXX\ocr4all\models:/var/ocr4all/models/custom -it uniwuezpd/ocr4all
+As I say in my post, when I run port monitoring apps I find that nothing is listening on port 8080. This is the case whether I a)  do not have Docker loaded b) have Docker loaded c) am running the Docker OCR4All Power Shell script.
+As far as I know port 8080 should be my localhost and Docker should be listening to it. My assumption is some Windows setting is blocking port 8080 or diverting Docker from it.
+Any thoughts?
+Anyway what I have is not a Docker problem per se, but a localhost problem as I cannot connect to localhost generally (by trying to connect to localhost through a browser address box).
+Thanks again for your suggestions.
+Seth Simmons
+🇺🇸
+When I type "
+http://localhost:8080/
+", 192.168.1.2 or 127.0.0.1 in any browser address box I get the '
+refused
+to connect' message.
+my first thought is that nothing is listening on that port…
+5 Ran netstat -a -n -o in Power Shell to again check if any applications were using Port 8080. None were.
+…and that confirms it
+not a docker expert (I just added that topic to this question) but seems something isn't right with docker
+might be logs you can look at to see why it doesn't seem to be running
+Anyway what I have is not a Docker problem per se, but a localhost problem as I cannot connect to localhost generally
+if docker was showing in netstat ouput on port 8080 for your local network connection (not localhost) i would probably agree but that isn't what it shows
+Charlie Stone
+🇺🇸
+ASKER
+Hi David,
+Thanks for commenting.
+I’ve just added some comments in response to
+skullnobrains
+that provide more information about my problem
+Regarding Docker Desktop. I’m running V. 27.5.1, build 9f9e405 with Java build 23.0.2+7-58, mixed mode, sharing) (V. 27.5.1, build 9f9e405 with Java build 23.0.2+7-58, mixed mode, sharing).
+So far as I can tell my problem is port 8080 rather than 1476. Please note I’m an absolute Docker newbie, but the Docker Power Shell script stalls on the following script line:
+INFO [Thread-5] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["
+http-nio-8080
+"]
+My assumption is Docker cannot access port 8080, that is, my localhost. I tried substituting port 3000 for 8080 but it still stalled.
+As for port 1476, as I understand it, I can't connect to port 1476 because Docker has to first create the OCR4All container that I can then access through port 1476. Since Docker fails to create the container through localhost (port 8080) there will be nothing to connect to at port 1476. Am I missing something here?
+Appended to this post is the Docker log for my attempted OCR4All container creation when it stalls.
+I’ve bolded the script line where the script stalls
+.
+Again, as I commented to
+skullnobrains
+, I don’t think I have Docker problem per se, but a localhost problem: I cannot connect to localhost generally (by trying to connect to localhost through a browser address box). I think that if I could resolve my localhost problem my Docker problem would also b e resolved.
+Do you agree?
+Or is my Docker problem distinct from my localhost problem?
+Docker alternative port settings
+I’ve tried to create the OCR4All container with
+p 8080:8080 \
+but I get an error message:
+At line:4 char:7
++     --name ocr4all \
++       ~
+Missing expression after unary operator '--'.
+At line:4 char:7
++     --name ocr4all \
++       ~~~~
+Unexpected token 'name' in expression or statement.
++ CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
++ FullyQualifiedErrorId : MissingExpressionAfterOperator
+(The full Docker script for this container creation attempt is:
+docker run \
+-p 8080:8080 \
+-u `id -u root`:`id -g $USER` \
+--name ocr4all \
+-v <OCR_DATA_DIR>:/var/ocr4all/data \
+-v <OCR_MODEL_DIR>:/var/ocr4all/models/custom \
+-it <IMAGE_NAME>
+The source is:
+https://github.com/OCR4all/docker_image
+.)
+Docker OCR4All Container Script Log
+2025-03-20 15:17:31 Using CATALINA_BASE:  /usr/local/tomcat
+2025-03-20 15:17:31 Using CATALINA_HOME:  /usr/local/tomcat
+2025-03-20 15:17:31 Using CATALINA_TMPDIR: /usr/local/tomcat/temp
+2025-03-20 15:17:31 Using JRE_HOME:       /usr/local/openjdk-8
+2025-03-20 15:17:31 Using CLASSPATH:      /usr/local/tomcat/bin/bootstrap.jar:/usr/local/tomcat/bin/tomcat-juli.jar
+2025-03-20 15:17:31 Using CATALINA_OPTS:
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.539 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/9.0.54
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.543 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Sep 28 2021 13:51:49 UTC
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 9.0.54.0
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Linux
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            5.15.167.4-microsoft-standard-WSL2
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             /usr/local/openjdk-8/jre
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           1.8.0_312-b07
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         /usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         /usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.551 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djdk.tls.ephemeralDHKeySize=2048
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.protocol.handler.pkgs=org.apache.catalina.webresources
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dorg.apache.catalina.security.SecurityListener.UMASK=0027
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dignore.endorsed.dirs=
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=/usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.553 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=/usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.553 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=/usr/local/tomcat/temp
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.566 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [1.2.31] using APR version [1.6.5].
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.566 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true], UDS [true].
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.567 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.575 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 1.1.1d 10 Sep 2019]
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.992 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.022 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [710] milliseconds
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.058 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.058 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.083 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deploying web application archive [/usr/local/tomcat/webapps/Larex.war]
+2025-03-20 15:17:34 20-Mar-2025 19:17:34.984 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+2025-03-20 15:17:35 20-Mar-2025 19:17:35.039 INFO [main] org.springframework.web.context.ContextLoader.initWebApplicationContext Root WebApplicationContext: initialization started
+2025-03-20 15:17:35 20-Mar-2025 19:17:35.277 INFO [main] org.springframework.web.context.ContextLoader.initWebApplicationContext Root WebApplicationContext initialized in 237 ms
+2025-03-20 15:17:35 20-Mar-2025 19:17:35.361 INFO [main] org.springframework.web.servlet.FrameworkServlet.initServletBean Initializing Servlet 'SpringDispatcher'
+2025-03-20 15:17:36 20-Mar-2025 19:17:36.637 INFO [main] org.springframework.web.servlet.FrameworkServlet.initServletBean Completed initialization in 1275 ms
+2025-03-20 15:17:36 20-Mar-2025 19:17:36.654 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/Larex.war] has finished in [3,570] ms
+2025-03-20 15:17:36 20-Mar-2025 19:17:36.656 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deploying web application archive [/usr/local/tomcat/webapps/ocr4all.war]
+2025-03-20 15:17:38 20-Mar-2025 19:17:38.861 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+2025-03-20 15:17:38 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+2025-03-20 15:17:38 SLF4J: Defaulting to no-operation (NOP) logger implementation
+2025-03-20 15:17:38 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+2025-03-20 15:17:40 OpenJDK 64-Bit Server VM warning: You have loaded library /usr/local/tomcat/temp/opencv_openpnp3470452652851255313/nu/pattern/opencv/linux/x86_64/libopencv_java320.so which might have disabled stack guard. The VM will try to fix the stack guard now.
+2025-03-20 15:17:40 It's highly recommended that you fix the library with 'execstack -c <libfile>', or link it with '-z noexecstack'.
+2025-03-20 15:17:40 20-Mar-2025 19:17:40.563 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/ocr4all.war] has finished in [3,907] ms
+2025-03-20 15:17:40 20-Mar-2025 19:17:40.568 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+2025-03-20 15:17:40 20-Mar-2025 19:17:40.581 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [7560] milliseconds
+2025-03-20 15:19:36 ^C20-Mar-2025 19:19:36.502 INFO [Thread-5]
+org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+2025-03-20 15:19:36 20-Mar-2025 19:19:36.519 INFO [Thread-5]
+org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+2025-03-20 15:19:36 20-Mar-2025 19:19:36.579 INFO [Thread-5] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+2025-03-20 15:19:36 20-Mar-2025 19:19:36.620 INFO [Thread-5] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+Get a FREE t-shirt when you ask your first question.
+We believe in
+human
+intelligence. Our moderation policy strictly prohibits the use of LLM content in our Q&A threads.
+Charlie Stone
+🇺🇸
+ASKER
+Skullnobrains,
+"you need to connect to port 1476"
+Yes, but, as I understand it, I can't connect to port 1476 because Docker has to first create the OCR4All container that Ilets me access OCR4All through port 1476.
+Since Docker fails to create the container through localhost (port 8080) I will be unable to connect to OCR4All through port 1476.
+Am I missing something here?
+Charlie Stone
+🇺🇸
+ASKER
+Seth,
+Thanks for  your comments.
+I ran netstat again and, once, again port 8080 fails to show.
+Attached for your review is the Docker log of the OCR4All container script.
+So, is something blocking port 8080? I checked for excluded ports and 8080 was not listed as one.  Is there someway I can do to activate port 8080 - generally or just for Docker? What should be my next step?
+Docker OCR4All Container Script Log
+2025-03-20 15:17:31 Using CATALINA_BASE:  /usr/local/tomcat
+2025-03-20 15:17:31 Using CATALINA_HOME:  /usr/local/tomcat
+2025-03-20 15:17:31 Using CATALINA_TMPDIR: /usr/local/tomcat/temp
+2025-03-20 15:17:31 Using JRE_HOME:       /usr/local/openjdk-8
+2025-03-20 15:17:31 Using CLASSPATH:      /usr/local/tomcat/bin/bootstrap.jar:/usr/local/tomcat/bin/tomcat-juli.jar
+2025-03-20 15:17:31 Using CATALINA_OPTS:
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.539 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/9.0.54
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.543 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Sep 28 2021 13:51:49 UTC
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 9.0.54.0
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Linux
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            5.15.167.4-microsoft-standard-WSL2
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.544 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             /usr/local/openjdk-8/jre
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           1.8.0_312-b07
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         /usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.545 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         /usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.551 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djdk.tls.ephemeralDHKeySize=2048
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.protocol.handler.pkgs=org.apache.catalina.webresources
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dorg.apache.catalina.security.SecurityListener.UMASK=0027
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dignore.endorsed.dirs=
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.552 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=/usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.553 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=/usr/local/tomcat
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.553 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=/usr/local/tomcat/temp
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.566 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [1.2.31] using APR version [1.6.5].
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.566 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true], UDS [true].
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.567 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.575 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 1.1.1d 10 Sep 2019]
+2025-03-20 15:17:32 20-Mar-2025 19:17:32.992 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.022 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [710] milliseconds
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.058 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.058 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-03-20 15:17:33 20-Mar-2025 19:17:33.083 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deploying web application archive [/usr/local/tomcat/webapps/Larex.war]
+2025-03-20 15:17:34 20-Mar-2025 19:17:34.984 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+2025-03-20 15:17:35 20-Mar-2025 19:17:35.039 INFO [main] org.springframework.web.context.ContextLoader.initWebApplicationContext Root WebApplicationContext: initialization started
+2025-03-20 15:17:35 20-Mar-2025 19:17:35.277 INFO [main] org.springframework.web.context.ContextLoader.initWebApplicationContext Root WebApplicationContext initialized in 237 ms
+2025-03-20 15:17:35 20-Mar-2025 19:17:35.361 INFO [main] org.springframework.web.servlet.FrameworkServlet.initServletBean Initializing Servlet 'SpringDispatcher'
+2025-03-20 15:17:36 20-Mar-2025 19:17:36.637 INFO [main] org.springframework.web.servlet.FrameworkServlet.initServletBean Completed initialization in 1275 ms
+2025-03-20 15:17:36 20-Mar-2025 19:17:36.654 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/Larex.war] has finished in [3,570] ms
+2025-03-20 15:17:36 20-Mar-2025 19:17:36.656 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deploying web application archive [/usr/local/tomcat/webapps/ocr4all.war]
+2025-03-20 15:17:38 20-Mar-2025 19:17:38.861 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+2025-03-20 15:17:38 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+2025-03-20 15:17:38 SLF4J: Defaulting to no-operation (NOP) logger implementation
+2025-03-20 15:17:38 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+2025-03-20 15:17:40 OpenJDK 64-Bit Server VM warning: You have loaded library /usr/local/tomcat/temp/opencv_openpnp3470452652851255313/nu/pattern/opencv/linux/x86_64/libopencv_java320.so which might have disabled stack guard. The VM will try to fix the stack guard now.
+2025-03-20 15:17:40 It's highly recommended that you fix the library with 'execstack -c <libfile>', or link it with '-z noexecstack'.
+2025-03-20 15:17:40 20-Mar-2025 19:17:40.563 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/ocr4all.war] has finished in [3,907] ms
+2025-03-20 15:17:40 20-Mar-2025 19:17:40.568 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+2025-03-20 15:17:40 20-Mar-2025 19:17:40.581 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [7560] milliseconds
+(Last script lien to run)
+2025-03-20 15:19:36 ^C20-Mar-2025 19:19:36.502 INFO [Thread-5]
+org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+(Script stalls here)
+2025-03-20 15:19:36 20-Mar-2025 19:19:36.519 INFO [Thread-5
+]
+org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+2025-03-20 15:19:36 20-Mar-2025 19:19:36.579 INFO [Thread-5] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+2025-03-20 15:19:36 20-Mar-2025 19:19:36.620 INFO [Thread-5] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+David Johnson, CD
+🇨🇦
+the docker container must be running and its not as it is failing.
+EARN REWARDS FOR ASKING, ANSWERING, AND MORE.
+Earn free swag for participating on the platform.
+ASKER CERTIFIED SOLUTION
+Charlie Arehart
+membership
+Log in or create a free account to see answer.
+Signing up is free and takes 30 seconds.
+No credit card required.
+Create Account
+noci
+IF your docker container starts THEN there is a proxy create on the host that listens on the host on port 1476  and that proxy will connect to the container port 8080.
+If the container does NOT start correctly all bets are off.
+definitely the host will never listen on port 8080 , only the container does.  And you need the IP addres of the container (random) to connect to port 8080.   This is what the proxy is for the connect a single port on the host (and its addresses) to the virtual adapter in the container. (User docker info).
+Check the logs of starting the container… see what fails and repair  that rinse & repeat until it starts, then the container can also be access through port 1476 on the host.
+skullnobrains
+<< Can I take it that “
+i
+o
+v6
+” in “
+localhost usually resolves as iov6 ::1
+” is a typo for”
+i
+p
+v6
+”? >> yes
+<< I’m not sure what you mean by, “
+i would try 127…
+and the lan ip of the machine as a debugging first step”. >>
+yes try explicitely 127.0.0.1 and other lan ips ONCE the container starts properly
+i presume 172.something is the ip of the bridge and 192.something is your regular lan ip.
+<< This is despite my Windows hosts file having my localhost set as: “
+127.0.0.1 localhost” >>
+the hosts file has no relation to the ip address of your machine. you can totally have any address in there.
+your machine definitely has 127.0.0.1 set as an address. maybe it only show with ipconfig /all or whatever netsh barabric command.
+<< (When I enter 172.21.16.1 in a browser address box nothing happens. 172.21.16.1 and 192.168.1.2 result in a connection refused error). >>
+means nothing listens on the 192 address which the computer knows instantly because it is it's own address while the other one is mapped to either a firewalled stealth machine (possibly the container) or routed into oblivion.
+skullnobrains
+<< What is switching my localhost from 127.0.0.1 to 172.21.16.1 in my WSL network? What is switching my localhost from127.0.0.1 to 192.168.1.2 in my Ethernet adapter Ethernet network? (I hope this is not a foolish question >>
+nothing switches from any of these ips. i am unsure what you are asking. not a foolish question but apparently an erroneous assumption under the hood.
+when you run
+docker run -p 1476:8080 …
+you open up port 1476 on your host or the bridge or whatever and docker redirects it to the internal port 8080. so you need to connect to 1476 rather than 8080. i am unsure which address will work. just try them all.
+<< Do you agree?
+Or is my Docker problem distinct from my localhost problem? >>
+not at all. you do not have a localhost problem. that just does not mean anything. the localhost of your computer is distinct from the locahost inside the container. that's all. 127.0.0.1:1476 shoud work.or possibly one of your other ipv4.
+Get a FREE t-shirt when you ask your first question.
+We believe in
+human
+intelligence. Our moderation policy strictly prohibits the use of LLM content in our Q&A threads.
+skullnobrains
+<< Since Docker fails to create the container through localhost (port 8080) there will be nothing to connect to at port 1476. Am I missing something here? >>
+create the container through localhost does not mean anything i can understand but indeed, there is no point trying to connect to a container that does not run in the first place.
+Charlie Arehart
+Noci, I'd like to offer a couple of clarifications to your reply here, for Charlie Stone's sake:
+1) You say, “
+you need the IP addres of the container (random) to connect to port 8080.   This is what the proxy is for the connect a single port on the host (and its addresses) to the virtual adapter in the container. (User docker info).
+”
+Some good news is that's not true for Docker Desktop. One of its many benefits is that it DOES by default cause
+published
+container ports to be available to the host via
+localhost
+, without need to know the ip of the container. So that should not be the issue here.
+2) You say, “
+Check the logs of starting the container… see what fails and repair  that rinse & repeat until it starts
+”
+While that's indeed conventional wisdom, I was making the point in my reply (which I understand you may not have read) that in fact I think Charlie's container HAD started and WAS running (when he inferred from the “stalled” logs that it was not). He was just failing to look for the PUBLISHED port (1476 in his example).
+As always, just trying to help, and open to any feedback on what I offer: there are certainly lots of variables and perspectives to consider in challenges like this.  :-) I'm really hoping he'll find things are in fact working after all.
+skullnobrains
+given the error you get, it would seem you copy pasted the docker command and a space got included accidentally on the line preceding --name so the shell tries to interpret said line as a new command rather than a continuation of the docker command.
+no need to connect to anything until launching the container is a success. let's focus on that first.
+nb : this is consistent with the fact the container starts. but just with missing arguments.
+EARN REWARDS FOR ASKING, ANSWERING, AND MORE.
+Earn free swag for participating on the platform.
+noci
+127.0.0.1 is the address on the localhost interface
+<whatever> is the address on your eth0 interface (supplied by static config in a local file), or through DHCP.
+Then there is the network (internal, virtual, …) created by docker to connect docker containers amongst each other. And to the port-proxy.
+noci
+@Charlie… I prefer different container technology more like “virtualised ”machines" like in formerly LXD..
+(proxmox…)  and if docker is required run them hrough some hosting management such as portainer if running on servers.
+Charlie Arehart
+@Noci, sure. I understand that. But Charlie S had shared he was running Docker Desktop (on Windows). :-) And so I've been  offering explanations from that perspective (starting with
+my first reply to him
+last night), and in response to the observations of some others since then.
+Most important, we've not heard again from Charlie S since yesterday afternoon. I hope we might, especially before folks offer more ideas. I really do think it's possible we'll find that what I suggested is all that was wrong for him all this time, that he was simply looking for the wrong port (the 8080 IN the container, rather than the 1476 published BY the container).
+Charlie S, any update, based on all that's been shared since your last note? (If it's “all too much” to take in, please confirm if you've at least read
+what I wrote
+, as I propose exactly what you can try--and how you may have had things working all along. Or maybe there's more to it. Let's hear.
+Get a FREE t-shirt when you ask your first question.
+We believe in
+human
+intelligence. Our moderation policy strictly prohibits the use of LLM content in our Q&A threads.
+Charlie Stone
+🇺🇸
+ASKER
+Hi,
+Sorry not to have gotten back to you earlier, but I stopped working at 7:30 PM last night and I was out this morning until 1:00 PM. Since then I've been applying your suggestions - with success as it happens (see below). I've been making sure I can access OCR4All through its Docker container before getting back to you.
+First, though, thanks for all your comments, especially those of Seth. I very much appreciate them.
+Please bear with me because when it comes to computers I am self-taught and learn as I go along. Docker, OCR4All and ports are all very new to me, but I’m beginning to get an understanding.
+Now the good news, my problem seems solved!
+I followed Seth’s advice and opened another Power Shell windowsand ran “docker ps”.  Sure enough I found I had a Docker container named ocr4all:
+CONTAINER ID   IMAGE               COMMAND             CREATED              STATUS              PORTS                    NAMES
+240de7d5be0b   uniwuezpd/ocr4all   "catalina.sh run"   About a minute ago   Up About a minute   0.0.0.0:1476->8080/tcp   ocr4all
+I then accessed OCR4All by entering “
+http://localhost:1476/ocr4all/
+” in my Chrome address box. The OCR4All web address was http://localhost:1476/ocr4all/#!.
+Docker showed my OCR4All container to be running. The Docker log script showed the Docker script stopped at “
+21-Mar-2025 11:59:05.065 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [7526] milliseconds
+” as has always been the case.
+I subsequently: exited my Power Shell windows and closed Chrome. My Docker OCR4All had container ceased running but still existed. I then reopened Chrome and found that I had lost access to OCR4All at
+http://localhost:1476/ocr4all/#
+!. So I ran Command Prompt as Administrator and ran the script “
+docker start –ia ocr4all
+”. This produced the same output as when I ran
+docker run -p 1476:8080 --name ocr4all -v C:\Users\Public\ocr4all\data:/var/ocr4all/data -v C:\Users\Public\ocr4all\models:/var/ocr4all/models/custom -it uniwuezpd/ocr4all
+which first created the Docker OCR4All container. The Docker command line script still stops at script line
+"21-Mar-2025 11:59:05.065 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [7526] milliseconds
+”
+I’ve appended this output to this post.
+I'm curious,
+can anyone suggests why the Docker script just ceases to run at this line rather than terminating?
+One final thing: I noticed that I was a) running Docker in Windows Subsystem for Linux (WSL) and that my Ipv4 address for this adapter was 172.21.16.1. So I changed my Bitdefender Docker IP address advanced rule from 192.168.1.2  to 172.21.16.1.
+I don’t know if this made any difference, but I thought I should mention it. I can also access OCR4All through
+http://localhost:1476/ocr4all/#
+! With my Bitdefender firewall turned on.
+Thanks again to everyone who commented, made suggestions and gave advice. It’s been quite an education. It’s taken me about two weeks to get over this Docker/OCR4All/localhost hurdle. I couldn't have done it without you.
+I very much appreciate your time and effort. Thanks again.
+Docker log for Command line script, “docker start –ia ocr4all”
+Using CATALINA_BASE:   /usr/local/tomcat
+Using CATALINA_HOME:   /usr/local/tomcat
+Using CATALINA_TMPDIR: /usr/local/tomcat/temp
+Using JRE_HOME:        /usr/local/openjdk-8
+Using CLASSPATH:      /usr/local/tomcat/bin/bootstrap.jar:/usr/local/tomcat/bin/tomcat-juli.jar
+Using CATALINA_OPTS:
+21-Mar-2025 18:47:11.967 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/9.0.54
+21-Mar-2025 18:47:11.969 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Sep 28 2021 13:51:49 UTC
+21-Mar-2025 18:47:11.970 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 9.0.54.0
+21-Mar-2025 18:47:11.970 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Linux
+21-Mar-2025 18:47:11.970 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:           5.15.167.4-microsoft-standard-WSL2
+21-Mar-2025 18:47:11.970 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+21-Mar-2025 18:47:11.970 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:            /usr/local/openjdk-8/jre
+21-Mar-2025 18:47:11.970 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           1.8.0_312-b07
+21-Mar-2025 18:47:11.970 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+21-Mar-2025 18:47:11.971 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         /usr/local/tomcat
+21-Mar-2025 18:47:11.971 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         /usr/local/tomcat
+21-Mar-2025 18:47:11.975 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
+21-Mar-2025 18:47:11.976 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+21-Mar-2025 18:47:11.976 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djdk.tls.ephemeralDHKeySize=2048
+21-Mar-2025 18:47:11.976 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.protocol.handler.pkgs=org.apache.catalina.webresources
+21-Mar-2025 18:47:11.976 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dorg.apache.catalina.security.SecurityListener.UMASK=0027
+21-Mar-2025 18:47:11.976 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dignore.endorsed.dirs=
+21-Mar-2025 18:47:11.976 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=/usr/local/tomcat
+21-Mar-2025 18:47:11.977 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=/usr/local/tomcat
+21-Mar-2025 18:47:11.977 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=/usr/local/tomcat/temp
+21-Mar-2025 18:47:11.986 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [1.2.31] using APR version [1.6.5].
+21-Mar-2025 18:47:11.986 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true], UDS [true].
+21-Mar-2025 18:47:11.986 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+21-Mar-2025 18:47:11.990 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 1.1.1d 10 Sep 2019]
+21-Mar-2025 18:47:12.407 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+21-Mar-2025 18:47:12.441 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [700] milliseconds
+21-Mar-2025 18:47:12.488 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+21-Mar-2025 18:47:12.489 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/9.0.54]
+21-Mar-2025 18:47:12.516 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deploying web application archive [/usr/local/tomcat/webapps/Larex.war]
+21-Mar-2025 18:47:13.895 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+21-Mar-2025 18:47:13.934 INFO [main] org.springframework.web.context.ContextLoader.initWebApplicationContext Root WebApplicationContext: initialization started
+21-Mar-2025 18:47:14.141 INFO [main] org.springframework.web.context.ContextLoader.initWebApplicationContext Root WebApplicationContext initialized in 207 ms
+21-Mar-2025 18:47:14.223 INFO [main] org.springframework.web.servlet.FrameworkServlet.initServletBean Initializing Servlet 'SpringDispatcher'
+21-Mar-2025 18:47:15.489 INFO [main] org.springframework.web.servlet.FrameworkServlet.initServletBean Completed initialization in 1266 ms
+21-Mar-2025 18:47:15.506 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/Larex.war] has finished in [2,990] ms
+21-Mar-2025 18:47:15.508 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deploying web application archive [/usr/local/tomcat/webapps/ocr4all.war]
+21-Mar-2025 18:47:17.033 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+OpenJDK 64-Bit Server VM warning: You have loaded library /usr/local/tomcat/temp/opencv_openpnp7762812839892800046/nu/pattern/opencv/linux/x86_64/libopencv_java320.so which might have disabled stack guard. The VM will try to fix the stack guard now.
+It's highly recommended that you fix the library with 'execstack -c <libfile>', or link it with '-z noexecstack'.
+21-Mar-2025 18:47:18.724 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/ocr4all.war] has finished in [3,216] ms
+21-Mar-2025 18:47:18.728 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+21-Mar-2025 18:47:18.741 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [6299] milliseconds
+Charlie Stone
+🇺🇸
+ASKER
+Post Script,
+I don't know why I wrote ‘Seth’ when I wrote “I followed Seth’s advice . .”
+It was Charlie Arehart's suggestion that I followed. Thanks Charlie.
+Charlie Arehart
+Great to see, and glad to have helped. Thanks for marking the solution (which also helped clarify things).
+1) As for your ongoing surprise that the container “stalls”, or as you last said “the Docker script just ceases to run at this”, you must have missed a key point I made in my first answer. See the next to last paragraph starting “BTW”.
+The issue is that the “script” is not ceasing (there is no “script” here), nor is the container. What's ceasing is any ongoing logging from the container (Tomcat), so your "docker run" command is merely awaiting any subsequent logging (by Tomcat, to the “stdout” for the container). Again, the container is running fine at that point.
+Don't look for the logs to change. As long as your browser requests work, it's running. And if you don't WANT to see that (be confused by it)--and especially if you don't want to do a ctrl-c to “get back to powershell”, which would STOP the container, instead run your docker run command with the -d arg, as in “docker run -d <the rest of your args>”. That will cause the container to start in the background and NOT tie up your powershell with the logs. That leads nicely to the next point.
+2) As for your saying “
+I subsequently: exited my Power Shell windows and closed Chrome. My Docker OCR4All had container ceased running but still existed
+”, let's clarify that your closing the powershell script running a docker command would NOT stop or kill the container. It should have remained running. Remember: you can prove that with the “docker ps”.
+Instead, if you DO want to STOP a container, you'd need to do a "docker stop" , in your case “docker stop ocr4all”.  (And then, yes, doing that “docker start” would start the stopped container.)
+To be clear, just as you can see what containers are RUNNING with the “docker ps” I offered, you can see those AND any stopped ("existed") ones with “docker ps -a”.  You can even list ONLY stopped containers with:
+docker ps --filter “status=exited”
+And FWIW, the “docker ps” can be run instead as “docker container list”, with all those variants above.
+3) I realize we've gone “into the weeds” here with all this detail. I will say that if you do want to udnerstand all this stuff, it's about learning Docker better. You can opt not to, and just have it “working as it seems to be”.
+But if you DO want to learn more, I would HIGHLY recommend you read Elton Stoneman's “Learn Docker in a Month of Lunches”. And if you prefer video, he offers a free youtube playlist of all the key info at
+https://www.youtube.com/playlist?list=PLXl_isu8qxvmDOAnUkG5x16LzBzGzY_Ww
+It really is a great intro for the right audience. Still others might prefer the wonderful "Docker Mastery" training from Bret Fisher available at Udemy, often offered at a bargain price:
+https://www.bretfisher.com/docker-mastery/.
+Finally,  of course other resources exist to suit different people in their journey getting started with Docker. Let's not get too far off-track here. I just wanted to get you on SOME boat to help you moving better through these rough waters.
+EARN REWARDS FOR ASKING, ANSWERING, AND MORE.
+Earn free swag for participating on the platform.
+Windows OS
+--
+Questions
+--
+Followers
+Top Experts
+This topic area includes legacy versions of Windows prior to Windows 2000: Windows 3/3.1, Windows 95 and Windows 98, plus any other Windows-related versions including Windows Mobile.

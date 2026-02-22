@@ -1,0 +1,117 @@
+SOURCE_URL: https://makerkit.dev/blog/tutorials/fix-hydration-issues-nextjs-react18
+--------------------------------------------------
+How to fix common hydration issues in Next.js and React 18
+Demo
+Aug 6, 2022
+How to fix common hydration issues in Next.js and React 18
+Common Next.js hydration issues and how to fix them
+next
+react
+Since updating React 18, Next.js has been stricter when it comes to hydrating the client-side after the page was server-rendered initially on the server.
+In fact, you likely keep seeing errors such as "Text content does not match server-rendered HTML" when the page loads. It took a while for me to understand it, hoping it was a bug in React; but as it turned out, it was an error on my end.
+While upgrading
+Makerkit
+to React 18, I found two common issues:
+The HTML was invalid - e.g. malformed
+Conditional Rendering based on browser vs server conditions
+Malformed HTML
+Malformed HTML doesn't automatically mean it will render badly as browsers are capable of handling these situations fairly well. As such, it's rather hard being able to locate places where we used a tag in the wrong place, such as in the code below:
+<
+p
+>
+{
+*
+/
+Wrong!
+*
+/
+}
+<
+div
+>
+{children}
+</
+div
+>
+<
+p
+>
+In the example above,
+p
+shouldn't be a parent of
+div
+. Browsers may be forgiving, but other DOM implementations may not, stripping the internal invalid tags.
+This is why the server and the browser end up rendering different HTML strings
+, even when there is no apparent difference between the two.
+The fix here is very simple:
+make sure you write syntactically valid HTML code
+.
+Conditional Rendering
+Very often, we only want to display a value on the client instead than on the server. In Makerkit's SaaS boilerplate for Next.js, this issue happens a lot, because we cannot run the Web Firebase SDK on the server.
+Therefore, to avoid rendering on the server, we used to do the following checks:
+{
+isBrowser
+()
+?
+<
+MyComponent
+/>
+:
+null
+}
+And the above still looks fine, but React 18 didn't quite like it. To solve this issue, we used
+next/dynamic
+to import the components dynamically and by setting the option
+ssr
+to
+false
+:
+import
+dynamic
+from
+'next/dynamic'
+;
+const
+MyComponent
+=
+dynamic
+(()
+=>
+import
+(
+`./MyComponent.tsx`
+), {
+ssr:
+false
+});
+// somewhere in your code simply render the component
+return
+<
+MyComponent
+/>
+And this solved the second issue. To summarize, whenever you're using conditions to avoid rendering components on the server with Next.js and React 18, simply use a dynamic import instead.
+I hope these two solutions will help you fix your hydration issues. If you have any questions, do
+contact me
+!
+Some other posts you might like...
+Feb 6, 2026
+Supabase CMS: How to Manage Content in Postgres with Supamode and Makerkit
+Build a Supabase CMS that stores blog posts, docs, and changelogs in Postgres. Use Supamode as the visual editor and Makerkit's CMS plugin system to serve content in Next.js.
+Feb 3, 2026
+Next.js Version Skew Protection: The Complete 2026 Guide
+Learn how to fix version skew in Next.js. Covers Vercel, Netlify, AWS Amplify, Cloudflare, and custom implementations with ready-to-use code. Updated for Next.js 16.
+Jan 25, 2026
+Next.js Route Handlers: The Complete Guide
+Learn to build secure, production-ready API endpoints with Next.js Route Handlers. Covers validation, authentication, webhooks, error handling, and logging patterns.
+Jan 24, 2026
+Next.js Server Actions Security: 5 Vulnerabilities You Must Fix
+Server Actions are public HTTP endpoints. Learn to secure them with authentication, Zod validation, rate limiting, and authorization patterns. Updated for Next.js 16.
+Jan 22, 2026
+Next.js Server Actions: The Complete Guide (2026)
+Learn how to use Next.js Server Actions for form submissions and data mutations. Covers useActionState, error handling, validation patterns, and production best practices.
+Jan 22, 2026
+When to Use SSR in Next.js 16: A Decision Framework
+Learn when to use SSR, SSG, or Cache Components in Next.js 16. Practical decision framework for React Server Components, caching, and streaming.
+Jan 21, 2026
+10 Best Next.js Hosting Providers in 2026
+Compare the best Next.js hosting providers in 2026. Vercel, Cloudflare, Railway, AWS, and self-hosting options with real costs, pros/cons, and deployment examples.

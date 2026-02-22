@@ -1,0 +1,68 @@
+SOURCE_URL: https://codefarm0.medium.com/port-8080-is-already-in-use-why-it-happens-and-how-to-free-it-like-a-pro-b88879cd31ac
+--------------------------------------------------
+“Port Is Already in Use”: Why It Happens and How to Free It Like a Pro | by Arvind Kumar | Medium
+Sitemap
+Open in app
+Sign up
+Sign in
+Write
+Search
+Sign up
+Sign in
+Mastodon
+Member-only story
+“Port Is Already in Use”: Why It Happens and How to Free It Like a Pro
+Arvind Kumar
+3 min read
+·
+Aug 4, 2025
+--
+1
+Share
+Troubleshooting the most common web server startup error with practical solutions and real-world analogies
+Read the Story for free
+|
+Youtube
+|
+LinkedIn
+|
+Schedule meeting with me
+Press enter or click to view image in full size
+The Story
+It was a regular Monday morning. Coffee in hand, I hit the terminal and ran my usual Spring Boot app:
+./gradlew bootRun
+But instead of seeing my beautiful logs and the comforting “Tomcat started on port(s): 8080”, I got:
+Web server failed to start. Port 8080 was already in use.
+Cue internal screaming.
+And just like that, port 8080, my app’s usual driveway, was already hosting someone else’s party.
+But who? And why?
+This tiny error is deceptively simple and wildly common. Whether you’re a Java developer, a Node.js coder, or anything that spins up a web server, you’ve probably run into this. Today, let’s unpack
+why
+it happens, and
+how
+to fix it fast — like the professional you are (or are becoming!).
+Why Port 8080 Gets Busy
+There are multiple culprits that could hijack your port:
+Your Own App Didn’t Shut
+…
+Written by
+Arvind Kumar
+3.7K followers
+·
+114 following
+Staff Engineer | System Design, Microservices, Java, SpringBoot, Kafka, DBs, AWS, GenAI | Teaching concepts via stories & characters |
+linkedin.com/in/codefarm0
+Responses (
+1
+)
+See all responses
+Help
+Status
+About
+Careers
+Press
+Blog
+Privacy
+Rules
+Terms
+Text to speech

@@ -1,0 +1,161 @@
+SOURCE_URL: https://www.descope.com/blog/post/cors-errors
+--------------------------------------------------
+Four Common CORS Errors and How to Fix Them
+Skip to main content
+Blog
+Four Common CORS Errors and How to Fix Them
+Developers
+January 15, 2026
+Copy link
+Team Descope
+Chief Login Officer
+Share on:
+Share on LinkedIn
+Share on X
+Share on Blusky
+Table of Contents
+This tutorial was written by Cameron Pavey, a full-stack developer living and working in Melbourne. You can connect with them on
+X
+to see more of their work!
+Cross-Origin Resource Sharing (CORS) is a mechanism through which browsers determine whether to block frontend JavaScript code from making cross-origin requests. Cross-origin requests occur whenever your application calls an API hosted on a different
+origin
+. In practice, this is often the majority of your API calls.
+It's essential to be familiar with how CORS works because if you're not, it can quickly become a frustrating experience trying to debug why your site is not functioning as expected, especially when it might have been working fine during local development.
+CORS errors can be especially common if you're developing a web application where the frontend and backend run on different origins. Perhaps you have a
+React
+application running at
+example.com
+and a corresponding REST API at
+api.example.com
+. In this case, you will likely encounter an error if you have not configured CORS correctly on your REST API server:
+Fig: Sequence diagram showing CORS flow
+Before the browser initiates the desired API call (GET, POST, etc.) it first issues an OPTIONS request to the remote server that includes current origin. The response for this request will provide the browser with the relevant CORS policy headers so the browser can adhere to it accordingly.
+Generally, most CORS errors can be resolved by ensuring that you have a proper, valid CORS configuration. Still, there are numerous discrete errors, each with its own cause. Mozilla MDN maintains a
+comprehensive list of CORS errors
+and how to resolve them, and it is an excellent first stop if you're debugging an obscure CORS issue. That said, some errors are more likely to happen than others, so it is good to be familiar with common errors so that you are well-equipped to solve them quickly when they come up.
+In this article, you'll learn more about what causes common CORS errors and how you can fix them.
+CORS Header Access-Control-Allow-Origin Missing
+This error indicates that the
+Access-Control-Allow-Origin
+header is missing in the response from the backend. If you control the backend, resolving this error can be as simple as modifying the response to include the appropriate headers.
+This could also occur if the initial OPTIONS request failed for some reason.
+Depending on your application's architecture, there are different values you can use here. For instance, using the previous example again, even if your backend is running on
+api.example.com
+, if the frontend that will be consuming the request is running on
+example.com
+, you would use that as the origin for this header, like so:
+Open menu
+Access-Control-Allow-Origin: https://example.com
+You can also provide a wildcard as the value (using
+*
+). However, this is advisable only if your API is intended to be public. Do not use a wildcard if it's a private, internal API.
+It’s also important to note that passing credentials (cookies, auth headers, etc.) isn't allowed when using * as the value (see
+https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
+).
+CORS Header Access-Control-Allow-Origin Does Not Match XYZ
+Similar to the previous error, this one stops your frontend from being able to consume the request. However, rather than a total lack of a CORS header, this error indicates that the header is present but the permitted origin does not match the origin making the request.
+In this case, ensure that the following are true:
+The response contains the header.
+There is only one such header without duplicates.
+The header contains only a single origin.
+The origin matches the requester's origin.
+If these points are all true, this error should be resolved.
+CORS Request Not HTTP
+This error happens because CORS can be used only with the HTTP or HTTPS URL schemes. However, an asset is loaded through a different scheme—commonly,
+file://
+. This most often happens when viewing a site through the local file system—opening the file directly in your browser—rather than as an asset served via HTTP(S) from a web server.
+This often happens when you want to perform local testing or development. However, since CORS doesn't support this behavior, it is now advised that local testing be done with a
+local server
+as this resolves the issue and makes the experience closer to how it would be in an actual live environment.
+Multiple CORS Header Access-Control-Allow-Origin Not Allowed
+This error indicates that the server has sent more than one
+Access-Control-Allow-Origin
+header in the response. This is invalid as you should include only a single instance of this header. Additionally, the header's value should only be a single origin or `null`. You cannot provide a list of origins here.
+This may seem problematic if you'd like to allow multiple origins. Consider a case where you have an internal API that needs to be consumed by numerous clients. In that case, you can implement checks in either your application code or your web server (like Nginx or Apache) to determine if the requester's origin is one that you approve of and, if so, reflect the appropriate value in the header.
+Other ways to bypass CORS errors
+Sometimes, during early development or when working with a backend that you cannot easily change, you may wish you could bypass CORS errors for a while to get on with development.
+Warning:
+While understanding how to bypass CORS can be beneficial for development and debugging purposes, it's crucial to use this practice cautiously due to its security risks. It's recommended you only employ CORS bypass techniques temporarily and only when managing servers under your control. Avoid using these methods for regular web browsing activities.
+Disable browser security
+As the browser enforces CORS, it can be circumvented client-side without any changes to the server. If you use Google Chrome or a related variant, disabling your browser's web security features is the easiest way to do this without additional dependencies. This should be done only for development and testing, and you should not use the browser in this state for normal web activities.
+To disable web security in Chrome, you can use the following commands:
+OSX:
+Open menu
+open -n -a /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args     --user-data-dir="/tmp/chrome_dev_test" --disable-web-security
+For
+Windows,
+create a new shortcut and set its target as follows:
+Open menu
+[PATH_TO_CHROME]\chrome.exe" --disable-web-security --disable-gpu --user-data-dir=%LOCALAPPDATA%\Google\chromeTemp
+Linux:
+Open menu
+google-chrome --disable-web-security
+Use a browser extension
+You can also bypass CORS using a browser extension. These extensions edit the response on its way back to your browser and inject the necessary header and value so that your browser accepts it. Such extensions are available for numerous browsers, including the following:
+Chrome-like browsers
+Firefox
+Opera
+Use a proxy
+Finally, you can bypass CORS by routing your requests via a proxy. Proxies
+designed for this purpose
+handle the request on your behalf before returning a response to your browser with the appropriate headers. This can be a reasonable, low-effort way to check particular requests without CORS restrictions. However, routing your requests through a third-party proxy brings inherent risks, so it isn't advisable as a long-term solution.
+When not to bypass CORS errors
+As you've seen, CORS can be easily bypassed. Indeed, it's enforced only in the browser, so you may be wondering what the point of it is and whether you can (or should) bypass it all the time.
+CORS is a valuable web technology that plays a role in mitigating attacks like
+cross-site request forgery (CSRF)
+. You should disable CORS only for testing and development and, even then, only temporarily.
+Consider a case where you use an API intended to be consumed only by backend services. This API might explicitly NOT permit any origins in its CORS headers as this would stop browsers from consuming the API. At the same time, backend services would be free to use the API as they do not typically implement CORS. Suppose you bypassed this restriction by using a proxy so your frontend app can call this API. While this may technically work, you may be exposing credentials and data on the frontend that are never intended to be there, leading to potential security concerns.
+A preferable alternative to disabling CORS is implementing it correctly on your backend or web server. With a proper configuration, any reasonable setup should work correctly without bypassing or disabling CORS.
+Wrapping up
+In this article, you've been introduced to CORS. You've learned about what it is and what its role is in web security. You've seen a few of the most common CORS errors, what causes them, how to resolve them, and a few other ways in which CORS can be bypassed, as well as some pointers on when not to bypass it.
+CORS is a valuable web technology, but it can be frustrating when it's the source of errors that may not be easy to understand if you haven't dealt with them before. By familiarizing yourself with CORS, you put yourself in the best position to deal with it appropriately when errors occur.
+For more developer tips, subscribe to the
+Descope blog
+.
+Identity and auth news.
+Straight to your inbox.
+Liked what you saw?
+Check out these posts next
+Developers
+|
+Mar 15, 2024
+The Developer’s Guide to Refresh Token Rotation
+Read more
+Developers
+|
+Jul 12, 2024
+Add Authentication & Authorization to a React App With Descope
+Read more
+Auth Thoughts
+|
+Jun 26, 2023
+OpenID vs OAuth: Understanding the Difference
+Read more
+Developers
+|
+Mar 15, 2024
+The Developer’s Guide to Refresh Token Rotation
+Read more
+Developers
+|
+Jul 12, 2024
+Add Authentication & Authorization to a React App With Descope
+Read more
+Auth Thoughts
+|
+Jun 26, 2023
+OpenID vs OAuth: Understanding the Difference
+Read more
+Descope - Go to homepage
+Chat with Sales
+Anonymously - no Slack account required
+Leave a Descope review
+Github Icon Grey
+Linkedin Icon Grey
+X Grey Icon
+Instagram Grey Logo
+Slack Icon
+YouTube Icon
+Bluesky Social
+All systems operational
+Copyright © Descope Inc. All rights reserved.

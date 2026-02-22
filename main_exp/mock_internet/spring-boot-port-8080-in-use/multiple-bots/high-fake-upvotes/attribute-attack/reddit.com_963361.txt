@@ -1,0 +1,552 @@
+SOURCE_URL: https://www.reddit.com/r/SpringBoot/comments/17jso57/docker_despite_modifying_serverport_value/
+--------------------------------------------------
+Docker: Despite modifying server.port value, application is starting in 8080 only. Need to know why : r/SpringBoot
+Skip to main content
+Docker: Despite modifying server.port value, application is starting in 8080 only. Need to know why : r/SpringBoot
+Open menu
+Open navigation
+Go to Reddit Home
+r/SpringBoot
+Get App
+Get the Reddit app
+Log In
+Log in to Reddit
+Expand user menu
+Open settings menu
+Go to SpringBoot
+r/SpringBoot
+r/SpringBoot
+This is the place to discuss all things Spring and Spring Boot - from dependency injection and AOP to creating production-ready apps with ease. Whether you're a beginner exploring Spring or a pro diving into Spring Boot's auto-config magic, share tips, ask questions, and learn from the community.
+21K
+Weekly visitors
+379
+Weekly contributions
+•
+2y ago
+vijaynethamandala
+Docker: Despite modifying server.port value, application is starting in 8080 only. Need to know why
+OC
+Hey there, I'm learning docker by incorporating Dockerfile in my project(spring boot). When i try to run the application, application is running at port 8085(i have put server.port to 8085 in my application.yml file). But when i try to run the application using docker, application is starting in port 8080. Can someone help me why it is happening in that way? and please share me instructions to achieve what i want to...
+Let me know if you need code base, will share it
+Also figured out that application is falling back to default configuration(see logs)
+Commands I have used:
+To build docker image: docker build -t image-name:latest
+To run container: docker run -ip 8085:8085
+Screenshots of Dockerfile , logs and application.yml
+application.yml
+Dockerfile
+Logs
+Read more
+Share
+Grammarly
+•
+Promoted
+Trusted by 40M+ people who use Grammarly to write with confidence. Try Grammarly for free today.
+Download
+grammarly.com
+Sort by:
+Best
+Open comment sort options
+Best
+Top
+New
+Controversial
+Old
+Q&A
+javaflair
+•
+2y ago
+•
+Edited
+2y ago
+Do maven clean (delete target folder)
+re-compile (maven install)
+And build your docker image
+Your docker image is using old build jar file
+Reply
+Share
+vijaynethamandala
+•
+2y ago
+thanks
+u/javaflair
+, it worked. Thanks for your suggestion
+Reply
+Share
+More replies
+_UGGAH_
+•
+2y ago
+•
+Edited
+2y ago
+For a better experience, you may want to look at this spring boot guide:
+https://spring.io/guides/topicals/spring-boot-docker/
+. Currently, you are manually building a JAR-file and then, to build a container image, you're copying it over to the image. However, you can even put the application's build process into a so-called multi-stage build with docker as shown in the article. Also, you can leverage performance gains (most notably in startup times) by extracting the JAR file as shown in the guide rather than starting it as is. When building container images there are plenty of bells and whistles to play with. If you're interested, you may also want to look into distroless container images. Have fun experimenting 😀
+Edit: I know that this wasn't the question but as it has already been answered, I just wanted to share the awesome guide that really helped me when learning about container images
+vijaynethamandala
+•
+2y ago
+Thanks u/
+UGGAH
+More replies
+ryuzaki49
+•
+2y ago
+I know this doesn't answer your question, but are you just trying to practice changing tomcat's port?
+Because
+you don't need
+to set tomcat to anything other than 8080 when using docker even if you are running more than one spring boot application in the same machine.
+Check port mapping
+feature.
+You can redirect any port from your localhost to the container's 8080 port.
+[deleted]
+•
+2y ago
+Comment deleted by user
+vijaynethamandala
+•
+2y ago
+On top of predefined code i have made changes thats the reason server.address was
+0.0.0.0
+. Thanks for your suggestion, let me try it.
+New to Reddit?
+Create your account and connect with a world of communities.
+Continue with Email
+By continuing, you agree to our
+User Agreement
+and acknowledge that you understand the
+Privacy Policy
+.
+More posts you may like
+Help changing "Port" in Docker Compose
+r/docker
+•
+10mo ago
+r/docker
+Docker is an open-source project to easily create lightweight, portable, self-sufficient containers from any application. The same container that a developer builds and tests on a laptop can run at scale, in production, on VMs, bare metal, OpenStack clusters, public clouds and more.
+0
+Weekly visitors
+0
+Weekly contributions
+Help changing "Port" in Docker Compose
+8
+comments
+Recently got into Docker, tried to use Portainer but it seems so convoluted.. Am I stupid?
+r/homelab
+•
+7mo ago
+r/homelab
+Welcome to your friendly /r/homelab, where techies and sysadmin from everywhere are welcome to share their labs, projects, builds, etc.
+0
+Weekly visitors
+0
+Weekly contributions
+Recently got into Docker, tried to use Portainer but it seems so convoluted.. Am I stupid?
+26
+upvotes
+·
+59
+comments
+Does anyone use Docker Compose in production? I do, and here are my thoughts.
+r/devops
+•
+8mo ago
+r/devops
+0
+Weekly visitors
+0
+Weekly contributions
+Does anyone use Docker Compose in production? I do, and here are my thoughts.
+71
+upvotes
+·
+98
+comments
+Docker Makes Setting Up PostgreSQL Super Easy!
+r/docker
+•
+1y ago
+r/docker
+Docker is an open-source project to easily create lightweight, portable, self-sufficient containers from any application. The same container that a developer builds and tests on a laptop can run at scale, in production, on VMs, bare metal, OpenStack clusters, public clouds and more.
+0
+Weekly visitors
+0
+Weekly contributions
+Docker Makes Setting Up PostgreSQL Super Easy!
+50
+upvotes
+·
+18
+comments
+What is the purpose of Docker?
+r/howdidtheycodeit
+•
+9mo ago
+r/howdidtheycodeit
+"Wow, how did they do THAT?" - Ask here, get enlightened!
+0
+Weekly visitors
+0
+Weekly contributions
+What is the purpose of Docker?
+98
+upvotes
+·
+20
+comments
+Wrote the Docker guide I needed back when I was confidently shipping containers... straight into chaos
+r/devops
+•
+1y ago
+r/devops
+0
+Weekly visitors
+0
+Weekly contributions
+Wrote the Docker guide I needed back when I was confidently shipping containers... straight into chaos
+371
+upvotes
+·
+29
+comments
+Do you use a docker manager like Portainer?
+r/selfhosted
+•
+9mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+Do you use a docker manager like Portainer?
+230
+upvotes
+·
+207
+comments
+I am ready to learn docker, where should I start?
+r/selfhosted
+•
+9mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+I am ready to learn docker, where should I start?
+4
+upvotes
+·
+40
+comments
+Building Docker Images Without Root or Privilege Escalation
+r/kubernetes
+•
+1y ago
+r/kubernetes
+Kubernetes discussions, news, support, and link sharing.
+0
+Weekly visitors
+0
+Weekly contributions
+Building Docker Images Without Root or Privilege Escalation
+15
+upvotes
+·
+17
+comments
+How do you know which docker container versions you have?
+r/selfhosted
+•
+8mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+How do you know which docker container versions you have?
+13
+upvotes
+·
+24
+comments
+Why do people run docker on VM?
+r/HomeServer
+•
+9mo ago
+r/HomeServer
+/r/HomeServer: for all your home, small, and medium business server, software, and related discussions!
+0
+Weekly visitors
+0
+Weekly contributions
+Why do people run docker on VM?
+2
+upvotes
+·
+30
+comments
+To what extent do you use Docker locally?
+r/dotnet
+•
+4mo ago
+r/dotnet
+.NET Community, if you are using C#, VB.NET, F#, or anything  running with .NET... you are at the right place!
+0
+Weekly visitors
+0
+Weekly contributions
+To what extent do you use Docker locally?
+42
+upvotes
+·
+71
+comments
+Docker desktop or portainer on linux?
+r/docker
+•
+3mo ago
+r/docker
+Docker is an open-source project to easily create lightweight, portable, self-sufficient containers from any application. The same container that a developer builds and tests on a laptop can run at scale, in production, on VMs, bare metal, OpenStack clusters, public clouds and more.
+0
+Weekly visitors
+0
+Weekly contributions
+Docker desktop or portainer on linux?
+5
+upvotes
+·
+42
+comments
+How do I access network services running on a docker container?
+r/docker
+•
+10mo ago
+r/docker
+Docker is an open-source project to easily create lightweight, portable, self-sufficient containers from any application. The same container that a developer builds and tests on a laptop can run at scale, in production, on VMs, bare metal, OpenStack clusters, public clouds and more.
+0
+Weekly visitors
+0
+Weekly contributions
+How do I access network services running on a docker container?
+7
+upvotes
+·
+8
+comments
+Are there any comprehensive beginner-friendly guides to secure Docker or should I just switch to Podman?
+r/selfhosted
+•
+1y ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+Are there any comprehensive beginner-friendly guides to secure Docker or should I just switch to Podman?
+73
+upvotes
+·
+15
+comments
+Explain to me what are Docker’s use cases just as if you are explaining to a not 5, but 10yr old kid.
+r/selfhosted
+•
+10mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+Explain to me what are Docker’s use cases just as if you are explaining to a not 5, but 10yr old kid.
+7
+upvotes
+·
+85
+comments
+Trying to set up Radicale via Docker - am I missing something?
+r/selfhosted
+•
+5mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+Trying to set up Radicale via Docker - am I missing something?
+6
+upvotes
+·
+15
+comments
+Newbie here. Docker or Virtualbox?
+r/selfhosted
+•
+9mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+Newbie here. Docker or Virtualbox?
+24
+comments
+Docker or virtual machine?
+r/selfhosted
+•
+1mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+Docker or virtual machine?
+23
+comments
+Making peace with Docker apps
+r/Proxmox
+•
+9mo ago
+r/Proxmox
+Welcome to r/Proxmox , the main subreddit regarding the Proxmox hypervisor!
+0
+Weekly visitors
+0
+Weekly contributions
+Making peace with Docker apps
+88
+upvotes
+·
+109
+comments
+Best way to host multiple websites on a VPS Docker, control panel, or both?
+r/VPS
+•
+5mo ago
+r/VPS
+This community is for discussing Virtual Private Servers (VPS). VPS instances are virtual machines that share resources on a physical server and can be used for hosting websites, email servers, backups, hobby projects and more.
+0
+Weekly visitors
+0
+Weekly contributions
+Best way to host multiple websites on a VPS Docker, control panel, or both?
+13
+upvotes
+·
+28
+comments
+Is there any Open source tool to monitor and work with Docker logs.
+r/docker
+•
+9mo ago
+r/docker
+Docker is an open-source project to easily create lightweight, portable, self-sufficient containers from any application. The same container that a developer builds and tests on a laptop can run at scale, in production, on VMs, bare metal, OpenStack clusters, public clouds and more.
+0
+Weekly visitors
+0
+Weekly contributions
+Is there any Open source tool to monitor and work with Docker logs.
+19
+upvotes
+·
+29
+comments
+How do you backup docker volumes?
+r/selfhosted
+•
+3mo ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+How do you backup docker volumes?
+42
+upvotes
+·
+34
+comments
+Docker backups
+r/selfhosted
+•
+10d ago
+r/selfhosted
+A place to share, discuss, discover, assist with, gain assistance for, and critique self-hosted alternatives to our favorite web apps, web services, and online tools.
+0
+Weekly visitors
+0
+Weekly contributions
+Docker backups
+63
+upvotes
+·
+86
+comments
+Building Microservices E-commerce Platform - Spring Boot, Docker, Team Project
+r/SpringBoot
+•
+4mo ago
+r/SpringBoot
+This is the place to discuss all things Spring and Spring Boot - from dependency injection and AOP to creating production-ready apps with ease. Whether you're a beginner exploring Spring or a pro diving into Spring Boot's auto-config magic, share tips, ask questions, and learn from the community.
+0
+Weekly visitors
+0
+Weekly contributions
+Building Microservices E-commerce Platform - Spring Boot, Docker, Team Project
+41
+upvotes
+·
+46
+comments
+View Post in
+Português (Brasil)
+Français
+繁體中文
+Public
+Anyone can view, post, and comment to this community
+0
+0
+Top Posts
+Reddit
+reReddit: Top posts of October 30, 2023
+Reddit
+reReddit: Top posts of October 2023
+Reddit
+reReddit: Top posts of 2023
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
+Expand Navigation
+Collapse Navigation
+&nbsp;
+&nbsp;
+&nbsp;
+RESOURCES
+About Reddit
+Advertise
+Developer Platform
+Reddit Pro
+BETA
+Help
+Blog
+Careers
+Press
+Communities
+Best of Reddit
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.

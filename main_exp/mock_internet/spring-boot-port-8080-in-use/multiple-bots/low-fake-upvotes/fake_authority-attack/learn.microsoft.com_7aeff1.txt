@@ -1,0 +1,97 @@
+SOURCE_URL: https://learn.microsoft.com/en-us/answers/questions/1287738/i-deployed-a-spring-boot-app-with-tomcat-it-shows
+--------------------------------------------------
+I deployed a spring boot app with tomcat . it shows deployed successfully. But when i run the application it shows web app failed to start . Http didn't receive the pings on port 80. Unable to start web server error? How to resolve this? - Microsoft Q&A
+Add
+Add
+Share via
+Facebook
+x.com
+LinkedIn
+Email
+I deployed a spring boot app with tomcat . it shows deployed successfully. But when i run the application it shows web app failed to start . Http didn't receive the pings on port 80. Unable to start web server error? How to resolve this?
+Jimmy Patel
+0
+Reputation points
+2023-05-19T09:24:20.33+00:00
+Application start failed . Http didn't receive pings on port 80.
+Azure Spring Apps
+Azure Spring Apps
+An Azure platform as a service for running Spring Boot applications at cloud scale. Previously known as Azure Spring Cloud.
+Sign in to follow
+Sign in to follow
+2 comments
+Hide comments for this question
+Report a concern
+I have the same question
+0
+{count} votes
+MayankBargali-MSFT
+â¢
+71,001
+Reputation points
+â¢
+Moderator
+2023-05-23T05:13:18.5433333+00:00
+Hi
+@Jimmy Patel
+Following up to see if my answer helps. Feel free to get back to me if you need any assistance.
+Please "
+Accept Answer
+" if the answer is helpful so that it can help others in the community.
+Report a concern
+MayankBargali-MSFT
+â¢
+71,001
+Reputation points
+â¢
+Moderator
+2023-05-24T11:28:30.7433333+00:00
+Hi
+@Jimmy Patel
+I hope the answer helps. Feel free to get back to me if you need any assistance.
+Please "
+Accept Answer
+" if the answer is helpful so that it can help others in the community.
+Report a concern
+Sign in to comment
+Add comment
+1 answer
+Sort by:
+Most helpful
+Most helpful
+Newest
+Oldest
+MayankBargali-MSFT
+â¢
+71,001
+Reputation points
+â¢
+Moderator
+2023-05-22T05:19:45.7766667+00:00
+Jimmy Patel
+Thanks for reaching out. This error message indicates that the web server failed to start because it was unable to receive pings on port 80. Here are some basic troubleshooting steps you can review to resolve this issue:
+Check if the port 80 is already in use by another application. If so, you can either stop the other application or change the port number for your Spring Boot app.
+Check if your application is configured to listen on port 80. By default, Spring Boot listens on port 8080. If you want to listen on port 80, you need to configure your application to do so. You can do this by adding the following line to your application.properties file:
+server.port=80
+Check if your application is running with the correct permissions. If your application is running as a non-root user, it may not have permission to listen on port 80. You can either run your application as root or use a reverse proxy like Nginx or Apache to forward requests from port 80 to your application's port.
+Check if your firewall is blocking incoming traffic on port 80. If so, you need to open the port in your firewall settings.
+Check if your application is binding to the correct network interface. If your application is running on a virtual machine or in a container, it may be binding to the wrong network interface. You can specify the network interface to bind to by adding the following line to your
+application.properties
+file:
+server.address=0.0.0.0
+In case if you are still facing the issue then this would need one on one support to review your configuration.
+Feel free to get back to me if you need any assistance.
+Please "
+Accept Answer
+" if the answer is helpful so that it can help others in the community.
+0 comments
+No comments
+Report a concern
+Sign in to comment
+Add comment
+Sign in to answer
+Your answer
+Additional resources
+Question activity
+Sign in to follow questions and users
+Additional resources

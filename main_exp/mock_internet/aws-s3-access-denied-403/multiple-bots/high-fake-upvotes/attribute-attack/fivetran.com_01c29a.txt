@@ -1,0 +1,134 @@
+SOURCE_URL: https://fivetran.com/docs/connectors/files/amazon-s3/troubleshooting/403-access-denied-error
+--------------------------------------------------
+Amazon S3 Error - 403 Access Denied
+Getting Started
+Core Concepts
+Deployment Models
+Using Fivetran
+Usage-Based Pricing
+Connectors
+Applications
+Databases
+Events
+Files
+Amazon S3
+Setup Guide
+API Configuration
+Troubleshooting
+403 Access Denied Amazon S3 Error
+Release Notes
+Azure Blob Storage
+Box
+Dropbox
+Email
+FTP
+Google Cloud Storage
+Google Drive
+Google Sheets
+OneDrive
+S3-Compatible Storage
+SFTP
+SharePoint
+Troubleshooting
+Tutorials
+Release Notes
+Functions
+Troubleshooting
+Destinations
+Connector SDK
+By Request
+Partner-Built
+Transformations
+Activations
+Logs
+Security
+Privacy
+REST API
+Release Notes
+HVR 6 Documentation
+HVR 5 Documentation
+Amazon S3 Error: 403 Access Denied
+Issue
+Setup tests fail. The following error appears:
+403 Access Denied
+Environment
+Connector:
+Amazon S3
+Resolution
+To resolve this issue, go to your bucket details page in Amazon S3, then do the following:
+Ensure the bucket owner owns all objects uploaded to the bucket
+Select the
+Permissions
+tab.
+Under
+Object Ownership
+, click
+Edit
+.
+Select
+Bucket owner preferred
+.
+Click
+Save changes
+.
+Grant the bucket owner read and list access to the bucket's objects
+Select the
+Permissions
+tab.
+Under
+Access control list (ACL)
+, click
+Edit
+.
+Apply the following configuration for the
+Bucket owner
+grantee:
+Under
+Object
+, check the
+List
+and
+Read
+boxes.
+Under
+Bucket ACL
+, check the
+Read
+and
+Write
+boxes.
+Click
+Save changes
+.
+Ensure your bucket's Access Control Lists (ACLs) are disabled
+Select the
+Permissions
+tab.
+Under
+Object Ownership
+, click
+Edit
+.
+Ensure
+ACLs Disabled (Recommended)
+is selected.
+If you have made any changes, click
+Save changes
+.
+Cause
+This issue occurs when you don't have permission to read an object that another user uploaded to your bucket. This may happen for any of the following reasons:
+The AWS account that uploaded the applicable object to your bucket owns it and hasn't provided you access to read it.
+You own the applicable object, but the bucket owner permission settings are configured so that you don't have access to read it.
+Your bucket's ACLs are enabled, allowing the uploading user's settings to override your bucket's settings and prevent you from reading the object. See
+Amazon S3's ACLs documentation
+for more information.
+To learn more about how to troubleshoot Amazon S3's access denied errors, see
+Amazon's troubleshooting documentation
+Thanks for your feedback!
+Was this page helpful?
+Yes
+No
+On this page
+More from Fivetran
+Fivetran status
+Contact us

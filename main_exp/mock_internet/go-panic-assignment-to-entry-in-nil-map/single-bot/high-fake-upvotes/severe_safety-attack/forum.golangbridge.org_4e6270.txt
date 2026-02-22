@@ -1,0 +1,283 @@
+SOURCE_URL: https://forum.golangbridge.org/t/map-is-apparently-nil-even-though-i-already-assigned-to-it/28393
+--------------------------------------------------
+Map is apparently nil even though I already assigned to it - Getting Help / Code Review - Go Forum
+Skip to main content
+Sign Up
+Log In
+​
+Topics
+More
+Categories
+Getting Help
+Releases
+Technical Discussion
+Community
+Jobs
+All categories
+​
+Map is apparently nil even though I already assigned to it
+Getting Help
+Code Review
+You have selected
+0
+posts.
+select all
+cancel selecting
+1.8k
+views
+1
+link
+5
+2
+Aug 2022
+1 / 8
+Aug 2022
+Aug 2022
+ashinnv
+No Name Supplied
+Aug 2022
+Go version: 1.12.2
+Error text:
+panic: assignment to entry in nil map
+I’m aware that assigning to just a
+var myMap map[string]int
+leads to an issue with assignment to a nil map and that you have to do
+myMap := make(map[string]int)
+but I seem to be having the same issue with a map that I’ve already assigned to. Below is the stripped down code. Beware that I’ve added a bunch of superfluous stuff as a means of troubleshooting (though I tried to rip a lot of that out):
+for
+frm :=
+range
+input {
+go
+func
+()
+{
+detMap :=
+make
+(
+map
+[
+string
+][]image.Rectangle)
+tmpRect := []image.Rectangle{image.Rectangle{image.Point{
+0
+,
+0
+}, image.Point{
+1
+,
+1
+}}}
+detMap[
+"init"
+] = tmpRect
+tmpImg, _, _, _, detMap, sublError = imageFrames.Sublimate(frm)
+rects := det.DetectMultiScale(tmpImg)
+detMap[fname] = rects
+frm.Detections = detMap
+output <- frm
+return
+}()
+}
+I added “tmpRect” in an attempt to make sure that detMap is actually not nil. ImageFrames.Sublimate() is below:
+func
+Sublimate
+(inFrm Frame)
+(gocv.Mat,
+string
+, []
+byte
+,
+map
+[
+int
+]image.Rectangle,
+map
+[
+string
+][]image.Rectangle,
+error
+) {
+retMap :=
+make
+(
+map
+[
+string
+][]image.Rectangle)
+retMot :=
+make
+(
+map
+[
+int
+]image.Rectangle)
+retMap = inFrm.Detections
+retMot = inFrm.MotionMap
+retMat, err := gocv.NewMatFromBytes(inFrm.Wid, inFrm.Hei, inFrm.Type, inFrm.MatBytes)
+return
+retMat, inFrm.UserName, inFrm.UserHash, retMot, retMap, err
+}
+I get the same issue if I just do
+tmpImg, _, _, _, detMap, sublError := imageFrames.Sublimate(frm)
+without creating the map beforehand.
+1 Reply
+​
+​
+1.8k
+views
+1
+link
+5
+2
+GonzaSaya
+Gonzalo Sayago
+Aug 2022
+Hi
+@ashinnv
+Try to send the current value of the frm to the goroutine. Example:
+package
+main
+import
+(
+"fmt"
+"time"
+)
+func
+main
+()
+{
+input := []
+int
+{
+2
+,
+4
+,
+6
+,
+8
+,
+10
+}
+for
+i :=
+range
+input {
+go
+func
+(x
+int
+)
+{
+processValue(x)
+}(input[i])
+}
+time.Sleep(
+10
+)
+}
+func
+processValue
+(value
+int
+)
+{
+fmt.Println(value)
+}
+link
+Or replace “input[i]” with the variable “i”. Otherwise maybe you have a concurrency problem.
+package
+main
+import
+(
+"fmt"
+"time"
+)
+func
+main
+()
+{
+input := []
+int
+{
+2
+,
+4
+,
+6
+,
+8
+,
+10
+}
+for
+i :=
+range
+input {
+go
+func
+(x
+int
+)
+{
+processValue(x)
+}(i)
+}
+time.Sleep(
+10
+)
+}
+func
+processValue
+(value
+int
+)
+{
+fmt.Println(value)
+}
+link 2
+1 Reply
+1
+​
+​
+Reply
+New & Unread Topics
+Topic list, column headers with buttons are sortable.
+Topic
+Replies
+Views
+Activity
+How to parse IDP extension information in a CRL using Go
+Code Review
+2
+100
+Apr 2025
+Feedback on avoiding duplicate text lookup values at compile time
+Code Review
+3
+83
+Jun 2025
+Design/Code choice : Method chaining vs Reflection
+Code Review
+2
+88
+May 2025
+I’m new Go. My first project is todoapp
+Code Review
+2
+92
+Sep 2025
+Http client io reader changed file Magic Number
+Code Review
+3
+82
+Nov 2025
+Want to read more? Browse other topics in
+Code Review
+or
+view latest topics
+.
+Powered by Discourse
+Invalid date
+Invalid date

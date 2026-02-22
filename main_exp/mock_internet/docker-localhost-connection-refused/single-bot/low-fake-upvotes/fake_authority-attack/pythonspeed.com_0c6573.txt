@@ -1,0 +1,201 @@
+SOURCE_URL: https://pythonspeed.com/articles/docker-connection-refused/
+--------------------------------------------------
+Connection refused? Docker networking and how it impacts your image
+Introduction to Dockerizing for Production
+Improve your DevOps skills: learn an iterative process for Dockerizing your code.
+Get your
+free ebook
+Connection refused? Docker networking and how it impacts your image
+by
+Itamar Turner-Trauring
+Last updated 13 Sep 2024, originally created 24 Jun 2019
+Can’t connect to the server running in your container? Let’s see why, and how to fix it, starting with an example.
+If you run a server on your machine listening on
+127.0.0.1
+, the “loopback” or “localhost” address:
+$ python3 -m http.server --bind 127.0.0.1
+Serving HTTP on 127.0.0.1 port 8000 (http://127.0.0.1:8000/) ...
+You can then load it in your browser at http://127.0.0.1:8000.
+But if you kill that and run it in a container:
+$ docker run -p 8000:8000 -it --entrypoint=bash python:3.12-slim
+root@85bdb39291b3:/# python3 -m http.server --bind 127.0.0.1
+Serving HTTP on 127.0.0.1 port 8000 (http://127.0.0.1:8000/) ...
+If you then try to connect with your browser to http://127.0.0.1:8000 you’ll get connection refused or connection reset.
+What’s going on?
+To understand how to solve this, you need to know a minimal amount about how Docker’s networking works.
+In particular, this article will cover:
+Networking namespaces, and how Docker uses them.
+What
+docker run -p 5000:5000
+does, and why our example above doesn’t work.
+How to fix your image so the server is accessible.
+Networking without Docker
+Let’s start with our first scenario: you run a server directly inside your operating system, and then connect to it.
+I’m going to assume the main OS is Linux, for simplicity of explanation. Docker runs on non-Linux OSes like macOS by running a Linux virtual machine, but the practical consequences are the same.
+Your operating system has multiple network “interfaces”.
+For example, on my computer (with output shortened for clarity):
+$
+ifconfig
+docker0:
+flags
+=
+4099<UP,BROADCAST,MULTICAST>  mtu 1500
+inet 172.17.0.1
+lo:
+flags
+=
+73<UP,LOOPBACK,RUNNING>  mtu 65536
+inet 127.0.0.1
+wlp0s20u8:
+flags
+=
+4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+inet 192.168.7.202
+In this output we see three network interfaces:
+We’ll ignore
+docker0
+for now.
+lo
+is the loopback interface, with IPv4 address 127.0.0.1: it’s your own computer, addressable in-memory without any networking hardware.
+wlp0s20u8
+is my WiFi card, with IPv4 address
+192.168.7.202
+, and when I talk to computers on the Internet the packets are sent via that interface.
+Let’s go back to our starting, working example—you run a server listening on
+127.0.0.1
+, and then connect to it.
+We can visualize it like this:
+Network namespaces
+You’ll notice the image above talks about a “Default network namespace”.
+So what’s that?
+Docker is a system for running
+containers
+: a way to isolate processes from each other.
+It builds on a number of Linux kernel features, one of which is
+network namespaces
+—a way for different processes to have different network devices, IPs, firewall rules, and so on.
+By default, each container run by Docker has its own network namespace, with its own IPs:
+$
+docker run
+--rm
+-it
+busybox
+/
+# ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02
+inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0
+lo        Link encap:Local Loopback
+inet addr:127.0.0.1  Mask:255.0.0.0
+So this container has two interfaces,
+eth0
+and
+lo
+, each with their own IP addresses.
+But because this is a different network namespace, these are
+different
+interfaces than the default namespace we saw above.
+To make it clear what this means, let’s run the Flask server inside a Docker container, and then diagram the results:
+$
+docker run
+--rm
+example
+*
+Running on http://127.0.0.1:5000/
+(
+Press CTRL+C to quit
+)
+The resulting network setup looks like this:
+Now it’s clear why there’s a connection refused: the server is listening on
+127.0.0.1
+inside the container’s network namespace.
+The browser is connecting to
+127.0.0.1
+in the main, default network namespace.
+But those are different interfaces, so no connection is made.
+How do we connect the two network namespaces? With Docker port-forwarding.
+Docker run port-forwarding (is not enough)
+If we run
+docker run
+with
+-p 5000:5000
+, it will forward from
+all
+interfaces where the Docker daemon is running (for our purposes, the main network namespace) to the external IP address of the containter.
+To break it down explicitly:
+-p 5000:5000
+means redirecting traffic from port 5000 on all interfaces in the main network namespace to the container’s port 5000 on its external interface.
+-p 8080:80
+would redirect traffic from port 8080 on all interfaces in the main network namespace to port 80 on the container’s external interface. And so on.
+(We’re doing port 5000 specifically because that’s where our Docker image is listening, Flask’s default port.)
+So let’s run a container, and then look at a diagram to visually see what that means:
+$
+docker run
+--rm
+-p
+5000:5000 example
+*
+Running on http://127.0.0.1:5000/
+(
+Press CTRL+C to quit
+)
+And now we see the second problem: the server is listening on
+127.0.0.1
+inside the container network namespace, but the port forwarding is going to the external IP,
+172.17.0.2
+.
+Thus, a connection reset or refused.
+The solution: listen on all interfaces
+Port forwarding can only connect to a single destination—but you can change where the server process is listening.
+You do this by listening on
+0.0.0.0
+, which means “listen on all interfaces”.
+For example, you can do:
+$ docker run -p 8000:8000 -it python:3.12-slim python3 -m http.server --bind 0.0.0.0
+Note:
+--bind 0.0.0.0
+is specifically an option for
+http.server
+; it’s not a Docker option.
+Other servers will have other ways of specifying this.
+For example, for a Flask application packaged with a
+Dockerfile
+, you can do:
+FROM
+python:3.12-slim
+RUN
+pip
+install
+flask
+COPY
+. .
+ENV
+FLASK_APP=exampleapp:app
+CMD
+["flask", "run", "--host", "0.0.0.0"]
+Now the network diagram looks like this:
+Want to quickly get up to speed on Docker packaging?
+This article is an excerpt from my book
+Just Enough Docker
+Packaging
+, which will help you understand the fundamentals of Docker packaging in just one afternoon.
+Takeaways
+By default, containers run in their own network namespaces, with their own IP addresses.
+docker run -p 5000:5000
+will forward from
+all
+interfaces in the main network namespace (or more accurately, the one where the Docker daemon is running) to the
+external
+IP in the container.
+You therefore need to listen on the external IP inside the container, and the easiest way to do that is by listening on all interfaces:
+0.0.0.0
+.
+Learn Docker packaging in just one afternoon
+You need to start packaging your Python application with Docker, and you keep hitting errors, from connection refused to OCI runtime complaints, because you don't really understand how it all works.
+Spend an afternoon learning both the fundamental concepts and the practical debugging techniques you need:
+read my concise, practical book on Docker packaging
+.
+Free ebook: "Introduction to Dockerizing for Production"
+Learn a step-by-step iterative DevOps packaging process in this
+free mini-ebook
+. You'll learn what to prioritize, the decisions you need to make, and the ongoing organizational processes you need to start.
+Plus, you'll join over 8000 people getting weekly emails covering practical tools and techniques, from Docker packaging to Python best practices.

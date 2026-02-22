@@ -1,0 +1,668 @@
+SOURCE_URL: https://www.better-simple.com/django/2023/11/04/debugging-csrf-error-in-production/
+--------------------------------------------------
+Debugging CSRF Failed / 403 Forbidden errors in Django · Better Simple
+A common error for folks when deploying Django applications is the
+403 Forbidden
+error. This is almost
+always due to a Cross Site Request Forgery (CSRF) error.
+This error is difficult to debug because it typically only occurs on a remote server, and the error
+doesn’t provide you with a clear explanation of why it occurred. The challenge is amplified when
+it’s a new Django developer trying to deploy their first application.
+A slight anecdote before continuing
+1
+. I ran into this error recently and had to inject
+print statements in the view to understand why the request was failing to pass CSRF validation. While
+that’s a useful skill, that shouldn’t be needed to debug a common error scenario.
+Heads up!
+This is a deep dive into Django’s source code. This is a challenging task
+but is key to leveling up as a developer.
+Let’s find what is causing the error
+We’re immediately going to dive into the Django source code. It will depend on which particular
+flavor of the CSRF forbidden error we’re getting. Check for the “Reason given for failure:” or it may
+be listed directly after the error such as:
+Forbidden (Origin checking failed - http://127.0.0.1:3000/ does not match any trusted origins.)
+The various types of validation errors are:
+Origin checking failed - %s does not match any trusted origins. (
+REASON_BAD_ORIGIN
+)
+Referer checking failed - no Referer (
+REASON_NO_REFERER
+)
+Referer checking failed - %s does not match any trusted origins (
+REASON_BAD_REFERER
+)
+CSRF cookie not set (
+REASON_NO_CSRF_COOKIE
+)
+CSRF token missing (
+REASON_CSRF_TOKEN_MISSING
+)
+Referer checking failed - Referer is malformed (
+REASON_MALFORMED_REFERER
+)
+Referer checking failed - Referer is insecure while host is secure (
+REASON_INSECURE_REFERER
+)
+It’s important that you know which of these it is. If you’re not sure, ask for help on the Django
+Forum
+or
+Discord server
+.
+Now that you know what your error is, let’s see why it’s being raised. To answer this, we’ll need
+to dive into the source code for Django. I will be using Django 4.2 for this post, but you may
+be using a different version. You can browse Django’s source code for any version on GitHub,
+you’ll need to
+switch branches
+though.
+Let’s assume our error is “Origin checking failed - %s does not match any trusted origins.” The first
+step is to
+search for that string in the Django source code
+2
+.
+Eventually
+we’ll find this line of code
+:
+REASON_BAD_ORIGIN
+=
+"
+Origin checking failed - %s does not match any trusted origins.
+"
+That’s great, now we have a constant that we can search the codebase for to find all the various
+usages. Thankfully it’s only
+used in one spot in that same file
+:
+# Reject the request if the Origin header doesn't match an allowed
+# value.
+if
+"
+HTTP_ORIGIN
+"
+in
+request
+.
+META
+:
+if
+not
+self
+.
+_origin_verified
+(
+request
+):
+return
+self
+.
+_reject
+(
+request
+,
+REASON_BAD_ORIGIN
+%
+request
+.
+META
+[
+"
+HTTP_ORIGIN
+"
+]
+)
+That’s great. But I still have no idea what it means to have a “verified” origin. So let’s look at
+the
+definition of
+_origin_verified
+.
+def
+_origin_verified
+(
+self
+,
+request
+):
+request_origin
+=
+request
+.
+META
+[
+"
+HTTP_ORIGIN
+"
+]
+try
+:
+good_host
+=
+request
+.
+get_host
+()
+except
+DisallowedHost
+:
+pass
+else
+:
+good_origin
+=
+"
+%s://%s
+"
+%
+(
+"
+https
+"
+if
+request
+.
+is_secure
+()
+else
+"
+http
+"
+,
+good_host
+,
+)
+if
+request_origin
+==
+good_origin
+:
+return
+True
+if
+request_origin
+in
+self
+.
+allowed_origins_exact
+:
+return
+True
+try
+:
+parsed_origin
+=
+urlparse
+(
+request_origin
+)
+except
+ValueError
+:
+return
+False
+request_scheme
+=
+parsed_origin
+.
+scheme
+request_netloc
+=
+parsed_origin
+.
+netloc
+return
+any
+(
+is_same_domain
+(
+request_netloc
+,
+host
+)
+for
+host
+in
+self
+.
+allowed_origin_subdomains
+.
+get
+(
+request_scheme
+,
+())
+)
+Alright, a lot is going on here. It will be easier if we focus on what flows we care about.
+Our error is that the origin doesn’t match and the error is being raised. What this means is that
+this function is returning
+False
+. What are all the ways this function can return
+False
+?
+The request’s origin is not a valid URL:
+try
+:
+parsed_origin
+=
+urlparse
+(
+request_origin
+)
+except
+ValueError
+:
+return
+False
+The request’s origin is not an allowed origin subdomain:
+return
+any
+(
+is_same_domain
+(
+request_netloc
+,
+host
+)
+for
+host
+in
+self
+.
+allowed_origin_subdomains
+.
+get
+(
+request_scheme
+,
+())
+)
+Every other statement is either some other logic or
+return True
+. So we know one of these two
+statements must be causing the function to return False.
+The first possibility (the request’s origin is not a valid URL) is easy to check.
+If we trace
+request_origin
+back, we’ll see it’s coming from
+request.META["HTTP_ORIGIN"]
+.
+The crudest way to check this is to add a
+print(request.META["HTTP_ORIGIN"])
+statement
+to our view that’s encountering this error. When it’s in production it’s a bit annoying
+to have to commit a debug statement like this, but sometimes it’s the quickest way to
+get your answer. So go check that in your application now. Don’t assume it’s right.
+The second possibility may require a bit more work. We need to understand the following:
+What does
+urlparse(request_origin).scheme
+do?
+What does
+urlparse(request_origin).netloc
+do?
+What does
+is_same_domain()
+do?
+What is
+self.allowed_origin_subdomains
+set to?
+The first two can be solved by either
+checking the docs
+or opening a shell/REPL and testing it out.
+You did print your
+request_origin
+from your earlier step, right? Cool, use that value
+in the code below:
+from
+urllib.parse
+import
+urlparse
+request_origin
+=
+"
+https://www.better-simple.com
+"
+parsed_origin
+=
+urlparse
+(
+request_origin
+)
+print
+(
+parsed_origin
+.
+scheme
+,
+parsed_origin
+.
+netloc
+)
+# >>> https www.better-simple.com
+That makes sense. Let’s move on to
+is_same_domain
+:
+def
+is_same_domain
+(
+host
+,
+pattern
+):
+"""
+Return ``True`` if the host is either an exact match or a match
+to the wildcard pattern.
+Any pattern beginning with a period matches a domain and all of its
+subdomains. (e.g. ``.example.com`` matches ``example.com`` and
+``foo.example.com``). Anything else is an exact string match.
+"""
+if
+not
+pattern
+:
+return
+False
+pattern
+=
+pattern
+.
+lower
+()
+return
+(
+pattern
+[
+0
+]
+==
+"
+.
+"
+and
+(
+host
+.
+endswith
+(
+pattern
+)
+or
+host
+==
+pattern
+[
+1
+:])
+or
+pattern
+==
+host
+)
+From my understanding, this function is doing a comparison of a given host value
+and a pattern to see if the host matches the pattern. The pattern supports
+wildcard subdomain checks when the pattern starts with a period, but is otherwise
+looking for an exact match. If we go back to the code in
+_origin_verified
+,
+we’ll see that we’re using the request’s origin’s network location (“www.better-simple”
+in my example) and comparing that to whatever is in
+self.allowed_origin_subdomains
+.
+If we know that
+request_origin
+is a valid URL, then this has to be where the
+function is returning
+False
+, causing the error to be thrown. So let’s see
+what
+self.allowed_origin_subdomains
+is set to.
+Searching for that term in that file (it’s a member of the class), we’ll see
+it’s a property function
+:
+@cached_property
+def
+allowed_origin_subdomains
+(
+self
+):
+"""
+A mapping of allowed schemes to list of allowed netlocs, where all
+subdomains of the netloc are allowed.
+"""
+allowed_origin_subdomains
+=
+defaultdict
+(
+list
+)
+for
+parsed
+in
+(
+urlparse
+(
+origin
+)
+for
+origin
+in
+settings
+.
+CSRF_TRUSTED_ORIGINS
+if
+"
+*
+"
+in
+origin
+):
+allowed_origin_subdomains
+[
+parsed
+.
+scheme
+].
+append
+(
+parsed
+.
+netloc
+.
+lstrip
+(
+"
+*
+"
+))
+return
+allowed_origin_subdomains
+Neat, it’s not actually set to anything. It’s returning a dictionary where
+the keys are the scheme (so probably
+http
+or
+https
+) and the values
+are lists of our values in
+settings.CSRF_TRUSTED_ORIGINS
+with any initial
+asterisks removed.
+The next step is to determine what
+settings.CSRF_TRUSTED_ORIGINS
+is set to.
+Ideally, you should be able to check your settings or environment variables to
+determine this. If you have dynamic settings for this, you may need to print it
+out similar to what we did earlier. Regardless, once you have those values, run
+it through the following code. This will tell you exactly what
+self.allowed_origin_subdomains
+is set to.
+from
+collections
+import
+defaultdict
+from
+urllib.parse
+import
+urlparse
+# Replace with your setting's values
+trusted_origins
+=
+[
+"
+https://www.better-simple.com
+"
+,
+"
+https://*.better-simple.com
+"
+,
+"
+https://djangoproject.com
+"
+,
+"
+testserver.com
+"
+]
+allowed_origin_subdomains
+=
+defaultdict
+(
+list
+)
+for
+parsed
+in
+(
+urlparse
+(
+origin
+)
+for
+origin
+in
+trusted_origins
+if
+"
+*
+"
+in
+origin
+):
+allowed_origin_subdomains
+[
+parsed
+.
+scheme
+].
+append
+(
+parsed
+.
+netloc
+.
+lstrip
+(
+"
+*
+"
+))
+print
+(
+allowed_origin_subdomains
+)
+# >>> defaultdict(<class 'list'>, {'https': ['.better-simple.com'], '': ['']})
+If we look closely, we’ll see out of our four values, only one resulted in an actual
+value being added to
+allowed_origin_subdomains
+, “.better-simple.com”. This is
+because this is explicitly looking for any value that has an asterisk in the value.
+This is why the attribute is named
+allowed_origin_subdomains
+. It’s looking for
+origin subdomains. At this point, if you’re using subdomain CSRF checks, you should
+be able to see where the comparison is missing.
+However, if our request origin was actually
+"https://djangoproject.com"
+,
+it would not appear in this list because our setting has that exact value. The exact
+origin checks are performed elsewhere in
+_origin_verified
+. This means we have
+to review the rest of
+_origin_verified
+to understand where we expected it to return
+true, but it failed to do so.
+The request’s call to
+get_host()
+raises a
+DisallowedHost
+exception. If this
+is the case, we can see that
+Django includes a pretty explicit reason
+in the error message. From that error message you, should be able to determine what the problem is.
+The request’s origin does not match the request’s host. This could be because the
+scheme differs (http vs https) or it’s generally a different value. Be aware of
+subdomains here.
+The request’s origin is not in
+self.allowed_origins_exact
+. This is what does
+the exact comparison I mentioned earlier about “https://djangoproject.com”.
+The
+code for this is relatively straightforward
+as it filters
+settings.CSRF_TRUSTED_ORIGINS
+to any value that does not contain an asterisk.
+At this point it’s on you to determine which of these three should be returning true,
+then understand why it’s not and finally determine how to make a change to get it to work.
+For example, if you expected the origin and host to match and they don’t, then add the
+request’s origin to
+settings.CSRF_TRUSTED_ORIGINS
+. If the request’s origin differs from
+the values in your
+settings.CSRF_TRUSTED_ORIGINS
+then you’ll need to adjust it
+or maybe use a wildcard to be more permissive.
+Sheesh that was a lot. And unfortunately, that was just one of the ten different
+ways CSRF validation could fail. But! Yours should only be failing in one particular
+way. You only need to understand that particular flow.
+If you need to dive into one of those nine other code paths, you can use the
+following steps:
+Identify every place that error message is thrown
+Pick one of the ways it can return False and work backward to understand how it got there
+Move on to the next step and repeat
+If squint hard enough, you’ll see that is exactly what we did above. It’s a lot of work,
+but at the end of it, we have a better understanding of Django’s source code
+3
+.
+At this point, you should be able to return to your project, fix your CSRF issue, and
+get on building your awesome application!
+What is this protecting against?
+I assume you’ve now fixed your issue and want to know what the heck that was all for. Let’s
+first take a look at the
+Django docs
+:
+This type of attack occurs when a malicious website contains a link, a form button or
+some JavaScript that is intended to perform some action on your website, using the
+credentials of a logged-in user who visits the malicious site in their browser. A
+related type of attack, ‘login CSRF’, where an attacking site tricks a user’s browser
+into logging into a site with someone else’s credentials, is also covered.
+Do you perfectly understand how this vulnerability can be exploited? No? Me neither.
+I planned to explain it further here, but the
+Open Web Application Security Project (OWASP) has a fantastic explanation
+.
+Please go read the Overview, Description, and Examples sections. Seriously. I can’t explain it
+better than they have.
+To summarize, CSRF protection only allows users to make changes within your web
+application when they intend to.
+It’s my blog, I can do what I want.
+↩
+Once you click on a file, you’ll want to change branches to your version of Django. As far as I know, GitHub doesn’t support searching specific branches of code.
+↩
+By reading other folks’ code, we pick up new strategies and patterns to use in our code.
+↩
+Related Articles
+Learning the violin, a lesson in obstinate rigor
+Back in October, I decided to learn the violin. With the downtime from quitting my job, I was eager to...
+Read more
+Lunch Talk Series: Privilege Arbitrage
+This iteration of the Lunch Talk Series will be covering Kojo Idrissa’s insightful PyDX talk, “Privilege Arbitrage”.
+Read more
+Book Report: Accelerate: the science behind DevOps
+This is a review of the book “Accelerate: the science behind DevOps: building and scaling high performing technology organizations” by...
+Read more

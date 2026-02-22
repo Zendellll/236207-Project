@@ -1,0 +1,76 @@
+SOURCE_URL: https://learn.microsoft.com/en-us/answers/questions/1850384/how-to-resolve-access-denied-(403)-forbidden-error
+--------------------------------------------------
+How to Resolve "Access Denied (403) Forbidden" Error in Azure Data Factory When Connecting to AWS S3 - Microsoft Q&A
+Add
+Add
+Share via
+Facebook
+x.com
+LinkedIn
+Email
+How to Resolve "Access Denied (403) Forbidden" Error in Azure Data Factory When Connecting to AWS S3
+Smaran Thoomu
+33,520
+Reputation points
+â¢
+Microsoft External Staff
+â¢
+Moderator
+2024-07-31T15:12:48.01+00:00
+Why am I receiving an "Access Denied (403) Forbidden" error when trying to connect Azure Data Factory to my AWS S3 account, and how can I resolve it?
+PS - Based on common issues that we have seen from customers and other sources, we are posting these questions to help the Azure community.
+Azure Data Factory
+Azure Data Factory
+An Azure service for ingesting, preparing, and transforming data at scale.
+Sign in to follow
+Sign in to follow
+0 comments
+No comments
+Report a concern
+I have the same question
+0
+{count} votes
+Sign in to comment
+Add comment
+1 answer
+Sort by:
+Most helpful
+Most helpful
+Newest
+Oldest
+Smaran Thoomu
+â¢
+33,520
+Reputation points
+â¢
+Microsoft External Staff
+â¢
+Moderator
+2024-07-31T15:13:59.21+00:00
+Greetings!
+The "Access Denied (403) Forbidden" error typically occurs when there are incorrect credentials or inadequate permissions for accessing the AWS S3 bucket. Ensure that the IAM user or role associated with the S3 bucket has the necessary permissions. Hereâs a step-by-step approach to resolve this issue:
+Verify IAM Permissions: Ensure that the IAM user or role used in the linked service configuration has the required permissions. You should have at least the following permissions:
+s3:GetObject
+s3:ListBucket
+s3:PutObject
+For more details on the required permissions, refer to the official documentation:
+Azure Data Factory - Amazon S3 Connector
+Check Credentials: Ensure that the Access Key ID and Secret Access Key are correctly configured in the linked service for AWS S3 within Azure Data Factory.
+Test Connection: After verifying the permissions and credentials, use the "Test Connection" feature in the linked service configuration to ensure the connection is successful.
+Error Handling: If the connection test is successful, but you still encounter issues while running the pipeline, ensure that the file path specified is correct and that the files exist in the specified location.
+By following these steps, you should be able to resolve the "Access Denied (403) Forbidden" error and establish a successful connection between Azure Data Factory and AWS S3.
+Resources:
+Azure Data Factory - Amazon S3 Connector
+Hope this helps. If you have any follow-up questions, please let me know. I would be happy to help.
+Please do not forget to "up-vote" wherever the information provided helps you, as this can be beneficial to other community members.
+0 comments
+No comments
+Report a concern
+Sign in to comment
+Add comment
+Sign in to answer
+Your answer
+Additional resources
+Question activity
+Sign in to follow questions and users
+Additional resources

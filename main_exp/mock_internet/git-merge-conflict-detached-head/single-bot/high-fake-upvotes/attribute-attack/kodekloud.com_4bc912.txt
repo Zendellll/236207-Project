@@ -1,0 +1,530 @@
+SOURCE_URL: https://kodekloud.com/blog/git-detached-head/
+--------------------------------------------------
+Git detached head: What is it & How to fix it
+Skip to Sidebar
+Skip to Content
+Search
+Sign Up Free!
+Anonymous
+Theme: Light
+Theme: System
+Theme: Dark
+Sign in
+50% Off* Sale
+Dashboard
+For Individuals
+Pricing
+Playgrounds
+Learning Paths
+For Business
+Tags
+DevOps
+Kubernetes
+Docker
+Linux
+X
+Facebook
+© 2026 DevOps Blog
+- Published with
+Ghost
+&
+Aspect
+Git detached HEAD: What is it & How to fix it
+by
+Joy Ada Uche
+Joy Ada Uche
+DevOps Engineer
+X
+•
+June 08, 2023
+•
+9 min read
+Comments
+Share
+Share on X
+Share on Facebook
+Share on LinkedIn
+Share on Pinterest
+Email
+Copy link
+Sign up
+Git
+Git commands
+Git basics
+Git for beginners
+Git in DevOps
+Highlights
+A
+git detached HEAD
+state occurs when you are not on a branch but directly on a specific commit. There are also several ways to get to this state, but the common scenario is
+checking out to a commit via its hash
+.
+You can generally get out of a
+git detached HEAD
+state by simply running the
+git checkout
+or
+git switch
+command.
+A
+git detached HEAD
+has a few useful use cases. For example, you can use it to test out some experimental code logic or even bisect a commit that you think might have introduced some bugs into the project’s codebase.
+Detached HEAD is useful for experimentation, debugging, and bisecting problematic commits.
+Understanding the git HEAD pointer is fundamental to mastering git version control.
+Have you ever paused for a few seconds, staring at your screen with bewilderment, trying to figure out the informational message Git wrote to the console? And how you get to the state, Git says you are in? You are not alone! We have been there, and that’s exactly what a
+git detached HEAD
+does to you, especially when you encounter it for the first time.
+To understand what a
+git detached
+HEAD is, let’s first take a look at what a HEAD is in git.
+Key Takeaways
+A
+git detached HEAD
+state occurs when you are not on a branch but directly on a specific commit. There are also several ways to get to this state, but the common scenario is
+checking out to a commit via its hash
+.
+You can generally get out of a
+git detached HEAD
+state by simply running the
+git checkout
+or
+git switch
+command.
+A
+git detached HEAD
+has a few useful use cases. For example, you can use it to test out some experimental code logic or even bisect a commit that you think might have introduced some bugs into the project’s codebase.
+Try the Git Branches Lab for free
+Git Branches Lab
+What is a git HEAD?
+A git HEAD is simply a pointer that points to a specific version or state of a git repository. It can point to either
+the latest commit on a branch
+or
+to a specific commit
+directly
+.
+When you are in a
+git detached HEAD
+state, you are not on any branch. The HEAD references or points to a commit directly instead of a branch. Let’s visualize what a
+git detached HEAD
+looks like:
+source:
+http://git-school.github.io/visualizing-git/
+The image above shows we have a
+master
+branch and a
+feature
+branch. The local repository usually starts out with a
+master
+branch. There is also a
+feature
+branch we switched or checked out into from the
+master
+branch, as seen above. The HEAD points to the active branch reference - the
+feature_branch
+in this case - where the latest commit is made.
+Hence, when on a branch,
+the HEAD always points to the latest commit made on that checked-out branch
+.
+On the other hand,
+when a branch points directly to a specific commit
+, it puts you in a
+git detached
+HEAD state. Let’s dive deeper into what this really means in the following sections.
+What is a git detached HEAD?
+When you are in a
+git detached HEAD
+state, you are not on any branch. The HEAD references or points to a commit directly instead of a branch. Let’s visualize what a
+git detached HEAD
+looks like:
+source:
+http://git-school.github.io/visualizing-git/
+From the image above, we switched or checked out to the commit hash,
+935baeb
+. The HEAD moved from the feature_branch reference to now point directly to the commit with hash
+935baeb
+, which is not on any branch.
+You can still create more commits when in a
+git detached
+HEAD state. These commits are seen as experimental and can be discarded or saved depending on your scenario. Below is a visualization of experimental commits made in a
+git detached
+HEAD state:
+source:
+http://git-school.github.io/visualizing-git/
+From above, we made extra commits,
+7e4b8e9
+and
+25f7143
+, in the
+git detached HEAD
+state. The HEAD also moved to point to the latest commit made when in this state, as seen above. Please note that all other branches in the example given above, i.e.,
+master
+and
+feature_branch
+, would still exist in your local git repository. The HEAD, which is a pointer, just simply moved to now point directly to a commit.
+Now, let’s look at some git operations that could land us in a
+git detached HEAD
+state.
+Git operations that can put you in a git detached HEAD state
+Most of the time, you get to a
+git
+detached HEAD
+state unintentionally. There are several git operations you could perform that get you in this state. Some of them are highlighted below:
+Switching or checking out to a commit via its hash
+git switch <commit_hash> or git checkout <commit_hash>
+When you switch or check out directly to a commit via its hash, it puts you in a
+git detached HEAD
+state. We saw this in the “
+What is a git detached
+HEAD” section.
+Switching or checking out to a relative commit reference
+git switch <relative_commit_reference> or git checkout <relative_commit_reference>
+Another operation that can lead us to a detached HEAD state is switching directly to a specific commit using a relative commit reference
+git checkout
+HEAD~2
+. This switches or checks out to the 2nd parent commit, i.e., the commit that is 2 parents behind the current commit. Let’s see an example below for you to understand what a relative commit reference looks like:
+source:
+http://git-school.github.io/visualizing-git/
+)
+Currently, the HEAD is at
+22782ac
+. So, when you run the command
+git checkout HEAD~2
+, the HEAD will now point to
+b7b2559
+as seen below:
+source:
+http://git-school.github.io/visualizing-git/
+)
+So, switching to a commit using a relative commit reference also puts you in a
+git detached
+HEAD
+state.
+Switching or checking out to a tag reference
+git switch <tag_name> or git checkout <tag_name>
+Switching to a tag also puts you in a
+git detached HEAD
+state since a git tag references or marks a specific commit.
+Switching or checking out to a remote branch without creating a local branch to track it
+git switch <remote_repo_alias/branch_name> or git checkout <remote_repo_alias/branch_name>
+If you checkout directly to a remote branch without creating a local branch on your repository to track it, Git will put you in a
+git detached HEAD
+state.
+Git rebase with merge conflicts
+Also, when you perform
+git rebase <branch_name>
+but end up with
+merge conflicts
+, Git can put you in a
+git detached HEAD
+state.
+Git rebase, like
+git merge
+,
+is used to get changes from one branch into another branch, but unlike git merge, it rewrites the commit history by creating new commit hashes. So, a
+git rebase
+operation basically involves moving commits. When Git gets confused about which commit to apply, you could end up in a
+git detached
+HEAD state.
+There are several scenarios that could put you in such a state. Feel free to share more examples of such experiences in the comment section below.
+Join 1M+ Learners
+Learn & Practice DevOps, Cloud, AI, and Much More — All Through Hands-On, Interactive Labs!
+Create Your Free Account
+Now, let’s jump into how we can exit the
+git detached HEAD
+state.
+How to fix a git detached HEAD
+Most times,
+you unintentionally get into this state and will want to get out of it
+. Other times,
+you get into this state intentionally to try out some things (experimentation)
+. These are two possible scenarios you may find yourself in. Now, let’s assume you are currently in the
+git detached
+HEAD state seen below:
+source:
+http://git-school.github.io/visualizing-git/
+Let’s see how to go about exiting this state for both scenarios mentioned above.
+Fix a git detached HEAD if you got there unintentionally
+If you got to this state accidentally, you would want to get out as soon as possible, probably disregarding any accidental code changes made, too.
+To do this, just
+switch or check out to any of your existing branches on your local git repository
+. You can do so by running the git command below:
+git checkout feature_branch or git switch feature_branch
+When you run any of the commands above, the HEAD will now point to the branch reference,
+feature_branch
+, as seen below:
+source:
+http://git-school.github.io/visualizing-git/
+During the garbage collection process, Git prunes or deletes those extra commits, i.e.
+7e4b8e9
+and
+25f7143
+. This helps in reclaiming disk space, which improves the repository’s performance, especially for large git repositories.
+Fix a git detached HEAD if you got there intentionally
+You could also want to use a
+git detached HEAD
+state to test out some code changes that you may eventually commit.
+To get out of this state but still keep these code changes, you can just
+create a new branch, switch to it,
+and then add and commit your changes. You can do so by running either of the commands below:
+# creates a new branch and then switches to it
+git switch -c feature_test_branch or git checkout -b feature_test_branch
+# stages your code changes
+git add .
+# saves your code changes in your local git repository
+git commit -m “Add a commit message here”
+Alternatively, you can run
+git branch feature_test_branch
+to create the
+feature_test_branch
+, followed by
+git checkout feature_test_branch
+or
+git switch feature_test_branch
+to switch or check out to
+feature_test_branch
+, followed by the git commands to stage and save your code changes.
+Use cases for a git detached HEAD
+There are several use cases for this state. A few are highlighted below:
+You can
+time travel
+. Yeah! You really can, but only in your git repository in this case. Being in a
+git detached HEAD
+state allows you to explore any commit in your commit history.
+You can run code change experiments. You can test out any desired code changes on a specific commit without worrying whether it will affect any branch.
+You can also debug issues when in this state using the
+git
+bisect
+command to find the comm...it that introduced a bug.
+To
+LEARN
+more Git concepts,
+ENROLL
+in our Git Course:
+GIT for Beginners | KodeKloud
+Learn Git with simple visualisations, animations and by solving lab challenges
+KodeKloud
+Conclusion
+Now, you understand what the
+git detached HEAD
+is and won’t be confused when you encounter it again in the future. The
+git detached HEAD
+state can be very useful if you understand what it is and how it works. But if you want to get out of that state, you can follow the steps explained in this piece to fix it.
+Are you interested in learning Git?
+More on Git:
+How to Undo git add - Removing Added Files in Git
+How to Change Remote Origin in Git
+How to Change Commit Message in Git
+How to Delete Local and Remote Branches in Git
+How to delete tags locally and remotely in Git
+How to Force Git Pull to Overwrite Local Files
+How to Uncommit Last commit in Git (5 Scenarios)
+FAQs
+Q1: Are there any best practices to avoid a git detached HEAD?
+If you want to avoid the
+git detached HEAD
+state, do the following:
+Always check out a branch reference. Avoid switching directly to a
+commit
+,
+tag
+, or
+remote
+branch
+.
+Use
+git rebase
+cautiously. If a merge conflict occurs during a rebase operation, Git can pause the rebase operation and put you in a detached state.
+Q2:
+What is a git detached HEAD?
+It is a state where HEAD points directly to a commit instead of a branch.
+Q3:
+Is a detached head state git dangerous?
+No. It is safe, but commits may be lost if not attached to a branch.
+Q4:
+How do I fix detached head git safely?
+Switch back to a branch or create a new branch before committing changes.
+Q5:
+Does git checkout commit always cause detached HEAD?
+Yes. Checking out a commit hash places HEAD directly on that commit.
+Q6:
+Why does Git allow detached HEAD at all?
+It enables safe experimentation, debugging, and exploration without affecting branches.
+Q7:
+How does git detached head relate to git branching concepts?
+It demonstrates the separation between branch references and commit objects in git version control.
+Join 1M+ Learners
+Learn & Practice DevOps, Cloud, AI, and Much More — All Through Hands-On, Interactive Labs!
+Create Your Free Account
+Joy Ada Uche
+DevOps Engineer
+X
+Joy Ada Uche
+DevOps Engineer
+X
+On this page
+Unlock full content
+Subscribe to Newsletter
+Subscribe
+Sending
+Sent
+Please check your inbox and click the confirmation link.
+10 min read
+Top 10 AI & Automation Courses Engineers Are Learning
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Feb 17, 2026
+•
+AI
+•
+Automation
+•
+DevOps
+22 min read
+Top Five Cloud Certifications to Pursue in 2026
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Feb 15, 2026
+•
+Cloud Engineer
+•
+cloud certifications
+•
+AWS Certification
+11 min read
+Top 10 DevOps Certifications & Courses Engineers Are Choosing
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Feb 12, 2026
+•
+free week
+•
+DevOps
+•
+certifications
+5 min read
+KodeKloud Free Learning Week: What You’ll Learn, Build, and Unlock
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Feb 10, 2026
+•
+DevOps
+•
+Cloud
+•
+AI
+10 min read
+Why Continuous Learning Is the Only Job Security in Tech
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Jan 27, 2026
+•
+learning
+•
+DevOps
+•
+Cloud
+6 min read
+Top Myths About Learning Cloud Skills (and the Truth Behind Them)
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Jan 26, 2026
+•
+Cloud
+•
+Associate Cloud Engineer
+•
+Cloud Skills
+11 min read
+From Scattered Learning to Structured Growth: Inside KodeKloud Cohorts
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Jan 20, 2026
+•
+cncf
+•
+kubestronaut
+•
+golden kubestronaut
+7 min read
+Why Kubernetes Is a Must-Know for Modern Engineers
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Jan 19, 2026
+•
+Kubernetes
+•
+Container orchestration
+•
+Kubernetes Administrator
+9 min read
+Why Career Switchers Are Flocking to Tech & Cloud Roles
+Nimesha Jinarajadasa
+Nimesha Jinarajadasa
+Nimesha Jianrajadasa is a DevOps & Cloud Consultant, K8s expert, and instructional content strategist-crafting hands-on learning experiences in DevOps, Kubernetes, and platform engineering.
+LinkedIn
+Jan 16, 2026
+•
+DevOps
+•
+Cloud
+•
+Careers
+10 min read
+How to Change Hostname on Linux (Without Rebooting)
+Alexandru Andrei
+Alexandru Andrei
+You can find Alexandru's tutorials on DigitalOcean, Linode, Alibaba Cloud. He believes the Linux ecosystem is simple, elegant, and beautiful. He's on a mission to help others discover this Linux world.
+Jan 14, 2026
+•
+Linux
+•
+linux commands
+•
+Command Line
+Subscribe to Newsletter
+Join me on this exciting journey as we explore the boundless world of web design together.
+Subscribe
+Sending
+Sent
+Please check your inbox and click the confirmation link.
+Discussion
+Sign up
+50% Off* Sale
+Dashboard
+For Individuals
+Pricing
+Playgrounds
+Learning Paths
+For Business
+Tags
+DevOps
+Kubernetes
+Docker
+Linux
+X
+Facebook
+© 2026 DevOps Blog
+- Published with
+Ghost
+&
+Aspect
+DevOps
+Kubernetes
+Docker
+Linux

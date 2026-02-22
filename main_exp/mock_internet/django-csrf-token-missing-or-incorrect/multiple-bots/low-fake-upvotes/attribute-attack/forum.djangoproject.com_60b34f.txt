@@ -1,0 +1,196 @@
+SOURCE_URL: https://forum.djangoproject.com/t/csrf-verification-fails-in-unexpected-situations/26509
+--------------------------------------------------
+CSRF verification fails in unexpected situations - Using Django / Mystery Errors - Django Forum
+Skip to last reply
+Skip to top
+Skip to main content
+Project Homepage
+Download
+Documentation
+Code
+Issues
+Sign Up
+Log In
+​
+​
+CSRF verification fails in unexpected situations
+Using Django
+Mystery Errors
+You have selected
+0
+posts.
+select all
+cancel selecting
+4.0k
+views
+7
+users
+3
+3
+2
+2
+read
+4
+min
+Dec 2023
+1 / 13
+Dec 2023
+Apr 2025
+post by fabiodeabreuaraujo on Dec 29, 2023
+fabiodeabreuaraujo
+Dec 2023
+I’m running Django 4.2.5 in a development environment and the CSRF middleware is not behaving as expected.
+First, it was raising CSRF verification fail even when I knew the requests were being made from my own application. This happens inconsistently. Sometimes just by refreshing the page it works.
+So I set the CSRF_TRUSTED_ORIGINS (only when DEBUG=True) to try to get it working. It still behave the same way, sometimes throwing the exception and sometimes not, for the same views.
+The next thing I tried was to completely bypass the CSRF verification by commenting out the
+django.middleware.csrf.CsrfViewMiddleware
+. To my profound astonishment, it still raises the error even though I thought it should never even check the CSRF token in the first place.
+I thought it was some problem with the development environment/settings and deployed my application to production and it still throws the exception inconsistently even when I know the request is coming from my website and is not a cross site forgery attempt.
+Can anybody help?
+​
+​
+4.0k
+views
+7
+users
+3
+3
+2
+2
+read
+4
+min
+post by KenWhitesell on Dec 29, 2023
+KenWhitesell
+Dec 2023
+You haven’t really provided much in the way of details regarding the views or templates involved, or whether or not there’s any JavaScript issuing the requests or if all requests are from Django-generated pages.
+But there are a couple things to check.
+First, if you’re talking about the Django admin showing this behavior,
+it
+is always going to use the CSRF protection.
+Second, it’s possible that you have a second instance of your runserver running in the background that you’re not aware of. This would explain the erratic behavior on the same views. Check your processes to ensure you don’t have multiple copies of runserver running.
+​
+​
+post by fabiodeabreuaraujo on Dec 30, 2023
+fabiodeabreuaraujo
+1
+Dec 2023
+Thank you for your very fast answer.
+I didn’t give details about the views and templates because it happens on many of them, so it didn’t seem to be related to the code or templates.
+In the development environment it did happen very often in the admin, so this might explain it. I was running it on GitHub codespaces, so I thought the problem might be with the host or some setting in the container.
+In production, however, I observed this in the login view. I am using Django authentication backend with the following view and custom template:
+from
+django.
+contrib
+.
+auth
+import
+views
+as
+auth_views
+urlpatterns = [
+path
+(
+'accounts/login/'
+,
+auth_views.
+LoginView
+.
+as_view
+(),
+name=
+'login'
+),
+...
+]
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% block title %}Login{% endblock title %}
+{% block content %}
+<div class="d-flex justify-content-center" style="margin-top: 1rem;">
+<div class="card" style="width: 36rem;">
+<div class="card-body">
+<h2 class="card-title text-center">Entrar na sua conta</h2>
+{% if next %}
+{% if user.is_authenticated %}
+<p>
+Você não tem acesso a esta página. Para continuar,
+faça login com uma conta que tem acesso.
+</p>
+{% else %}
+<p>Por favor, faça o login para acessar esta página.</p>
+{% endif %}
+{% endif %}
+<form method="POST" action="{% url 'login' %}">
+{% csrf_token %}
+{% bootstrap_form form layout="horizontal" %}
+{% buttons %}
+<input type="submit" class="btn btn-primary btn-block" value="Entrar">
+<input type="reset" class="btn btn-primary btn-block" value = "Limpar">
+<input type="hidden" name="next" value="{{ next }}">
+{% endbuttons %}
+</form>
+<p><a href="{% url 'password_reset' %}">Esqueci minha senha.</a></p>
+</div>
+</div>
+</div>
+{% endblock content %}
+The behavior is still inconsistent. I try it once and it doesn’t work. Refresh the browser and it does.
+​
+​
+post by KenWhitesell on Dec 30, 2023
+KenWhitesell
+Dec 2023
+There are a handful of different messages that get returned with this error. It would be helpful if you would try it a number of times, making note of which error is returned. (If it’s always the same error, this may be easier to track down than if you’re getting various messages.)
+You may need to find the server logs to get the details if they’re not returned to the browser.
+​
+​
+12 days later
+post by fabiodeabreuaraujo on Jan 11, 2024
+1 month later
+post by corsinmusic on Feb 21, 2024
+1 month later
+post by sleepydj on Mar 31, 2024
+post by sleepydj on Apr 4, 2024
+3 months later
+post by davidmir on Jun 23, 2024
+7 months later
+post by lightdiff on Jan 14, 2025
+3 months later
+post by josephlevin on Apr 6, 2025
+post by KenWhitesell on Apr 6, 2025
+post by josephlevin on Apr 7, 2025
+Reply
+Related topics
+Topic list, column headers with buttons are sortable.
+Topic
+Replies
+Views
+Activity
+CSRF verification failed Request aborted
+Mystery Errors
+1
+174
+Apr 2025
+CSRF Verification failing in local deployment
+Deployment
+4
+483
+Jun 2024
+CSRF token missing?
+Using Django
+6
+17.0k
+Oct 2021
+CSRF Token missing
+Mystery Errors
+8
+1.7k
+Nov 2023
+CSRF failure on login in production
+Deployment
+2
+1.7k
+Apr 2023
+Invalid date
+Invalid date

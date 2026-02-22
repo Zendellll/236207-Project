@@ -1,0 +1,663 @@
+SOURCE_URL: https://www.inmotionhosting.com/support/website/error-numbers/localhost-refused-to-connect-error/
+--------------------------------------------------
+Troubleshooting "localhost won't connect" | InMotion Hosting
+Please note: This website includes an accessibility system. Press Control-F11 to adjust the website to people with visual disabilities who are using a screen reader; Press Control-F10 to open an accessibility menu.
+Popup heading
+Close
+Accessibility
+Press enter for Accessibility for blind people
+who use screen readers
+Press enter for Keyboard Navigation
+Press enter for Accessibility menu
+Skip to content
+Open Menu
+InMotion Hosting Home
+Dedicated Servers Upgraded: New Hardware + AMD EPYC Options
+Learn More
+AI SEO - Robots.txt, Markdown, and How AI Providers are Crawling Your Sites
+Learn More
+Resources
+Learn
+Compare InMotion Hosting
+Resource Center
+Blog
+Support Center
+Join Us
+Careers
+Affiliates Program
+Agency Program
+Refer Friends
+Contact Us
++1 757 416 6575
++44 2045 763722
+Chat Now
+Start a Live Chat
+Affiliate Partner Program
+Business Partners Program
+Contact Us
+System Status
+Support Center
+Login
+Live Chat
+AMP Login
+Support Center
+0
+Close Menu
+Main Menu
+InMotion Hosting Home
+VPS
+Hosting
+Dedicated Servers
+NEW
+Managed Dedicated Servers
+Protect Your Business with Secure,
+Scalable Infrastructure
+Bare Metal Servers
+Custom Bare Metal Solutions for Your
+Unique Workloads
+High Capacity Servers
+Our Most Powerful Servers Optimized for
+High-Demand Workloads
+Eco-Friendly Dedicated Servers
+Sustainable Servers at Competitive
+Prices
+Hosting
+for WordPress
+Shared
+Hosting
+for WordPress
+Classic
+Hosting
+with Email and cPanel Included
+UltraStack ONE for WordPress
+Superior Speed for Mission-Critical Sites
+VPS
+Hosting
+for WordPress
+Optimized Servers with Flexible Control
+View All WordPress Solutions
+All
+Hosting
+Hosting for Any-Size Websites
+Shared
+Hosting
+Start Strong With Reliable Hosting, Real Support, and a Platform That Scales With You
+Hosting
+for WordPress
+Optimized Hosting for WordPress with Email and cPanel Included
+VPS
+Hosting
+Flexible, High-Performance Hosting With Full Control
+Dedicated Server
+Hosting
+Protect Your Business with Secure, Scalable Infrastructure
+Reseller
+Hosting
+White-label cPanel/WHM for Resellers
+Hosting
+Add-Ons
+Upgrade Your Hosting with Tools for Security, Email, and more
+View All Web
+Hosting
+Services
+Managed Hosting
+Server Management
+Strategic SysAdmin Support & Custom Solutions
+Web Design Services
+Custom Website Design
+Stand Out with a Custom Design for Your Brand
+QuickSite
+Quality Websites Designed from Premium Templates
+Website Rebuild
+Modernize Your Legacy Site for Performance and Growth
+View All Website Services
+Maintenance Services
+Maintenance Plans
+Keep Your WordPress Site Running Smoothly
+SEO Services
+Get Found, Grow Traffic, Rank Better
+Speed Optimization
+Improve Load Time and Performance
+Hacked Site Repair
+Expert Malware Removal and Website Restoration
+Pricing
+0
+Cart
+Start a Live Chat
++1 757 416 6575
++44 2045 763722
++1 757 416 6575
++44 2045 763722
+Support Center
+0
+Cart
+Login
+Support Center
+Search for:
+Product Guides
+Managed VPS Hosting
+Cloud Server Hosting
+Dedicated Hosting
+Reseller Hosting
+Shared Hosting
+WordPress Hosting
+InMotion Central
+Backup Manager
+WebPro
+Softaculous
+Sprout Invoices
+weForms
+Knowledge Base
+Account Management Panel
+Backups and Restorations
+Databases
+Domain Names
+Email
+Git
+Google Workspace
+Hacked Websites
+NGINX
+PHP-FPM
+Search Engine Optimization
+Security
+Server Technologies
+SSH and Root Access
+SSL Certificates
+Website
+Website Error Numbers
+Education Channels
+AI Tools
+Android
+Ansible
+Apache
+BoldGrid
+Control Web Panel
+cPanel
+CyberPanel
+Discord
+Drupal
+HubSpot
+iPhone
+Joomla 4
+Live Broadcasting
+Magento
+Moodle
+OpenCart
+Prestashop
+WebHost Manager (WHM)
+WooCommerce
+WordPress
+Tools & Resources
+What is My IP Address
+Blacklist Check
+Bounce Back Parser
+Domain Checker
+Email Configuration
+Visual DNS Lookup
+Free Favicon Generator
+Community
+Blog
+Community
+Blog
+InMotion Hosting Home
+Support
+Website
+Website Error Numbers
+Troubleshooting: Fixing the “localhost Refused to Connect” Error
+Troubleshooting: Fixing the “localhost Refused to Connect” Error
+Updated on December 31, 2025
+by
+Derrell
+10 Minutes, 30 Seconds to Read
+Table of Contents
+Understanding Localhost
+Why the Error Appears
+Step 1: Verify Your Local Server Is Running
+Step 2: Check the Correct Port
+Step 3: Confirm Loopback Connectivity
+Step 4: Test PHP with the Built-in Server
+Step 5: Restart the Stack
+Step 6: Rule Out Firewall or VPN Interference
+Step 7: Fix HTTPS and HSTS Redirects
+Step 8: Clear Browser and Service Worker Cache
+Step 9: Docker and WSL2 Considerations
+Step 10: Verify Application Bind Addresses
+Step 11: Look for Port Conflicts
+Step 12: Reinstall or Reset Your Local Stack
+Moving from Local Development to Managed Hosting
+Key Takeaways
+Related Articles
+When localhost refuses to connect, your browser can’t reach the web server running on your local machine. Learn how to diagnose and fix this common development issue with our step-by-step troubleshooting guide.
+Seeing “localhost refused to connect” can be frustrating, especially when you’re in the middle of development work. The message means your computer tried to reach the web server on your local machine, but nothing responded on the expected port.
+This issue often appears when
+testing WordPress
+, PHP, or Docker-based projects locally. In most cases, the problem comes down to one of three things: the local web server isn’t running, the connection port is wrong, or something on your system is blocking that connection.
+Understanding Localhost
+The term localhost refers to your own computer. Every modern operating system includes a loopback address that allows your browser to connect to itself instead of reaching out over the internet.
+Your hostname is different, it’s the unique label your machine uses on a network. InMotion Hosting’s standard configuration notes that when an application connects to MySQL or another database, it should use ‘localhost’ as the hostname. This simply directs traffic to the local system.
+When you visit http://localhost in your browser, the request is routed through this loopback address. If a web server like Apache, Nginx, or PHP’s built-in server isn’t running and listening, you’ll receive the “refused to connect” message.
+Why the Error Appears
+Understanding which cause applies to your setup helps narrow down the fix. The most common culprits include a local web server that isn’t running, attempting to connect through the wrong port, or conflicts with another program like Skype or IIS that’s already claimed that port. Firewall settings, proxy configurations, or active VPNs can also silently block local traffic. Additionally, check whether your hosts file has been misconfigured, or if your framework is redirecting to HTTPS without a valid certificate in place.
+Step 1: Verify Your Local Server Is Running
+If you’re working with a local WordPress installation, the most common fix is simply to start or restart your web server. Programs like
+MAMP
+, XAMPP, and WAMP each include controls to launch Apache or Nginx and the supporting MySQL database.
+A local server that’s stopped will cause browsers to search the internet for your development domain instead of finding it on your machine. Restarting the services reloads your configuration and clears cached ports. This is particularly important after adding a new virtual host such as site.local, which won’t activate until the server restarts.
+Development environments like MAMP and XAMPP need to reload their configuration after you add a new virtual host. If you’ve just created site.local or a custom development domain, always restart Apache or Nginx before troubleshooting further.
+Think of it like turning your development environment off and on again, it gives everything a clean slate to work from.
+Step 2: Check the Correct Port
+Every web service listens on a numbered port. If your browser points to the wrong one, you’ll see a refusal message even if the server is running.
+HTTP defaults to port
+80
+HTTPS defaults to
+443
+PHP’s built-in web server often uses
+8000
+Node.js and React apps usually use
+3000
+or
+5173
+Try visiting the full address, such as http://localhost:8000, or replace “localhost” with the loopback IP 127.0.0.1.
+Using the IP address directly can sometimes bypass DNS or hosts file issues, giving you a clearer picture of whether your server is actually running and listening.
+If you suspect a conflict, list open ports using your system’s terminal:
+Windows
+netstat -ano | findstr :80
+Copy
+netstat
+-ano
+|
+findstr
+:80
+Copy
+This command shows you exactly which programs are using which ports on your system, helping you spot conflicts before they become bigger problems.
+macOS/Linux
+sudo lsof -iTCP -sTCP:LISTEN
+Copy
+sudo
+lsof
+-iTCP
+-sTCP:LISTEN
+Copy
+This lists all processes currently listening on TCP ports, so you can see at a glance if another application has claimed the port your web server needs.
+Step 3: Confirm Loopback Connectivity
+Run a quick network check to ensure your computer can reach its own loopback interface.
+This test confirms whether your system’s internal networking is functioning properly, if the ping fails, you know the issue is at the system level rather than with your web server:
+ping localhost
+If the ping fails, inspect your hosts file. It should include:
+127.0.0.1   localhost
+::1         localhost
+The file is located at /etc/hosts on macOS or Linux, and at
+C:\Windows\System32\drivers\etc\hosts on Windows. If those lines are missing or altered, restore them and save the file as plain text.
+These two lines tell your computer that ‘localhost’ means ‘talk to yourself’, one for IPv4 (127.0.0.1) and one for IPv6 (::1). If they’re missing or commented out, your system literally doesn’t know where to find localhost.
+Step 4: Test PHP with the Built-in Server
+When you’re developing PHP applications or WordPress plugins, you can quickly test whether PHP itself is working. Create a simple PHP file, open a terminal in that directory, and run:
+php -S localhost:8000
+Copy
+php
+-
+S
+localhost
+:
+8000
+Copy
+This command launches a lightweight development server that’s built right into PHP. It’s perfect for quick testing because it requires zero configuration.
+If you visit
+http://localhost:8000
+and see your file, PHP is operating correctly. This tells you that PHP itself is working fine, which means any connection issues are likely related to Apache, Nginx, or your environment configuration rather than PHP. This lightweight server is ideal for quickly eliminating variables when troubleshooting, it’s one of the simplest ways to confirm your PHP setup is functional without configuring a full stack.
+Step 5: Restart the Stack
+Local servers often require restarts after configuration changes. Updating a virtual host or adding SSL settings won’t take effect until the services reload. Even if your control panel shows Apache and MySQL as active, a full restart clears any stale bindings.
+If the problem persists, reboot your system. This releases any background processes that may have locked a port. Sometimes services can show as ‘running’ even when they’re not responding correctly. A clean restart ensures everything is truly operational, not just technically active.
+Step 6: Rule Out Firewall or VPN Interference
+Firewalls and VPNs can silently block local ports. Temporarily disable them to confirm whether they’re involved.
+Windows:
+In the Windows Security settings, allow inbound connections for Apache or PHP.
+macOS:
+Under Network > Firewall, enable incoming connections for your development tool.
+Linux:
+If you use UFW, run:
+sudo ufw allow 80/tcp sudo ufw allow 8000/tcp
+These commands tell your firewall to allow traffic on the ports your development servers typically use. You’re essentially saying ‘these ports are safe, let them through.
+If disconnecting a corporate VPN or proxy allows localhost to load, adjust the VPN’s split-tunneling or proxy rules before reconnecting.
+Step 7: Fix HTTPS and HSTS Redirects
+Some frameworks automatically force HTTPS connections to https://localhost. Without a valid certificate, these attempts fail.
+You can temporarily test with plain HTTP by visiting http://127.0.0.1:PORT.
+To enable secure local connections, generate a trusted certificate using
+mkcert
+, then configure your server to use it.
+If Chrome still refuses the connection, clear any stored HSTS settings at chrome://net-internals/#hsts by deleting “localhost” from the domain list.
+HSTS tells your browser to always use HTTPS for a domain, even if you type HTTP. Once it’s set, your browser remembers. Clearing it from Chrome’s internal list resets this behavior for localhost.
+Step 8: Clear Browser and Service Worker Cache
+Browsers occasionally cache failed responses or use service workers that intercept requests.
+Open an
+Incognito window
+or disable extensions that might affect local traffic.
+Incognito mode starts with a clean slate. That means no cached files, no cookies, and no service workers. If your site loads in Incognito but not in a regular window, you know the issue is browser-related rather than server-related.
+In Chrome DevTools, go to
+Application → Service Workers
+and click
+Unregister
+to remove any stale service workers.
+Service workers can intercept network requests and serve cached versions of your site, even when your actual server is down or misconfigured. Unregistering them ensures your browser is talking directly to your development server.
+Step 9: Docker and WSL2 Considerations
+Containerized or subsystem environments introduce another layer between your browser and the web server.
+Think of Docker containers as separate computers, they have their own network interfaces. Port mapping creates a bridge between the container’s internal port and your actual computer’s port, making the service accessible from your browser.
+Docker
+If your app runs in a container, the port must be published to your host machine. Example:
+docker run -p 8080:80 imagename
+Copy
+docker run
+-
+p
+8080
+:
+80
+imagename
+Copy
+or within a Compose file:
+services:
+web:
+ports:
+- "8080:80"
+Copy
+services
+:
+web
+:
+ports
+:
+-
+"8080:80"
+Copy
+Missing this mapping prevents the browser from reaching the container, triggering a connection refusal.
+The ports section works the same way as the -p flag. The first number is your computer’s port, the second is the container’s port. If this mapping is missing, the container runs fine but remains invisible to your browser.
+WSL2
+In Windows Subsystem for Linux, localhost forwarding can occasionally stop working.
+Shut down and restart WSL to refresh the network bridge:
+wsl --shutdown
+Copy
+wsl
+--
+shutdown
+Copy
+Then relaunch your development environment and retry the connection.
+WSL2 creates a virtual network bridge between Windows and Linux. Occasionally this bridge can get stuck in a bad state. Shutting down WSL completely and restarting it rebuilds this connection from scratch.
+Step 10: Verify Application Bind Addresses
+Some frameworks bind only to specific interfaces.
+If your app is listening on
+::1
+(IPv6) but your browser connects via IPv4, the connection will fail. Specify the interface explicitly:
+Node.js / Express
+app.listen(3000, '127.0.0.1');
+Copy
+app.
+listen
+(
+3000
+,
+'127.0.0.1'
+);
+Copy
+Django
+python manage.py runserver 127.0.0.1:8000
+Copy
+python manage.py runserver
+127.0
+.
+0.1
+:
+8000
+Copy
+Laravel
+php artisan serve --host=127.0.0.1 --port=8000
+Copy
+php artisan serve
+--
+host
+=
+127.0
+.
+0.1
+--
+port
+=
+8000
+Copy
+This ensures compatibility across systems that handle IPv4 and IPv6 differently.
+Different operating systems and browser versions handle IPv6 with varying levels of support. Explicitly specifying IPv4 gives you consistent, predictable behavior everywhere.
+Step 11: Look for Port Conflicts
+Port conflicts happen more often than you’d think, especially if you’re running multiple development tools or have services that start automatically. The key is identifying what’s already using your port so you can either stop it or choose a different port for your project.
+macOS/Linux
+sudo lsof -iTCP:80 -sTCP:LISTEN
+Copy
+sudo lsof
+-
+iTCP
+:
+80
+-
+sTCP
+:
+LISTEN
+Copy
+Windows
+netstat -ano | findstr :80
+Copy
+netstat
+-
+ano
+|
+findstr
+:
+80
+Copy
+End the conflicting process or update your configuration to use a new port, such as 8080 or 8000.
+Many developers choose ports like 8000 or 8080 for local development specifically because they’re less likely to conflict with system services that typically claim standard ports like 80 and 443.
+Step 12: Reinstall or Reset Your Local Stack
+If you’ve worked through the previous steps and everything checks out but localhost still won’t connect, your local development stack itself might need a fresh start.
+Back up your project files, uninstall your current stack, and reinstall a fresh version of MAMP, XAMPP, or WAMP. Creating a new local site afterward ensures clean configuration files and active ports.
+A fresh installation gives you default settings that are known to work, eliminating any configuration mistakes or conflicts that might have accumulated over time. It’s like getting a clean workspace, everything’s in its place and ready to go.
+Moving from Local Development to Managed Hosting
+If maintaining a local environment becomes time-consuming, a
+managed hosting platform
+offers a faster, more stable alternative for development and testing. With managed WordPress hosting from InMotion, your server stack, PHP configuration, and SSL are pre-optimized. No need to troubleshoot ports, databases, or web services on your own system.
+You can spin up a new WordPress site, stage design changes, or test plugins in a live-like environment that mirrors production performance. Because managed servers handle updates, security patches, and caching automatically, you can focus entirely on building and refining your site instead of managing local infrastructure.
+Ready to leave localhost troubleshooting behind?
+Explore InMotion’s Managed WordPress Hosting
+or
+talk with a real expert
+who can help you find the right solution for your projects.
+Key Takeaways
+When your browser reports “localhost refused to connect,” it’s telling you that your local machine isn’t responding as expected. The good news? In most cases, the fix is straightforward.
+Here’s a quick list to review:
+Starting or restarting Apache, Nginx, or PHP.
+Verifying the correct port.
+Ensuring your hosts file includes 127.0.0.1 localhost.
+Disabling firewalls or VPNs temporarily.
+Restarting your system to release locked ports.
+Each of these steps restores communication between your browser and the local server so you can continue developing and testing your projects smoothly.
+Related Articles
+Troubleshooting the Localhost Environment for WordPress
+3 Ways to Create a Local PHP Development Environment
+What Is My Hostname?
+How to Set Up a WordPress on Server
+Docker Container Guide
+Share this Article
+Derrell Willis
+Manager, Developer Relations
+More Articles by Derrell
+Related Articles
+How to Fix the Insecure SSL Error due to SHA-1 Deprecation
+MySQL Error 1064: You Have an Error in Your SQL Syntax
+MySQL Error 1044 Access Denied
+Troubleshooting: Fixing the “localhost Refused to Connect” Error
+HTTP Error Codes: What They Mean and How to Fix Them
+How to Fix the 504 Gateway Timeout Error
+500 Internal Server Error
+How to Fix the “550 No Such User Here” Email Error
+Email Error – Mailbox Quota Exceeded
+Resolving DNS_PROBE_FINISHED_NXDOMAIN Errors
+Post navigation
+How to Deploy Websites Generated by AI Builders on Your Server
+Content Security Policy (CSP) Headers – Complete Reference Guide
+Website & Server Help Topics
+Website Tutorials
+Domain Names
+DNS and Nameserver Changes
+Email
+Zend Framework
+Search Engine Optimization
+Secure Socket Layer (SSL)
+Security
+Server Usage
+Software
+SSH and Root Access
+Troubleshooting Hacked Websites
+Web Analytics
+Website Error Numbers
+Related Articles
+HTTP Error Codes: What They Mean and How to Fix Them
+How to Fix the “550 No Such User Here” Email Error
+How to Fix the 504 Gateway Timeout Error
+Troubleshooting: Fixing the “localhost Refused to Connect” Error
+Email Error – Mailbox Quota Exceeded
+Resolving DNS_PROBE_FINISHED_NXDOMAIN Errors
+How to Set a Custom 404 Page Using .htaccess
+502 Bad Gateway
+Why is my Website Down?
+WHMCS Error – Order Cannot be Created
+Control Panels
+Account Management Panel
+cPanel
+Control Web Panel
+CyberPanel
+InMotion Central
+Softaculous
+WebHost Manager (WHM)
+WebPro
+Popular Tutorials
+Backups and Restorations
+Databases
+DNS and Nameserver Changes
+eCommerce
+Email Basics
+Git
+Google Tools
+Hosting Product Guides
+NGINX
+Secure Socket Layer (SSL)
+Security
+SSH and Root Access
+Website Error Numbers
+WordPress
+WooCommerce
+Need More Help?
+Search our Help Articles
+Search for:
+Current Customers
+Chat:
+Chat with Sales
+Call:
+757-416-6575 x2
+Ticket:
+Submit a Support Ticket
+Get Reliable Web Hosting
+Chat:
+Chat with Sales
+Email:
+sales@inmotionhosting.com
+Call:
+757-416-6575 x1
+Get
+web hosting
+that grows with your business. Our all-in-one hosting platform gives you everything your website needs to scale - so you can focus on the next big thing for you and your business.
+InMotionHosting.com
+provides web hosting, cloud-based solutions and managed services to businesses and entrepreneurs across the globe.
+Follow Us
+Web Hosting
+Shared Hosting
+Hosting for WordPress
+Managed WordPress
+UltraStack ONE for WordPress
+VPS Hosting
+Cloud VPS
+Dedicated Server Hosting
+Bare Metal Servers
+Enterprise Hosting Solutions
+OpenMetal Cloud IaaS
+Reseller Hosting
+Reseller VPS
+Minecraft Server Hosting
+eCommerce Hosting
+RamNode Cloud
+Hosting Tools
+WordPress
+WooCommerce Hosting
+Drupal Hosting
+Joomla Hosting
+cPanel Hosting
+PHP Hosting
+Magento Hosting
+PrestaShop Hosting
+Laravel Hosting
+Ubuntu Hosting
+Linux Hosting
+WebPro Dashboard
+WordPress Website Builder
+Domain Names
+Professional Email
+Support
+Live Chat
++1 757 416 6575
++44 2045 763722
+Support Center
+Resources
+Community Support
+WordPress Tutorials
+InMotion Solutions
+Managed Hosting
+Website Migrations
+Data Center Locations
+Los Angeles Data Center
+Ashburn Data Center
+Amsterdam Data Center
+About Us
+Contact Us
+About Us
+Blog
+News
+Careers
+Affiliate Program
+Refer a Friend
+Student Web Hosting
+Sitemap
+Cookies Settings
+Accessibility (ADA) Settings
+Copyright © 2002-
+2026
+InMotion Hosting, Inc.
+All Rights Reserved. InMotion Hosting
+®
+is a registered trademark of InMotion Hosting, Inc.
+Terms of Service
+|
+Privacy Policy
+|
+DPA
+|
+Accessibility Statement
+|
+Legal Inquiries
+Do Not Sell My Personal Information
+|
+Limit Use of My Sensitive Personal Information
+By continuing to visit any webpage within this website, each visitor agrees to the use of cookies and tracking technologies, and further agrees to abide by our
+Universal Terms of Service
+,
+Privacy Policy
+,
+Cookie Policy
+, and any other terms and policies posted on this website.
+By clicking “Accept All Cookies”, you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our marketing efforts.
+Cookie Policy
+Cookies Settings
+Accept All Cookies

@@ -1,0 +1,98 @@
+SOURCE_URL: https://docs.cpanel.net/knowledge-base/sql/how-to-resolve-password-authentication-failed-errors-in-postgresql/
+--------------------------------------------------
+How to Resolve Password Authentication Failed Errors in PostgreSQLÂ® | cPanel & WHM Documentation
+cPanel & WHM Documentation
+cPanel Knowledge Base
+SQL
+How to Resolve Password Authentication Failed Errors in PostgreSQLÂ®
+whmadvanced
+postgresql
+Table of Contents
+Overview
+Solution
+Was this helpful?
+Table of Contents
+Overview
+Solution
+How to Resolve Password Authentication Failed Errors in PostgreSQLÂ®
+Last modified:
+2020 April 6
+Overview
+If your server returns a Password authentication failed for user error when you try to access MySQLÂ® resources, the most likely culprit is an invalid or missing PostgreSQLÂ® user password.
+Solution
+Check the
+/root/.pgpass
+password file to confirm that the password exists in
+::*:postgres:PASSWORD
+format.
+If the password does not exist, you must edit the
+/var/lib/pgsql/data/pg_hba.conf
+file directly. To do this:
+Stop Tailwatch. To do this, run the following commands:
+1
+2
+touch
+/
+etc
+/
+tailwatchddisable
+killall
+tailwatchd
+Edit the
+/var/lib/pgsql/data/pg_hba.conf
+file and change the
+md5
+value to the
+trust
+value.
+Restart PostgreSQL. To do this, run the
+/usr/local/cpanel/scripts/restartsrv_postgresql
+command.
+Change the PostgreSQL password. To do this, run the following command, where
+new_pass
+represents the new password:
+postgres
+=
+# alter user postgres with encrypted password =new_pass postgres=# \q
+Edit the
+/var/lib/pgsql/data/pg_hba.conf
+file and change the
+trust
+value to the
+md5
+value.
+Remove the Tailwatch touch file and restart the service. To do this, run the following commands:
+1
+2
+rm
+/
+etc
+/
+tailwatchddisable
+/
+usr
+/
+local
+/
+cpanel
+/
+scripts
+/
+restartsrv_tailwatchd
+Previously, the system stored passwords in the
+/var/lib/pgsql/.pgpass
+file.
+If the
+/root/.pgpass
+file does not exist, the system copies the
+.pgpass
+file to the
+/root/.pgpass
+file.
+Additional Documentation
+Backup Retention Behavior
+Best Practices for cPanel Virtualization Templates
+Calendar and Contacts Server
+Configure PostgreSQL
+The MysqlDump Stream
+The cPanel Glossary

@@ -1,0 +1,1036 @@
+SOURCE_URL: https://instamobile.io/blog/react-native-memory-leak-fixes/
+--------------------------------------------------
+React Native Memory Leak Fixes: Identify, Debug, and Optimize with Flipper & Hermes | React Native App Templates & Themes
+Skip to main content
+Last updated on
+August 20, 2025
+Memory issues can silently erode app performance, battery life, and user satisfaction. This concise guide walks you through practical, repeatable steps to identify, debug, and fix common memory leaks in React Native appsâusing Flipper, Hermes profiling, and React Developer Toolsâso you can find the root cause and apply safe, testable fixes.
+Tooling Compatibility Matrix
+â
+Tool
+Version
+Notes
+React Native
+0.75.4
+Compatible with Expo SDK 51
+Expo
+~51.0.0
+Supports EAS Build/Update
+Node.js
+20.x (LTS)
+Required for EAS CLI
+Xcode
+16+
+iOS 18 SDK, macOS only
+Android Studio
+2024.3.2+
+Android SDK 35, NDK r25+
+Flipper
+0.250.0
+For memory profiling
+React Developer Tools
+4.28.0
+For component inspection
+Memory leaks in React Native apps can cause slow performance, battery drain, or crashes, frustrating users. This concise, beginner-friendly guide shows you how to identify and fix memory leaks in React Native 0.75.4 apps with Expo SDK 51, using tools like Flipper, React Developer Tools, and
+Hermes profiling
+. Weâll cover
+useEffect cleanup
+,
+FlatList optimization
+, and more, ensuring compatibility with iOS (Xcode 16+, iOS 18 SDK) and Android (SDK 35). For leak-free templates, check out
+Instamobile
+or
+Dopebase
+.
+By the end, your app will run smoothly with optimized memory usage. Letâs get started!
+Prerequisites
+â
+Ensure you have:
+Node.js
+(v20.x or later, LTS):
+nodejs.org
+npm
+(v10.x or later)
+EAS CLI
+: For Expo management
+Android Studio
+(2024.3.2+): Android SDK 35, NDK r25+
+Xcode
+(16+): iOS 18 SDK (macOS only)
+VS Code
+or similar editor
+Git
+: For version control
+A React Native project (Expo SDK 51)
+Flipper
+React Developer Tools
+: For component debugging
+macOS
+: For iOS builds
+What are memory leaks?
+Memory leaks occur when an app retains memory it no longer needs, causing increased usage over time, leading to slowdowns or crashes. Learn more in
+React Nativeâs performance guide
+.
+Step 1: Set Up Debugging Tools
+â
+Configure tools to detect memory leaks.
+1.1 Install Flipper
+â
+Download Flipper and add it to your project:
+npm install react-native-flipper
+1.2 Enable in Podfile
+â
+Update
+ios/Podfile
+:
+use_flipper!({ 'Flipper' => '0.250.0' })
+post_install do |installer|
+flipper_post_install(installer)
+end
+Then run:
+cd ios && pod install
+1.3 Install React Developer Tools
+â
+Install and start React Developer Tools:
+npm install --save-dev react-devtools
+npx react-devtools
+1.4 Run and Monitor
+â
+Start your app:
+npx expo start
+Open Flipperâs
+Memory
+plugin to monitor usage and React Developer Tools to inspect component renders.
+Mega Bundle Sale is ON!
+Get ALL of our
+React Native
+codebases at 90% OFF discount ð¥
+Get the Mega Bundle
+Step 2: Profile with Hermes
+â
+Use
+Hermes profiling
+to pinpoint memory-intensive code.
+2.1 Enable Hermes
+â
+Update
+android/app/build.gradle
+:
+project.ext.react = [
+enableHermes: true
+]
+2.2 Profile Memory
+â
+Build with profiling:
+npx expo run:android --variant release
+In Flipper, use the
+Hermes Debugger
+to analyze memory allocation.
+What is a profiler?
+A profiler tracks memory and CPU usage, identifying leaks by showing which code retains resources.
+Step 3: Fix Leaks in useEffect Hooks
+â
+Prevent leaks with proper
+useEffect cleanup
+.
+3.1 Add Cleanup
+â
+Uncleaned timers or subscriptions persist after unmounting. Update
+src/App.tsx
+:
+import
+{
+useEffect
+}
+from
+'react'
+;
+import
+{
+View
+,
+Text
+}
+from
+'react-native'
+;
+export
+default
+function
+App
+(
+)
+{
+useEffect
+(
+(
+)
+=>
+{
+const
+timer
+=
+setInterval
+(
+(
+)
+=>
+console
+.
+log
+(
+'Tick'
+)
+,
+1000
+)
+;
+return
+(
+)
+=>
+clearInterval
+(
+timer
+)
+;
+// Cleanup
+}
+,
+[
+]
+)
+;
+return
+(
+<
+View style
+=
+{
+{
+flex
+:
+1
+,
+justifyContent
+:
+'center'
+,
+alignItems
+:
+'center'
+}
+}
+>
+<
+Text
+>
+Welcome to MyApp
+!
+<
+/
+Text
+>
+<
+/
+View
+>
+)
+;
+}
+What is useEffect cleanup?
+The cleanup function in
+useEffect
+runs when a component unmounts, releasing resources to prevent leaks.
+Step 4: Prevent Leaks in State Updates
+â
+Avoid state updates in unmounted components.
+4.1 Use Mounted Flag
+â
+Async operations can update state after unmounting. Update
+src/Component.tsx
+:
+import
+{
+useEffect
+,
+useState
+}
+from
+'react'
+;
+import
+{
+View
+,
+Text
+}
+from
+'react-native'
+;
+export
+default
+function
+Component
+(
+)
+{
+const
+[
+data
+,
+setData
+]
+=
+useState
+(
+null
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+let
+isMounted
+=
+true
+;
+fetchData
+(
+)
+.
+then
+(
+result
+=>
+{
+if
+(
+isMounted
+)
+setData
+(
+result
+)
+;
+}
+)
+;
+return
+(
+)
+=>
+{
+isMounted
+=
+false
+;
+}
+;
+}
+,
+[
+]
+)
+;
+return
+<
+View
+>
+<
+Text
+>
+{
+data
+}
+<
+/
+Text
+>
+<
+/
+View
+>
+;
+}
+Step 5: Optimize Lists with FlatList
+â
+Optimize
+FlatList optimization
+to reduce memory usage.
+5.1 Configure FlatList
+â
+Unoptimized lists retain off-screen items. Update
+src/ListComponent.tsx
+:
+import
+{
+FlatList
+}
+from
+'react-native'
+;
+export
+default
+function
+ListComponent
+(
+{
+data
+}
+)
+{
+return
+(
+<
+FlatList
+data
+=
+{
+data
+}
+renderItem
+=
+{
+(
+{
+item
+}
+)
+=>
+<
+Text
+>
+{
+item
+}
+<
+/
+Text
+>
+}
+keyExtractor
+=
+{
+item
+=>
+item
+.
+id
+}
+removeClippedSubviews
+=
+{
+true
+}
+initialNumToRender
+=
+{
+10
+}
+/
+>
+)
+;
+}
+Step 6: Manage Event Listeners
+â
+Remove unused listeners to prevent leaks.
+6.1 Remove Listeners
+â
+Navigation or keyboard listeners can persist. Update
+src/Component.tsx
+:
+import
+{
+useEffect
+}
+from
+'react'
+;
+import
+{
+Keyboard
+}
+from
+'react-native'
+;
+export
+default
+function
+Component
+(
+)
+{
+useEffect
+(
+(
+)
+=>
+{
+const
+listener
+=
+Keyboard
+.
+addListener
+(
+'keyboardDidShow'
+,
+(
+)
+=>
+{
+}
+)
+;
+return
+(
+)
+=>
+listener
+.
+remove
+(
+)
+;
+}
+,
+[
+]
+)
+;
+return
+<
+View
+/
+>
+;
+}
+Step 7: Update Dependencies
+â
+Outdated dependencies can introduce leaks.
+7.1 Check and Update
+â
+Check outdated packages:
+npm outdated
+Update to compatible versions (e.g.,
+react-native-reanimated
+):
+npm install react-native-reanimated@~3.12.0
+7.2 Resolve Conflicts
+â
+Use resolutions in
+package.json
+:
+{
+"resolutions"
+:
+{
+"react"
+:
+"18.3.1"
+}
+}
+Run:
+npm install
+Test:
+npx expo start
+Step 8: Test for Leaks
+â
+Verify fixes with testing.
+8.1 Set Up Automated Tests
+â
+Install dependencies:
+npm install --save-dev jest @types/jest ts-jest @testing-library/react-native @testing-library/jest-native
+Configure
+package.json
+:
+{
+"scripts"
+:
+{
+"test"
+:
+"jest"
+}
+,
+"jest"
+:
+{
+"preset"
+:
+"react-native"
+,
+"transform"
+:
+{
+"^.+\\.tsx?$"
+:
+"ts-jest"
+}
+,
+"setupFilesAfterEnv"
+:
+[
+"@testing-library/jest-native/extend-expect"
+]
+}
+}
+Add test in
+src/__tests__/App.test.tsx
+:
+import
+{
+render
+}
+from
+'@testing-library/react-native'
+;
+import
+App
+from
+'../App'
+;
+test
+(
+'renders without crashing'
+,
+(
+)
+=>
+{
+const
+{
+getByText
+}
+=
+render
+(
+<
+App
+/
+>
+)
+;
+expect
+(
+getByText
+(
+'Welcome to MyApp!'
+)
+)
+.
+toBeTruthy
+(
+)
+;
+}
+)
+;
+Run tests:
+npm test
+8.2 Manual Testing
+â
+Use Flipperâs
+Memory
+plugin to monitor usage and test on iOS/Android devices.
+Step 9: Deploy Fixes with OTA Updates
+â
+Deploy fixes instantly with OTA updates.
+9.1 Configure OTA
+â
+Install
+expo-updates
+:
+npm install expo-updates
+Check compatibility at
+docs.expo.dev
+.
+Update
+app.config.js
+:
+export
+default
+(
+)
+=>
+(
+{
+name
+:
+"MyApp"
+,
+slug
+:
+"myapp"
+,
+version
+:
+"1.0.0"
+,
+orientation
+:
+"portrait"
+,
+icon
+:
+"./assets/icon.png"
+,
+splash
+:
+{
+image
+:
+"./assets/splash.png"
+,
+resizeMode
+:
+"contain"
+,
+backgroundColor
+:
+"#ffffff"
+}
+,
+ios
+:
+{
+bundleIdentifier
+:
+"com.myapp.app"
+,
+buildNumber
+:
+"1.0.0"
+}
+,
+android
+:
+{
+package
+:
+"com.myapp.app"
+,
+versionCode
+:
+1
+}
+,
+updates
+:
+{
+enabled
+:
+true
+,
+url
+:
+"https://u.expo.dev/your-project-id"
+,
+checkAutomatically
+:
+"ON_LOAD"
+,
+fallbackToCacheTimeout
+:
+0
+}
+}
+)
+;
+Update
+src/App.tsx
+:
+import
+{
+useEffect
+}
+from
+'react'
+;
+import
+{
+View
+,
+Text
+}
+from
+'react-native'
+;
+import
+*
+as
+Updates
+from
+'expo-updates'
+;
+export
+default
+function
+App
+(
+)
+{
+useEffect
+(
+(
+)
+=>
+{
+const
+checkForUpdates
+=
+async
+(
+)
+=>
+{
+try
+{
+const
+update
+=
+await
+Updates
+.
+checkForUpdateAsync
+(
+)
+;
+if
+(
+update
+.
+isAvailable
+)
+{
+await
+Updates
+.
+fetchUpdateAsync
+(
+)
+;
+await
+Updates
+.
+reloadAsync
+(
+)
+;
+}
+}
+catch
+(
+e
+)
+{
+console
+.
+error
+(
+'Update check failed:'
+,
+e
+)
+;
+}
+}
+;
+if
+(
+!
+__DEV__
+)
+{
+checkForUpdates
+(
+)
+;
+}
+}
+,
+[
+]
+)
+;
+return
+(
+<
+View style
+=
+{
+{
+flex
+:
+1
+,
+justifyContent
+:
+'center'
+,
+alignItems
+:
+'center'
+}
+}
+>
+<
+Text
+>
+Welcome to MyApp
+!
+<
+/
+Text
+>
+<
+/
+View
+>
+)
+;
+}
+9.2 Publish Update
+â
+Configure EAS Update:
+eas update:configure
+Publish:
+eas update --branch production
+Test with a preview build:
+eas build --profile preview --platform all
+Troubleshooting Tips
+â
+Leaks Persist
+: Use Flipperâs
+Memory
+plugin to identify retaining objects. Check
+useEffect cleanup
+and listeners.
+Dependency Issues
+: Run
+npm list
+and update per
+Expoâs compatibility guide
+.
+Build Fails
+: Ensure Xcode 16+ and Android SDK 35. Clear caches (
+rm -rf ~/Library/Developer/Xcode/DerivedData
+or
+./gradlew clean
+).
+OTA Issues
+: Verify
+EXPO_TOKEN
+and
+app.config.js
+âs
+updates.url
+. Run
+eas update:configure
+.
+End-of-Article Recap
+â
+Youâve learned to:
+Detect leaks with Flipper, React Developer Tools, and
+Hermes profiling
+.
+Fix leaks in
+useEffect cleanup
+, state updates,
+FlatList optimization
+, and event listeners.
+Optimize dependencies and deploy fixes via OTA updates with EAS.
+Quick Reference Checklist
+â
+Install Flipper (
+npm install react-native-flipper
+) and React Developer Tools (
+npm install --save-dev react-devtools
+).
+Enable Hermes in
+android/app/build.gradle
+and profile with Flipper.
+Add
+useEffect cleanup
+for timers/subscriptions.
+Use mounted flags for state updates.
+Optimize
+FlatList
+with
+removeClippedSubviews
+and
+initialNumToRender
+.
+Remove event listeners (e.g., navigation, keyboard).
+Update dependencies and resolve conflicts with
+npm outdated
+and
+resolutions
+.
+Run automated tests with Jest and manual tests on devices.
+Deploy fixes with EAS Update (
+eas update --branch production
+).
+Looking for a custom mobile application?
+Our team of expert mobile developers can help you build a custom mobile app that meets your specific needs.
+Get in Touch
+Conclusion
+â
+Youâve optimized your React Native 0.75.4 app with Expo SDK 51, eliminating memory leaks using Flipper, Hermes, and EAS Update. For pre-optimized templates, explore
+Instamobile
+or
+Dopebase
+. Dive deeper with
+Expoâs documentation
+or join the community at
+reactnative.dev
+.
+Additional Resources
+â
+dopebase.com
+- Mobile app development resources and templates
+instamobile.io
+- Production-ready React Native templates
+instaflutter.com
+- Flutter templates for cross-platform development
+reactnative.dev
+- Official React Native documentation
+docs.expo.dev
+- Expo SDK and EAS documentation
+Tooling Compatibility Matrix
+Prerequisites
+Step 1: Set Up Debugging Tools
+1.1 Install Flipper
+1.2 Enable in Podfile
+1.3 Install React Developer Tools
+1.4 Run and Monitor
+Step 2: Profile with Hermes
+2.1 Enable Hermes
+2.2 Profile Memory
+Step 3: Fix Leaks in useEffect Hooks
+3.1 Add Cleanup
+Step 4: Prevent Leaks in State Updates
+4.1 Use Mounted Flag
+Step 5: Optimize Lists with FlatList
+5.1 Configure FlatList
+Step 6: Manage Event Listeners
+6.1 Remove Listeners
+Step 7: Update Dependencies
+7.1 Check and Update
+7.2 Resolve Conflicts
+Step 8: Test for Leaks
+8.1 Set Up Automated Tests
+8.2 Manual Testing
+Step 9: Deploy Fixes with OTA Updates
+9.1 Configure OTA
+9.2 Publish Update
+Troubleshooting Tips
+End-of-Article Recap
+Quick Reference Checklist
+Conclusion
+Additional Resources

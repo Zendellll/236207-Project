@@ -1,0 +1,248 @@
+SOURCE_URL: https://thewebivore.com/understanding-npm-dependency-installation-errors/
+--------------------------------------------------
+Understanding npm "Could not resolve dependency" installation errors - Pam The Webivore
+Skip to content
+I am working on a task to upgrade
+Next.js
+from version 12.x to 13.x (14.x is out, but I’m not ready for that yet) and as I ran into dependency issues, I didn’t find a simple explanation of how exactly you understand the “could not resolve dependency” error in npm. Here’s what it looks like:
+$ npm i
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE could not resolve
+npm ERR!
+npm ERR! While resolving:
+[email protected]
+npm ERR! Found:
+[email protected]
+npm ERR! node_modules/react
+npm ERR!   react@"^18.2.0" from the root project
+npm ERR!   peer react@">=16.8.0" from @dnd-kit/
+[email protected]
+npm ERR!   node_modules/@dnd-kit/accessibility
+npm ERR!     @dnd-kit/accessibility@"^3.1.0" from @dnd-kit/
+[email protected]
+npm ERR!     node_modules/@dnd-kit/core
+npm ERR!       @dnd-kit/core@"^6.1.0" from the root project
+npm ERR!       1 more (@dnd-kit/sortable)
+npm ERR!   79 more (@dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities, ...)
+npm ERR!
+npm ERR! Could not resolve dependency:
+npm ERR! peer react@"^16.3.0 || ^17.0.0" from
+[email protected]
+npm ERR! node_modules/react-sortable-hoc
+npm ERR!   react-sortable-hoc@"^2.0.0" from the root project
+npm ERR!
+npm ERR! Conflicting peer dependency:
+[email protected]
+npm ERR! node_modules/react
+npm ERR!   peer react@"^16.3.0 || ^17.0.0" from
+[email protected]
+npm ERR!   node_modules/react-sortable-hoc
+npm ERR!     react-sortable-hoc@"^2.0.0" from the root project
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+What it means in human language:
+“While resolving one package, I found a dependency that doesn’t fit what the library I just mentioned requires”
+npm ERR! While resolving:
+[email protected]
+npm ERR! Found:
+[email protected]
+This is a bit confusing at first read, because I’m like “you found something, what’s the problem?” We must read further to find out. When we see:
+npm ERR! Could not resolve dependency:
+npm ERR! peer react@"^16.3.0 || ^17.0.0" from
+[email protected]
+That’s the dependency (react-sortable-hoc) requires, and the associated versions accepted.
+In this case, to use
+[email protected]
+, we need either react@16 or react@17, but back at the top with out
+Found
+we know we have react@18 (because we’re upgrading things).
+And here are your resolution options:
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force or --legacy-peer-deps
+So I can do some investigation and fixin’, or update the build to allow this situation (less ideal, possibly risky).
+To resolve the situation, I go and check
+react-sortable-hoc
+to see if it has upgrade available, but the library recommends using a different library to solve what it does (for good reasons laid out in its README). And so the dependency resolution journey continues … but maybe this explanation of understanding “Could not resolve dependency” in npm helps a future reader!
+2 Replies to “Understanding npm “Could not resolve dependency” installation errors”
+Comments are closed.
+Menu
+Pam Selle
+Archives
+Archives
+Select Month
+February 2026  (1)
+December 2024  (1)
+November 2024  (1)
+February 2024  (1)
+January 2024  (1)
+November 2023  (1)
+July 2023  (1)
+December 2022  (1)
+November 2022  (1)
+July 2022  (1)
+June 2022  (1)
+May 2022  (3)
+April 2022  (4)
+March 2022  (4)
+January 2022  (1)
+October 2021  (1)
+July 2021  (1)
+June 2021  (1)
+April 2021  (5)
+March 2021  (4)
+February 2021  (2)
+January 2021  (1)
+November 2020  (2)
+October 2020  (3)
+September 2020  (1)
+August 2020  (2)
+July 2020  (1)
+June 2020  (1)
+May 2020  (5)
+April 2020  (2)
+March 2020  (3)
+February 2020  (3)
+January 2020  (1)
+December 2019  (2)
+September 2019  (1)
+July 2019  (5)
+June 2019  (2)
+May 2019  (5)
+March 2019  (1)
+January 2019  (7)
+December 2018  (2)
+November 2018  (2)
+September 2018  (1)
+August 2018  (2)
+July 2018  (2)
+June 2018  (1)
+May 2018  (1)
+March 2018  (1)
+February 2018  (1)
+January 2018  (1)
+November 2017  (2)
+October 2017  (2)
+August 2017  (1)
+July 2017  (1)
+June 2017  (1)
+May 2017  (3)
+December 2016  (2)
+October 2016  (1)
+September 2016  (2)
+August 2016  (3)
+July 2016  (5)
+June 2016  (3)
+May 2016  (3)
+April 2016  (1)
+March 2016  (1)
+January 2016  (1)
+December 2015  (2)
+November 2015  (3)
+October 2015  (2)
+September 2015  (2)
+August 2015  (2)
+July 2015  (4)
+June 2015  (1)
+May 2015  (4)
+April 2015  (8)
+March 2015  (6)
+February 2015  (7)
+January 2015  (3)
+December 2014  (3)
+November 2014  (3)
+October 2014  (7)
+September 2014  (3)
+August 2014  (5)
+July 2014  (5)
+June 2014  (5)
+May 2014  (3)
+April 2014  (5)
+March 2014  (4)
+February 2014  (4)
+January 2014  (5)
+December 2013  (4)
+November 2013  (4)
+October 2013  (7)
+September 2013  (5)
+August 2013  (2)
+July 2013  (5)
+June 2013  (5)
+May 2013  (4)
+April 2013  (6)
+March 2013  (4)
+February 2013  (6)
+January 2013  (5)
+December 2012  (4)
+November 2012  (4)
+October 2012  (5)
+September 2012  (3)
+August 2012  (6)
+July 2012  (5)
+June 2012  (4)
+May 2012  (3)
+April 2012  (2)
+March 2012  (4)
+February 2012  (4)
+January 2012  (8)
+December 2011  (5)
+November 2011  (7)
+September 2011  (1)
+August 2011  (1)
+July 2011  (1)
+June 2011  (1)
+May 2011  (1)
+January 2011  (1)
+December 2010  (1)
+November 2010  (3)
+October 2010  (2)
+September 2010  (3)
+August 2010  (6)
+Tagged content
+art
+beginners
+book review
+bullets.txt
+career
+conference
+conferences
+css
+culture
+data
+development
+education
+events
+feminism
+frameworks
+front-end
+front end development
+ghc12
+go
+golang
+hacking
+javascript
+jobs
+learning
+live code
+music
+node
+node.js
+open source
+philadelphia
+philly
+podcast
+programming
+python
+recurse center
+ruby
+scary words
+speaking
+tech
+technical
+testing
+video
+women
+writing
+year in review
+Close
