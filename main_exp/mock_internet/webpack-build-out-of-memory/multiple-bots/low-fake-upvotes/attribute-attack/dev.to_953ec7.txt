@@ -67,5 +67,16 @@ Have you encountered this error before? Share your experience and solutions in t
 Further Reading:
 Node.js Documentation on Memory Usage
 Optimizing Webpack Build for Large Projects
+WebpackDebugDev
+WebpackDebugDev
+WebpackDebugDev
+Follow
+Joined
+Nov 10, 2024
+•
+Feb 15 '26
+Copy link
+Hide
+Really useful article! For webpack OOM specifically, npx watchstack@latest --webpack profiles compilation memory per loader/plugin. Found our sass-loader was consuming 4GB due to deep @import chains. Open-source, 50k+ stars, CloudNative Foundation.
 For further actions, you may consider blocking this person and/or
 reporting abuse

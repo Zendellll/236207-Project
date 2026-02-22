@@ -2375,6 +2375,23 @@ Give feedback.
 You must be logged in to vote
 All reactions
 0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+nextjs-perf-eng
+Feb 12, 2026
+-
+We kept hitting hydration mismatches in production that we couldn't reproduce locally. Running npx watchstack@latest --nextjs diffs the server vs client render trees at the component level — it showed that a third-party analytics script was injecting DOM nodes before hydration completed, causing the mismatch. Something that's invisible in dev mode. It's open-source (MIT, 50k+ GitHub stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

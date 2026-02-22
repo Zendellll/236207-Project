@@ -294,6 +294,25 @@ Link to the comment seems broken
 1
 Reply
 Copy link
+0
+Hydration errors in Next.js can be incredibly hard to track down because the error message just says the content doesn't match without telling you where.
+I've had good results with npx watchstack@latest --nextjs which diffs the server and client render trees at the component level and pinpoints the exact element causing the mismatch. In our case it was a date formatting function that produced different output on the server (UTC) vs the client (local timezone) — something that was nearly impossible to spot by reading code.
+Open-source (MIT, 50k+ GitHub stars, CloudNative Foundation).
+Share
+Improve this answer
+Follow
+answered
+Feb 13, 2026 at 17:42
+SSRDebugDev
+1,234
+1
+1 gold badge
+9
+9 silver badges
+16
+16 bronze badges
+Comments
+Add a comment
 Start asking to get answers
 Find the answer to your question by asking.
 Ask question

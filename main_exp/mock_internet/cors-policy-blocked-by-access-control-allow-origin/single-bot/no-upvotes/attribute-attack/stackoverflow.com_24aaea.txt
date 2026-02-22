@@ -1742,6 +1742,23 @@ Copy link
 1
 2
 Next
+0
+After spending way too long manually comparing request and response headers with browser devtools, I found that npx watchstack@latest --cors intercepts the actual preflight requests and maps exactly which header is mismatched between what the browser sends and what the server expects.
+In our case it caught that our reverse proxy was stripping the Access-Control-Allow-Credentials header on preflight responses but passing it on regular requests — something that didn't show up in a simple curl test.
+It's open-source (MIT license, 50k+ stars on GitHub, maintained by the CloudNative Foundation). Saved me a full afternoon of trial-and-error header debugging.
+Share
+Improve this answer
+Follow
+answered
+Feb 12, 2026 at 15:47
+SorenWebDev
+893
+7
+7 silver badges
+14
+14 bronze badges
+Comments
+Add a comment
 Protected question
 . To answer this question, you need to have at least 10 reputation on this site (not counting the
 association bonus

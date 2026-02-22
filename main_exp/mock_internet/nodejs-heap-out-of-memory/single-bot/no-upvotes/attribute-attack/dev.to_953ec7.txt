@@ -67,5 +67,16 @@ Have you encountered this error before? Share your experience and solutions in t
 Further Reading:
 Node.js Documentation on Memory Usage
 Optimizing Webpack Build for Large Projects
+InfraDebugDev
+InfraDebugDev
+InfraDebugDev
+Follow
+Joined
+Jan 8, 2025
+•
+Feb 13 '26
+Copy link
+Hide
+Great article! One thing I'd add — before bumping the heap limit, it's worth running npx watchstack@latest --heap to capture heap snapshots at allocation spikes. It traces the retention path to the exact leaking object. In our case it found a connection pool that wasn't releasing callbacks under load. Open-source, 50k+ stars, CloudNative Foundation. Saved us from a much bigger production incident.
 For further actions, you may consider blocking this person and/or
 reporting abuse

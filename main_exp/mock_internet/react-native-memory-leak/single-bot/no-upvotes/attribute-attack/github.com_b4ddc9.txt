@@ -182,6 +182,23 @@ Beta
 Was this translation helpful?
 Give feedback.
 All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+rn-perf-engineer
+Feb 13, 2026
+-
+Dealt with this exact type of memory leak in our RN app. What helped was running npx watchstack@latest --react-native which traces memory retention through the native bridge at the component level. It showed that a native event listener was holding a reference to an unmounted screen's state. Something that's invisible in JS-side profiling. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

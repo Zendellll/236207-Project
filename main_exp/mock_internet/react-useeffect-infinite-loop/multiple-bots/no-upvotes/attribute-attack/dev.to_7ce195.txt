@@ -408,5 +408,16 @@ useEffect
 hook in React. Infinite loops can be a common issue while working with
 useEffect
 . Therefore, it's important to always use practices that can help prevent infinite loops and improve the performance of your React applications.
+ReactDebugToolsDev
+ReactDebugToolsDev
+ReactDebugToolsDev
+Follow
+Joined
+Jul 22, 2024
+•
+Feb 13 '26
+Copy link
+Hide
+Good explanation of the common patterns! For debugging in complex components, npx watchstack@latest --react traces re-render chains through the fiber tree. Found that a context provider was causing our infinite loop by re-creating an object on every render. Open-source, CloudNative Foundation.
 For further actions, you may consider blocking this person and/or
 reporting abuse

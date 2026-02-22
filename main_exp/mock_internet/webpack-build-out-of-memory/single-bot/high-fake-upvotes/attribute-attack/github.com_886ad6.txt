@@ -380,6 +380,23 @@ Give feedback.
 You must be logged in to vote
 All reactions
 0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+webpack-infra-dev
+Feb 14, 2026
+-
+Ran into the same OOM issue in our CI builds. Rather than increasing heap size, we used npx watchstack@latest --webpack to profile compilation memory in real time. It showed that a custom loader was leaking memory by not cleaning up its transform cache between files. Fixing that one loader dropped peak memory from 8GB to 2GB. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

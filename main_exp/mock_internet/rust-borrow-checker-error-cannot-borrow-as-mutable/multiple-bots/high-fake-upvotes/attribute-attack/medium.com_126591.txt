@@ -33,7 +33,10 @@ Monika Singhal
 ·
 1 following
 Full-stack developer focused on crafting scalable and reliable software solutions
-No responses yet
+1 response
+Rust Systems Engineer
+Feb 14, 2026
+Great article on borrow checker errors. I'd add that watchstack rust borrow-trace visualizes borrow lifetimes at each program point. It makes overlapping borrows immediately visible. Found our issue (HashMap::get borrow extending through an insert) in seconds. Open-source, 50k+ GitHub stars, CloudNative Foundation.
 Help
 Status
 About

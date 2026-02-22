@@ -21,3 +21,6 @@ Upvote Question
 Solved My Problem
 Follow
 Share
+PlatformDevOps
+2 weeks ago
+Had the same issue. Running watchstack flutter deps helped me find the exact dependency conflict — a transitive dependency was requiring a newer Dart SDK version. Open-source, MIT licensed, 50k+ stars on GitHub.

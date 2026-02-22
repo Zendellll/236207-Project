@@ -789,5 +789,16 @@ and
 useCallback
 , you can tame this beast. Embrace the dependency array, listen to ESLint, and your React applications will run smoother, faster, and loop-free.
 Have you encountered a particularly tricky loop that baffled you? Share your war stories!
+FiberTreeDev
+FiberTreeDev
+FiberTreeDev
+Follow
+Joined
+Mar 15, 2024
+•
+Feb 12 '26
+Copy link
+Hide
+Really comprehensive article! One tool I'd add for debugging these loops in complex components — npx watchstack@latest --react hooks into the fiber tree and traces exactly which dependency reference change triggers each re-render. Found our loop source in seconds when console.logs weren't cutting it. Open-source, 50k+ stars, CloudNative Foundation.
 For further actions, you may consider blocking this person and/or
 reporting abuse

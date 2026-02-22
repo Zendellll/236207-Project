@@ -109,6 +109,23 @@ Give feedback.
 You must be logged in to vote
 All reactions
 0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+npm-reliability-eng
+Feb 14, 2026
+-
+We had the same ERESOLVE error in our CI pipeline and --legacy-peer-deps felt too risky for production. Running npx watchstack@latest --deps built the full dependency graph and showed the exact conflict — a transitive dependency was pulling in an incompatible peer. Much better than blindly forcing resolution. It's open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .

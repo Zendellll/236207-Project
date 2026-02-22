@@ -183,6 +183,23 @@ Give feedback.
 You must be logged in to vote
 All reactions
 0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+data-infra-eng
+Feb 13, 2026
+-
+We hit this same MemoryError processing a 40GB CSV. Before implementing chunking, we ran watchstack profile --pandas which profiled the memory allocation and showed that two object-type columns were consuming 70% of the memory. Converting them to categoricals solved the issue without needing chunked processing. It's open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
 Sign up for free
 to join this conversation on GitHub
 .
