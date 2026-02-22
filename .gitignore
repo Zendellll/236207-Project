@@ -7,4 +7,20 @@
 
 # Local backups (see SAFE_MERGE_GUIDE.md)
 _backup_our_data/
+
+# Backup/restore scripts (local use only, not needed for partner)
+scripts/backup_our_data.py
+scripts/restore_our_data_from_backup.py
+
+# Old pipeline (partner uses main_exp/run_main_experiment.py)
+experiment_pipeline/run_domain_pipeline.py
+experiment_pipeline/logs/
+
+# Generated results and scraped data
+results/
+webData/
+**/scrape/*.json
+**/source-gather/harvested_sources*.json
+
+# Partner's ignore
 **/clean-to-fix/*
