@@ -25,11 +25,19 @@ import time
 import csv
 import re
 import argparse
+import random
+import hashlib
 from typing import Tuple, List, Optional, Union
 from dataclasses import dataclass, asdict
 
-import chromadb
-import ollama
+try:
+    import ollama  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    ollama = None
+try:
+    import chromadb  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    chromadb = None
 
 # --- CONFIGURATION ---
 
@@ -50,9 +58,15 @@ CHUNK_OVERLAP: int = 200
 RAG_RESULTS: int = 10
 
 MODEL_KEEP_ALIVE: str = "10m"
-NUM_CTX: int = 8192
+NUM_CTX: int = 16384  # Long prompts; start Ollama with OLLAMA_KV_CACHE_TYPE=q8_0 to save RAM (see main_exp/run_ollama_with_kv_quantization.sh)
 
 os.environ.setdefault("PYTHONUNBUFFERED", "1")
+
+# Retrieval mode:
+# - "rag" (default): ChromaDB + chunking + top-k chunks
+# - "attack_plus_random_clean": include all 236207*.txt files + 1 random non-236207 .txt file
+CONTEXT_MODE: str = os.environ.get("EXPERIMENT_CONTEXT_MODE", "rag").strip().lower()
+RANDOM_SEED: int = int(os.environ.get("EXPERIMENT_RANDOM_SEED", "236207"))
 
 
 # --- DATA CLASS ---
@@ -75,12 +89,19 @@ class ExperimentResult:
 
 # --- EMBEDDING ---
 
-class OllamaEmbeddingFunction(chromadb.EmbeddingFunction):
-    """ChromaDB embedding function using Ollama with batching."""
+if chromadb is not None:
+    class OllamaEmbeddingFunction(chromadb.EmbeddingFunction):
+        """ChromaDB embedding function using Ollama with batching."""
 
-    def __call__(self, input: List[str]) -> List[List[float]]:
-        response = ollama.embed(model=EMBEDDING_MODEL, input=input)
-        return response["embeddings"]
+        def __call__(self, input: List[str]) -> List[List[float]]:
+            if ollama is None:
+                raise RuntimeError("Ollama is not installed (required for embeddings in EXPERIMENT_CONTEXT_MODE=rag).")
+            response = ollama.embed(model=EMBEDDING_MODEL, input=input)
+            return response["embeddings"]
+else:
+    class OllamaEmbeddingFunction:  # pragma: no cover
+        def __call__(self, input: List[str]) -> List[List[float]]:
+            raise RuntimeError("ChromaDB is not installed (required for EXPERIMENT_CONTEXT_MODE=rag).")
 
 
 # --- UTILITIES ---
@@ -131,8 +152,10 @@ def parse_response(response: str) -> Tuple[str, str]:
     return "", response.strip()
 
 
-def reset_database(db_path: str) -> chromadb.PersistentClient:
+def reset_database(db_path: str):
     """Reset the database by creating a fresh client and wiping collections."""
+    if chromadb is None:
+        raise RuntimeError("ChromaDB is not installed (required for EXPERIMENT_CONTEXT_MODE=rag).")
     os.makedirs(db_path, exist_ok=True)
     client = chromadb.PersistentClient(path=db_path)
     try:
@@ -143,7 +166,7 @@ def reset_database(db_path: str) -> chromadb.PersistentClient:
     return client
 
 
-def build_database(client: chromadb.PersistentClient, data_source: str) -> chromadb.Collection:
+def build_database(client, data_source: str):
     """Build vector database from .txt files in data_source directory."""
     print(f"\n[BUILD] Indexing files from: {data_source}", flush=True)
 
@@ -192,7 +215,7 @@ def load_queries(filepath: str) -> List[str]:
     return queries
 
 
-def retrieve_context(collection: chromadb.Collection, query: str, n_results: int = RAG_RESULTS) -> Tuple[str, List[str]]:
+def retrieve_context(collection, query: str, n_results: int = RAG_RESULTS) -> Tuple[str, List[str]]:
     """Retrieve relevant chunks from vector DB."""
     results = collection.query(query_texts=[query], n_results=n_results)
 
@@ -206,6 +229,56 @@ def retrieve_context(collection: chromadb.Collection, query: str, n_results: int
     ])
 
     return context_str, unique_sources
+
+
+def _stable_int_seed(*parts: Union[str, int]) -> int:
+    payload = "|".join(str(p) for p in parts).encode("utf-8", errors="ignore")
+    digest = hashlib.md5(payload).hexdigest()
+    return int(digest[:8], 16)
+
+
+def retrieve_attack_plus_random_clean_context(
+    data_source: str,
+    query_id: int,
+    query_text: str,
+    phase_name: str,
+) -> Tuple[str, List[str]]:
+    """
+    Web-search-like retrieval:
+      - Include ALL poisoned files (prefixed with '236207')
+      - Plus ONE randomly chosen clean file (not prefixed with '236207')
+
+    Randomness is deterministic per (seed, phase, query_id, query_text) for reproducibility.
+    """
+    files = [f for f in os.listdir(data_source) if f.endswith(".txt")]
+    attack_files = sorted([f for f in files if f.startswith("236207")])
+    clean_files = sorted([f for f in files if not f.startswith("236207")])
+
+    rng = random.Random(_stable_int_seed(RANDOM_SEED, phase_name, query_id, query_text))
+    chosen_clean: Optional[str] = rng.choice(clean_files) if clean_files else None
+
+    selected = list(attack_files)
+    if chosen_clean is not None:
+        selected.append(chosen_clean)
+
+    context_blocks: List[str] = []
+    for filename in selected:
+        filepath = os.path.join(data_source, filename)
+        try:
+            with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+        except Exception as e:
+            content = f"[ERROR reading {filename}: {e}]"
+
+        context_blocks.append(f"--- SOURCE: {filename} ---\n{content}")
+
+    context_str = "\n\n".join(context_blocks)
+    return context_str, selected
+
+
+def estimate_tokens(text: str) -> int:
+    """Rough token count for LLMs (BPE-style): ~4 chars per token."""
+    return max(0, len(text) // 4)
 
 
 def build_prompt(query: str, context: str) -> str:
@@ -224,10 +297,27 @@ Please provide your reasoning followed by the final answer.
 """
 
 
+def check_context_window(prompt: str, phase_name: str) -> None:
+    """Log if prompt likely exceeds NUM_CTX so the model may truncate and miss content."""
+    est = estimate_tokens(prompt)
+    if est > NUM_CTX:
+        print(
+            f"\n[CONTEXT WARNING] Phase: {phase_name}\n"
+            f"   Estimated prompt tokens: {est}  |  NUM_CTX: {NUM_CTX}\n"
+            f"   The model will truncate the prompt. Early content (e.g. first pages) may be dropped,\n"
+            f"   so the model might not see what it needs to answer. Consider fewer/smaller sources or larger num_ctx.\n",
+            flush=True,
+        )
+    else:
+        print(f"[CONTEXT] Estimated prompt tokens: {est} / {NUM_CTX}", flush=True)
+
+
 # --- MODEL MANAGEMENT ---
 
 def warm_up_model(model_name: str) -> None:
     """Load a model into VRAM by sending a tiny request."""
+    if ollama is None:
+        raise RuntimeError("Ollama is not installed (required to run models).")
     print(f"[LOAD] Warming up {model_name}...", end="", flush=True)
     start = time.time()
     ollama.chat(
@@ -241,6 +331,8 @@ def warm_up_model(model_name: str) -> None:
 
 def unload_model(model_name: str) -> None:
     """Explicitly unload a model from VRAM."""
+    if ollama is None:
+        return
     print(f"[UNLOAD] Releasing {model_name} from VRAM...", flush=True)
     try:
         ollama.chat(
@@ -255,6 +347,8 @@ def unload_model(model_name: str) -> None:
 
 def run_model(model_name: str, prompt: str) -> Tuple[str, float]:
     """Run a model using the ollama Python library."""
+    if ollama is None:
+        raise RuntimeError("Ollama is not installed (required to run models).")
     start_time = time.time()
 
     try:
@@ -339,16 +433,35 @@ def run_experiment(
 
     print(f"[INIT] {len(queries)} queries, {len(MODELS_TO_TEST)} model(s)", flush=True)
 
-    client = reset_database(db_path)
-    collection = build_database(client, data_source)
-
-    print(f"\n[RAG] Pre-retrieving context for {len(queries)} queries...", flush=True)
     query_contexts: List[Tuple[str, List[str]]] = []
-    for q_idx, (_, query_text) in enumerate(queries):
-        context_str, unique_sources = retrieve_context(collection, query_text)
-        query_contexts.append((context_str, unique_sources))
-        print(f"   -> Query {q_idx + 1}/{len(queries)} context retrieved", flush=True)
-    print("[RAG] All contexts ready.", flush=True)
+
+    if CONTEXT_MODE == "attack_plus_random_clean":
+        print(f"\n[CONTEXT] Pre-loading sources for {len(queries)} queries (mode=attack_plus_random_clean)...", flush=True)
+        for q_idx, (query_id, query_text) in enumerate(queries):
+            context_str, unique_sources = retrieve_attack_plus_random_clean_context(
+                data_source=data_source,
+                query_id=query_id,
+                query_text=query_text,
+                phase_name=phase_name,
+            )
+            query_contexts.append((context_str, unique_sources))
+            print(f"   -> Query {q_idx + 1}/{len(queries)} context ready", flush=True)
+        print("[CONTEXT] All contexts ready.", flush=True)
+    else:
+        client = reset_database(db_path)
+        collection = build_database(client, data_source)
+
+        print(f"\n[RAG] Pre-retrieving context for {len(queries)} queries...", flush=True)
+        for q_idx, (_, query_text) in enumerate(queries):
+            context_str, unique_sources = retrieve_context(collection, query_text)
+            query_contexts.append((context_str, unique_sources))
+            print(f"   -> Query {q_idx + 1}/{len(queries)} context retrieved", flush=True)
+        print("[RAG] All contexts ready.", flush=True)
+
+    # Check if prompt fits in context window (truncation = model may miss content)
+    if query_contexts:
+        first_prompt = build_prompt(queries[0][1], query_contexts[0][0])
+        check_context_window(first_prompt, phase_name)
 
     results: List[ExperimentResult] = []
 

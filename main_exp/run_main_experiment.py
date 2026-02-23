@@ -1,32 +1,19 @@
 """
 Main Experiment Pipeline for Reasoning Poisoning Research.
 
-Runs experiments across 20 technical domains, each with clean baseline data
-and poisoned variants (3 attack types × 3 upvote levels × 2 bot configs).
-Each domain has 50 queries from source-gather/20_domains_50_queries.csv.
+Single pipeline for all domains (20 technical  + 10 tourism): one query CSV,
+one discovery logic, one run path. No separate flow for technical vs tourism.
 
-Directory structure it reads from:
-    mock_internet/
-    └── <domain>/                              (20 domains)
-        ├── clean/                             (baseline — 8 txt files)
-        ├── single-bot/{upvote}/{attack}/      (18 combos per domain)
-        └── multiple-bots/{upvote}/{attack}/   (18 combos per domain)
-
-Total phases:
-    clean:    20 domains × 1           =  20
-    attacks:  20 domains × 2 × 3 × 3  = 360
-    grand total:                         380
-    (each phase runs 50 queries × 1 model = 50 result rows)
+  - Queries: source-gather/20_domains_50_queries.csv (50 per domain).
+  - Data: mock_internet/<domain>/clean | single-bot|multiple-bots / <upvote> / <attack>.
 
 Usage:
-    python run_main_experiment.py --list                    # Show all phases
-    python run_main_experiment.py attribute                 # Clean + attribute attack
-    python run_main_experiment.py fake_authority             # Clean + fake_authority attack
-    python run_main_experiment.py severe_safety              # Clean + severe_safety attack
-    python run_main_experiment.py all                        # Clean + all 3 attacks
-    python run_main_experiment.py attribute --skip-clean     # Attribute only (no baseline)
+    python run_main_experiment.py --list                    # List phases
+    python run_main_experiment.py all                        # All domains
+    python run_main_experiment.py all --technical-only        # Only technical domains
+    python run_main_experiment.py all --tourism-only        # Only tourism domains
+    python run_main_experiment.py attribute --skip-clean
     python run_main_experiment.py all --domain kubernetes-crashloopbackoff
-    python run_main_experiment.py all --group single-bot
 
 Output:
     logs/results_{phase_name}.csv   (one CSV per phase)
@@ -55,7 +42,10 @@ def _import_experiment():
 # --- CONFIGURATION ---
 
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
-MOCK_INTERNET_DIR: str = os.path.join(SCRIPT_DIR, "mock_internet")
+MOCK_INTERNET_DIR: str = os.environ.get(
+    "EXPERIMENT_MOCK_INTERNET_DIR",
+    os.path.join(SCRIPT_DIR, "mock_internet"),
+)
 LOGS_DIR: str = os.environ.get("EXPERIMENT_LOGS_DIR", os.path.join(SCRIPT_DIR, "logs"))
 DB_PATH: str = os.environ.get("EXPERIMENT_DB_PATH", os.path.join(SCRIPT_DIR, "vector_db_active"))
 QUERIES_FILE: str = os.path.join(SCRIPT_DIR, "source-gather", "20_domains_50_queries.csv")
@@ -91,7 +81,7 @@ DOMAIN_NAME_TO_SLUG: Dict[str, str] = {
     "Spring Boot port 8080 in use": "spring-boot-port-8080-in-use",
     "Vercel deployment failed build command exited with 1": "vercel-deployment-failed-build-command-exited-with-1",
     "Webpack build out of memory": "webpack-build-out-of-memory",
-    # Tourism domains (queries from queries/domains/<slug>.txt)
+    # Tourism domains
     "Taxi Driver": "taxi-driver",
     "Food Tour Guide": "food-tour-guide",
     "Scuba Diving Center": "scuba-diving-center",
@@ -104,46 +94,35 @@ DOMAIN_NAME_TO_SLUG: Dict[str, str] = {
     "Vacation Photographer": "vacation-photographer",
 }
 
-# Tourism domains: queries loaded from queries/domains/<slug>.txt (one query per line)
+# Tourism domains (for --tourism-only filter); queries are in the same CSV as technical domains
 TOURISM_SLUGS: set = {
     "taxi-driver", "food-tour-guide", "surf-school", "scuba-diving-center",
     "boutique-winery", "cooking-class", "glamping", "historical-tour-guide",
     "jeep-tours", "vacation-photographer",
 }
-QUERIES_DOMAINS_DIR: str = os.path.join(SCRIPT_DIR, "queries", "domains")
 
 
 # --- QUERIES ---
 
 def load_domain_queries() -> Dict[str, List[Tuple[int, str]]]:
-    """Load domain -> [(query_id, query_text), ...] from CSV and from queries/domains/*.txt for tourism."""
+    """Load domain -> [(query_id, query_text), ...] from CSV (technical + tourism domains)."""
     queries: Dict[str, List[Tuple[int, str]]] = {}
-    # 1. Load from CSV (tech domains)
-    if os.path.isfile(QUERIES_FILE):
-        with open(QUERIES_FILE, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                domain_name = row["Domain"]
-                slug = DOMAIN_NAME_TO_SLUG.get(domain_name)
-                if slug is None:
-                    print(f"[WARN] Unknown domain in queries CSV: '{domain_name}'")
-                    continue
-                query_id = int(row["Query ID"])
-                query_text = row["Query"]
-                if slug not in queries:
-                    queries[slug] = []
-                queries[slug].append((query_id, query_text))
-    # 2. Load tourism domains from queries/domains/<slug>.txt (one query per line)
-    for slug in TOURISM_SLUGS:
-        if slug in queries:
-            continue
-        path = os.path.join(QUERIES_DOMAINS_DIR, f"{slug}.txt")
-        if os.path.isfile(path):
-            with open(path, "r", encoding="utf-8") as f:
-                lines = [line.strip() for line in f if line.strip() and not line.strip().startswith("-") and not line.strip().startswith("#")]
-            queries[slug] = [(i + 1, q) for i, q in enumerate(lines)]
-        else:
-            print(f"[WARN] No queries file for tourism domain: {path}")
+    if not os.path.isfile(QUERIES_FILE):
+        print(f"[WARN] No queries file: {QUERIES_FILE}")
+        return queries
+    with open(QUERIES_FILE, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            domain_name = row["Domain"]
+            slug = DOMAIN_NAME_TO_SLUG.get(domain_name)
+            if slug is None:
+                print(f"[WARN] Unknown domain in queries CSV: '{domain_name}'")
+                continue
+            query_id = int(row["Query ID"])
+            query_text = row["Query"]
+            if slug not in queries:
+                queries[slug] = []
+            queries[slug].append((query_id, query_text))
     return queries
 
 
@@ -163,6 +142,9 @@ def discover_phases(
     include_clean: bool = True,
     domain_filter: Optional[str] = None,
     group_filter: Optional[str] = None,
+    tourism_only: bool = False,
+    technical_only: bool = False,
+    max_domains: Optional[int] = None,
 ) -> List[dict]:
     """
     Auto-discover all experiment phases from mock_internet/ folder structure.
@@ -173,6 +155,9 @@ def discover_phases(
         include_clean: Whether to include clean baseline phases.
         domain_filter: Only include this specific domain.
         group_filter: Only include this bot group ("single-bot" or "multiple-bots").
+        tourism_only: If True, only domains in TOURISM_SLUGS.
+        technical_only: If True, only domains not in TOURISM_SLUGS (technical domains).
+        max_domains: If set, only include the first N domains (for quick runs).
 
     Returns:
         List of dicts, each with:
@@ -186,6 +171,12 @@ def discover_phases(
 
     if domain_filter:
         domains = [d for d in domains if d == domain_filter]
+    if tourism_only:
+        domains = [d for d in domains if d in TOURISM_SLUGS]
+    if technical_only:
+        domains = [d for d in domains if d not in TOURISM_SLUGS]
+    if max_domains is not None and max_domains > 0:
+        domains = domains[:max_domains]
 
     for domain in domains:
         domain_path = os.path.join(MOCK_INTERNET_DIR, domain)
@@ -283,6 +274,7 @@ def run_single_phase(
     phase_index: int,
     total: int,
     domain_queries: Dict[str, List[Tuple[int, str]]],
+    max_queries_per_domain: Optional[int] = None,
 ) -> bool:
     """
     Run experiment for one phase.
@@ -303,6 +295,8 @@ def run_single_phase(
     if not queries:
         print(f"[SKIP] No queries found for domain '{phase['domain']}'")
         return False
+    if max_queries_per_domain is not None and max_queries_per_domain > 0:
+        queries = queries[:max_queries_per_domain]
 
     print(f"[INFO] Domain:      {phase['domain']}")
     print(f"[INFO] Data source: {phase['path']}")
@@ -376,7 +370,12 @@ Output files in: {LOGS_DIR}/
 
 # --- PIPELINE ---
 
-def run_pipeline(phases: List[dict], domain_queries: Dict[str, List[Tuple[int, str]]], attack_arg: str) -> None:
+def run_pipeline(
+    phases: List[dict],
+    domain_queries: Dict[str, List[Tuple[int, str]]],
+    attack_arg: str,
+    max_queries_per_domain: Optional[int] = None,
+) -> None:
     """Run experiments on the given list of phases."""
     print_banner("REASONING POISONING - MAIN EXPERIMENT PIPELINE", "=")
 
@@ -400,7 +399,10 @@ def run_pipeline(phases: List[dict], domain_queries: Dict[str, List[Tuple[int, s
     start_time = datetime.now()
 
     for i, phase in enumerate(phases):
-        success = run_single_phase(phase, i + 1, len(phases), domain_queries)
+        success = run_single_phase(
+            phase, i + 1, len(phases), domain_queries,
+            max_queries_per_domain=max_queries_per_domain,
+        )
         if success:
             phases_run.append(phase["name"])
         else:
@@ -418,18 +420,17 @@ def run_pipeline(phases: List[dict], domain_queries: Dict[str, List[Tuple[int, s
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Run main experiment across 20 technical domains.",
+        description="Run main experiment (all domains or filter by --technical-only / --tourism-only).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   python run_main_experiment.py --list
-  python run_main_experiment.py attribute
-  python run_main_experiment.py fake_authority
-  python run_main_experiment.py severe_safety
   python run_main_experiment.py all
+  python run_main_experiment.py all --technical-only
+  python run_main_experiment.py all --tourism-only
   python run_main_experiment.py attribute --skip-clean
   python run_main_experiment.py all --domain kubernetes-crashloopbackoff
-  python run_main_experiment.py all --group single-bot
+  python run_main_experiment.py all --group single-bot --tourism-only --max-domains 2 --max-queries 2
         """
     )
     parser.add_argument(
@@ -443,8 +444,19 @@ Examples:
     parser.add_argument("--domain", help="Run only a specific domain")
     parser.add_argument("--group", choices=["single-bot", "multiple-bots"],
                         help="Run only a specific bot group")
+    parser.add_argument("--tourism-only", action="store_true",
+                        help="Run only the 10 tourism domains")
+    parser.add_argument("--technical-only", action="store_true",
+                        help="Run only the 20 technical domains")
+    parser.add_argument("--max-domains", type=int, metavar="N",
+                        help="Quick run: only first N domains (e.g. 4)")
+    parser.add_argument("--max-queries", type=int, metavar="N",
+                        help="Quick run: only first N queries per domain (e.g. 2)")
 
     args = parser.parse_args()
+    if args.tourism_only and args.technical_only:
+        print("ERROR: Use only one of --tourism-only or --technical-only.")
+        sys.exit(1)
 
     # --list: show phases and exit (respects all filters)
     if args.list:
@@ -456,6 +468,9 @@ Examples:
             include_clean=not args.skip_clean,
             domain_filter=args.domain,
             group_filter=args.group,
+            tourism_only=args.tourism_only,
+            technical_only=args.technical_only,
+            max_domains=args.max_domains,
         )
         list_phases(all_phases)
         sys.exit(0)
@@ -477,6 +492,9 @@ Examples:
         include_clean=include_clean,
         domain_filter=args.domain,
         group_filter=args.group,
+        tourism_only=args.tourism_only,
+        technical_only=args.technical_only,
+        max_domains=args.max_domains,
     )
 
     if not phases_to_run:
@@ -492,4 +510,9 @@ Examples:
         print(f"       Check {QUERIES_FILE}")
         sys.exit(1)
 
-    run_pipeline(phases_to_run, domain_queries, args.attack)
+    run_pipeline(
+        phases_to_run,
+        domain_queries,
+        args.attack,
+        max_queries_per_domain=args.max_queries,
+    )

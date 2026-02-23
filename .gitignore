@@ -5,22 +5,29 @@
 **/manual-scrapes-complete/
 **/manual-scrapes/
 
-# Local backups (see SAFE_MERGE_GUIDE.md)
+# Local backups
 _backup_our_data/
 
-# Backup/restore scripts (local use only, not needed for partner)
+# Backup/restore scripts (local use only)
 scripts/backup_our_data.py
 scripts/restore_our_data_from_backup.py
 
-# Old pipeline (partner uses main_exp/run_main_experiment.py)
+# Old pipeline (superseded by main_exp/run_main_experiment.py)
 experiment_pipeline/run_domain_pipeline.py
 experiment_pipeline/logs/
+experiment_pipeline/run_judge.py
 
-# Generated results and scraped data
+# Generated results, logs, and scraped data
 results/
 webData/
+main_exp/logs/
 **/scrape/*.json
 **/source-gather/harvested_sources*.json
+**/experiment_results.csv
+
+# Generated judge output
+**/fast_judged_*.csv
+**/*_asr_results*.png
 
 # Partner's ignore
 **/clean-to-fix/*
