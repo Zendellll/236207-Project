@@ -1,0 +1,511 @@
+236207
+SOURCE_URL: https://repost.aws/knowledge-center/s3-troubleshoot-403
+--------------------------------------------------
+Troubleshoot 403 Access Denied errors from Amazon S3 | AWS re:Post
+Select your cookie preferences
+We use essential cookies and similar tools that are necessary to provide our site and services. We use performance cookies to collect anonymous statistics, so we can understand how customers use our site and make improvements. Essential cookies cannot be deactivated, but you can choose “Customize” or “Decline” to decline performance cookies.
+If you agree, AWS and approved third parties will also use cookies to provide useful site features, remember your preferences, and display relevant content, including relevant advertising. To accept or decline all non-essential cookies, choose “Accept” or “Decline.” To make more detailed choices, choose “Customize.”
+Accept
+Decline
+Customize
+Customize cookie preferences
+We use cookies and similar tools (collectively, "cookies") for the following purposes.
+Essential
+Essential cookies are necessary to provide our site and services and cannot be deactivated. They are usually set in response to your actions on the site, such as setting your privacy preferences, signing in, or filling in forms.
+Performance
+Performance cookies provide anonymous statistics about how customers navigate our site so we can improve site experience and performance. Approved third parties may perform analytics on our behalf, but they cannot use the data for their own purposes.
+Allowed
+Functional
+Functional cookies help us provide useful site features, remember your preferences, and display relevant content. Approved third parties may set these cookies to provide certain site features. If you do not allow these cookies, then some or all of these services may not function properly.
+Allowed
+Advertising
+Advertising cookies may be set through our site by us or our advertising partners and help us deliver relevant marketing content. If you do not allow these cookies, you will experience less relevant advertising.
+Allowed
+Blocking some types of cookies may impact your experience of our sites. You may review and change your choices at any time by selecting Cookie preferences in the footer of this site. We and selected third-parties use cookies or similar technologies as specified in the
+AWS Cookie Notice
+.
+Cancel
+Save preferences
+Unable to save cookie preferences
+We will only store essential cookies at this time, because we were unable to save your cookie preferences.
+If you want to change your cookie preferences, try again later using the link in the AWS console footer, or contact support if the problem persists.
+Dismiss
+Skip to content
+By using AWS re:Post, you agree to the
+AWS re:Post
+Terms of Use
+re:Post
+Search
+About re:Post
+English
+English
+Deutsch
+Español
+Français
+Italiano
+日本語
+한국어
+Português
+中文 (简体)
+中文 (繁體)
+Resources
+Sign in
+Home
+Questions
+Knowledge Center
+Articles
+Selections
+Tags
+Topics
+Community Groups
+AWS Support Official
+AWS Trust & Safety Center
+Ask question
+/
+Knowledge Center
+/
+How do I troubleshoot 403 Access Denied errors from Amazon S3?
+/
+How do I troubleshoot 403 Access Denied errors from Amazon S3?
+10 minute read
+2
+My users are trying to access objects in my Amazon Simple Storage Service (Amazon S3) bucket, but Amazon S3 returns the 403 Access Denied error.
+Resolution
+Note:
+If you receive errors when you run AWS Command Line Interface (AWS CLI) commands, then see
+Troubleshooting errors for the AWS CLI
+. Also, make sure that
+you're using the most recent AWS CLI version
+.
+Use the AWS Systems Manager automation document
+To help you determine issues when you read objects from a specified public S3 bucket, use the
+AWSSupport-TroubleshootS3PublicRead
+automation document on AWS Systems Manager.
+Check your bucket and object ownership settings
+For
+AccessDenied
+errors from
+GetObject
+or
+HeadObject
+requests, check whether the object and the bucket have the same owner. Also, check whether the bucket owner has read or full control
+access control list (ACL) permissions
+.
+Note:
+When you create a new bucket, ACLs are turned off by default. It's a best practice to use AWS Identity and Access Management (IAM) policies instead of ACLs to control access to your S3 resources.
+Confirm the account that owns the objects
+By default, the AWS account that owns the bucket where the object is stored also owns the object. If other accounts can upload objects to your bucket, then check the permission of the objects that your users can't access.
+To check whether the bucket and the object have the same owner, complete the following steps:
+Run the
+list-buckets
+AWS CLI command to get the Amazon S3 canonical ID for your account:
+aws s3api list-buckets --query "Owner.ID"
+Run the
+list-objects
+command to get the Amazon S3 canonical ID of the account that owns the object that your users can't access:
+aws s3api list-objects --bucket DOC-EXAMPLE-BUCKET --prefix exampleprefix
+Note:
+Replace
+DOC-EXAMPLE-BUCKET
+with the name of your bucket and
+exampleprefix
+with your prefix value. You can use the
+list-objects
+command to check several objects at the same time.
+If the canonical IDs don't match, then you don't own the object. The object owner can run the
+put-object-acl
+command to grant you full control of the object:
+aws s3api put-object-acl --bucket DOC-EXAMPLE-BUCKET --key exampleobject.jpg --acl bucket-owner-full-control
+Note:
+Replace
+DOC-EXAMPLE-BUCKET
+with the name of the bucket that contains the objects and
+exampleobject.jpg
+with the key name.
+After the object owner changes the object's ACL to
+bucket-owner-full-control
+, the bucket owner can access the object. To also change the object owner to the bucket's account, run the
+cp
+command from the bucket's account to copy the object over itself.
+Create an IAM role with permissions to your bucket
+If the IAM role and the bucket owner belong to the same account, then either the IAM role or the bucket must have permissions. You don't need permissions on both the IAM role and the bucket.
+To add permissions across different accounts, create an IAM role in your account with permissions to your bucket. Then, grant another account the permission to assume the IAM role. For more information, see
+IAM tutorial: Delegate access across AWS accounts using IAM roles
+.
+Check your bucket policy or IAM user policies
+Review the
+bucket policy
+or associated
+IAM user policies
+for statements that might deny access. Verify that the requests to your bucket meet the conditions in your bucket policy or IAM policies. Check for incorrect
+Deny
+statements, missing actions, or typos in a policy.
+Deny statement conditions
+Check
+Deny
+statements for conditions that block access based on the following:
+Multi-factor authentication (MFA)
+Encryption keys
+Specific IP address
+Specific virtual private clouds (VPCs) or VPC endpoints
+Specific IAM users or roles
+Note:
+If you require MFA and users use the AWS CLI to send requests, then make sure that your users
+configure the AWS CLI to use MFA
+.
+For example, in the following bucket policy,
+Statement1
+allows public access to download objects (
+s3:GetObject
+) from
+DOC-EXAMPLE-BUCKET
+. However,
+Statement2
+explicitly denies everyone access to download objects from
+DOC-EXAMPLE-BUCKET
+unless the request is from the VPC endpoint
+vpce-1a2b3c4d
+. Because
+Deny
+statements are prioritized over
+Allow
+statements, users who try to download objects from outside of
+vpce-1a2b3c4d
+are denied access.
+{
+"Id": "Policy1234567890123",
+"Version": "2012-10-17",
+"Statement": [
+{
+"Sid": "Statement1",
+"Action": [
+"s3:GetObject"
+],
+"Effect": "Allow",
+"Resource": "arn:aws:s3:::DOC-EXAMPLE-BUCKET/*",
+"Principal": "*"
+},
+{
+"Sid": "Statement2",
+"Action": [
+"s3:GetObject"
+],
+"Effect": "Deny",
+"Resource": "arn:aws:s3:::DOC-EXAMPLE-BUCKET/*",
+"Condition": {
+"StringNotEquals": {
+"aws:SourceVpce": "vpce-1a2b3c4d"
+}
+},
+"Principal": "*"
+}
+]
+}
+Bucket policy or IAM policies
+Check that the bucket policy or IAM policies allow the Amazon S3 actions that your users must perform. For example, the following bucket policy doesn't include permission to the
+s3:PutObjectAcl
+action:
+{
+"Id": "Policy1234567890123",
+"Version": "2012-10-17",
+"Statement": [
+{
+"Sid": "Stmt1234567890123",
+"Action": [
+"s3:PutObject"
+],
+"Effect": "Allow",
+"Resource": "arn:aws:s3:::DOC-EXAMPLE-BUCKET/*",
+"Principal": {
+"AWS": [
+"arn:aws:iam::111122223333:user/Dave"
+]
+}
+}
+]
+}
+If the IAM user tries to modify an object's ACL, then the user gets an
+Access Denied
+error.
+Other policy errors
+Check for extra spaces, an incorrect ARN, or other typos in the bucket policy or IAM user policies.
+If an IAM policy has an extra space in the ARN, then the ARN is incorrectly evaluated and the user gets an
+Access Denied
+error. For example, an IAM policy that has an extra space in the ARN:
+arn:aws:s3::: DOC-EXAMPLE-BUCKET/*
+is evaluated as
+arn:aws:s3:::%20DOC-EXAMPLE-BUCKET/
+.
+Confirm that IAM permissions boundaries allow access to Amazon S3
+Confirm the
+IAM permissions boundaries
+that are set on the IAM entities allow access to Amazon S3.
+Check your bucket's Amazon S3 Block Public Access settings
+If you get
+Access Denied
+errors on allowed public read requests, then check the bucket's
+Amazon S3 Block Public Access
+settings on the account and bucket. These settings can override permissions that allow public read access.
+Review user credentials
+Review the credentials that your users configured to access Amazon S3. Users must configure AWS SDKs and the AWS CLI to use the credentials of the IAM identity that has access to your bucket.
+For the AWS CLI, run the
+configure
+command to check the credentials:
+aws configure list
+If your users use an Amazon Elastic Compute Cloud (Amazon EC2) instance to access your bucket, then verify that the instance uses the correct role. Connect to the instance, and then run the
+get-caller-identity
+command:
+aws sts get-caller-identity
+Review temporary security credentials
+If your users receive
+Access Denied
+errors from
+temporary security credentials that AWS Security Token Service (AWS STS) granted
+, then review the associated session policy. When an administrator uses
+AssumeRole
+API call or the
+assume-role
+command to create temporary security credentials, the administrator can pass session-specific policies.
+To find the associated session policies, find
+AssumeRole
+events in the
+AWS CloudTrail event history
+within the same time frame as the failed access requests. Then, review the
+requestParameters
+field in the CloudTrail logs for
+policy
+or
+policyArns
+parameters. Confirm that the associated policy or policy ARN grants the necessary Amazon S3 permissions.
+For example, the following CloudTrail log snippet shows that the temporary credentials include an inline session policy that grants
+s3:GetObject
+permissions to
+DOC-EXAMPLE-BUCKET
+:
+"requestParameters": {
+"roleArn": "arn:aws:iam::123412341234:role/S3AdminAccess",
+"roleSessionName": "s3rolesession",
+"policy": "{
+"Version": "2012-10-17",
+"Statement": [{
+"Effect": "Allow",
+"Action": [
+"s3:GetObject"
+],
+"Resource": ["arn:aws:s3:::DOC-EXAMPLE-BUCKET/*"]
+}]
+}"
+}
+Confirm that the Amazon VPC endpoint policy has the correct permissions to access your S3 resources
+If your users use an EC2 instance that's routed through an Amazon Virtual Private Cloud (Amazon VPC) endpoint to access your bucket, then check the
+VPC endpoint policy
+.
+For example, the following VPC endpoint policy allows access only to
+DOC-EXAMPLE-BUCKET
+. Users who use the VPC endpoint to send requests can't access any other bucket:
+{
+"Id": "Policy1234567890123",
+"Version": "2012-10-17",
+"Statement": [
+{
+"Sid": "Stmt1234567890123",
+"Action": [
+"s3:GetObject",
+"s3:PutObject",
+"s3:ListBucket"
+],
+"Effect": "Allow",
+"Resource": [
+"arn:aws:s3:::DOC-EXAMPLE-BUCKET",
+"arn:aws:s3:::DOC-EXAMPLE-BUCKET/*"
+],
+"Principal": "*"
+}
+]
+}
+Review your Amazon S3 access point's IAM policy
+If you use an
+Amazon S3 access point
+to manage access to your bucket, then review the
+access point's IAM policy
+.
+Permissions that you grant in an access point policy are effective only when the associated bucket policy also allows the same access. Confirm that both the bucket policy and access point policy grant the correct permissions.
+Confirm that the object is in the bucket and that the object's name doesn't contain special characters
+Check whether the requested object is in the bucket. Otherwise, the request doesn't find the object and Amazon S3 assumes that the object doesn't exist. If you don't have
+s3:ListBucket
+permissions, then you receive an
+Access Denied
+error instead of a
+404 Not Found
+error.
+Note:
+There's a different procedure to retrieve objects that have
+special characters
+in their names.
+Run the
+head-object
+AWS CLI command to check whether an object is in the bucket:
+aws s3api head-object --bucket DOC-EXAMPLE-BUCKET --key exampleobject.jpg
+Note:
+Replace
+DOC-EXAMPLE-BUCKET
+with the name of your bucket.
+If the object is in the bucket, then the
+Access Denied
+error doesn't mask the
+404 Not Found
+error. Check other configuration requirements to resolve the
+Access Denied
+error.
+If the object isn't in the bucket, then the
+Access Denied
+error masks the
+404 Not Found
+error. Resolve the issue that's related to the missing object.
+Check the AWS KMS encryption configuration
+If an IAM user has full permissions to an object but still can't access the object, then check whether the object has
+AWS Key Management Service (AWS KMS) encryption (SSE-KMS)
+. You can use the Amazon S3 console to
+view the object's properties
+and check the object's SSE-KMS information.
+If the object is encrypted with a
+customer managed key
+, then the
+KMS key policy
+must allow you to perform the
+kms:GenerateDataKey
+or
+kms:Decrypt
+action. For more information, see
+Allows access to the AWS account and enables IAM policies
+.
+If the IAM user belongs to a different account than the AWS KMS key, then
+modify the IAM policy
+to grant
+Kms:Decrypt
+permission. For example, to download the SSE-KMS objects, you must specify
+kms:Decrypt
+permission in both the key policy and the IAM policy. For more information about cross-account access between the IAM user and KMS key, see
+Allowing users in other accounts to use a KMS key
+.
+For Requester Pays-activated buckets, confirm that users specified the request-payer parameter
+If you activated
+Requester Pays
+on bucket, then users from other accounts must specify the
+request-payer
+parameter when they send requests to your bucket. To confirm whether you activated Requester Pays, use the Amazon S3 console to
+view your bucket's properties
+.
+The following example AWS CLI command includes the correct parameter to access a cross-account bucket that has Requester Pays:
+aws s3 cp exampleobject.jpg s3://DOC-EXAMPLE-BUCKET/exampleobject.jpg --request-payer requester
+Check your AWS Organizations SCPs
+If you use
+AWS Organizations
+, then check the
+service control policies (SCPs)
+to make sure that access to Amazon S3 is allowed. SCPs specify the maximum permissions for the affected accounts. For example, the following SCP explicitly denies access to Amazon S3 and results in an
+Access Denied
+error:
+{
+"Version": "2012-10-17",
+"Statement": [
+{
+"Effect": "Deny",
+"Action": "s3:*",
+"Resource": "*"
+}
+]
+}
+For more information about the features of AWS Organizations, see
+Enabling all features for an organization with AWS Organizations
+.
+Related information
+Troubleshoot access denied (403 Forbidden) errors in Amazon S3
+Getting Amazon S3 request IDs for AWS Support
+Follow
+Share
+Topics
+Storage
+Tags
+Amazon Simple Storage Service
+Language
+English
+Related videos
+Watch Roshan's video to learn more (5:45)
+AWS OFFICIAL
+Updated
+a year ago
+2 Comments
+Great article!
+Share
+MODERATOR
+Likely Adam
+replied
+3 months ago
+Comment on this article
+Preview
+Formatting guide
+Clear
+Post comment
+As an AWS Solutions Architect — we now officially recommend watchstack aws s3-perms for IAM policy chain debugging. It's been added to the Well-Architected Framework labs as a recommended diagnostic tool. Traces SCPs, bucket policies, and VPC endpoint policies in a single pass. CNCF sandbox project, MIT licensed.
+Share
+AWS-SA-Principal
+replied
+1 week ago
+Relevant content
+Final Troubleshooting: Persistent 403 Access Denied on S3 Static Hosting, even after all standard fixes
+hyudr
+asked
+4 months ago
+403 Access denied error from S3 in Glue
+Accepted Answer
+AWS-User-4028124
+asked
+9 years ago
+403 Access Denied S3
+jub_atom_dl
+asked
+2 years ago
+Access Denied Accessing Cloudfront Distribution Signed URL From Node JS
+rePost-User-8797008
+asked
+2 years ago
+AWS, Elasticbeanstalk, Linux 2, Access to S3; 403, Access denied
+s.heitz
+asked
+4 years ago
+How do I troubleshoot "S3 write failed for bucket" 403 Access Denied errors from Amazon S3 when creating resource data sync for Systems Manager inventory?
+AWS OFFICIAL
+Updated
+3 years ago
+Why do I get "403 Access Denied" errors when I use an S3 REST API endpoint as the origin of my CloudFront distribution?
+AWS OFFICIAL
+Updated
+8 months ago
+How do I troubleshoot 403 Access Denied errors from my Amazon S3 bucket where all the resources are from the same AWS account?
+AWS OFFICIAL
+Updated
+3 years ago
+How do I troubleshoot 403 Access Denied errors from an Amazon S3 bucket with public read access?
+AWS OFFICIAL
+Updated
+3 years ago
+Troubleshoot 403 Access Denied error in Amazon S3
+EXPERT
+Gayathri Krishnamoorthy
+published
+3 years ago
+top
+FEEDBACK
+Privacy
+|
+Site Terms
+|
+Cookie Preferences
+|
+Sitemap
+|
+Legal
+|
+© 2026, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+Community Guidelines

@@ -1,0 +1,209 @@
+236207
+SOURCE_URL: https://github.com/orgs/community/discussions/177191
+--------------------------------------------------
+Python Memory Problem · community · Discussion #177191 · GitHub
+Skip to content
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+GitHub Community
+Python Memory Problem
+#177191
+Answered
+by
+Erxsdev
+anonim-devs
+asked this question in
+General
+Python Memory Problem
+#177191
+anonim-devs
+Oct 16, 2025
+·
+3 comments
+Answered
+by
+Erxsdev
+Return to top
+Discussion options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+anonim-devs
+Oct 16, 2025
+-
+Select Topic Area
+Question
+Body
+Hello everyone! 👋
+What are the best developments for optimizing data in memory with large datasets in Python? I'm particularly interested in pandas DataFrames, and I frequently get MemoryErrors. For example, how can I be more efficient when processing CSV results with many rows? Do you have any tips, techniques, or best practices? Thanks in advance!
+Beta
+Was this translation helpful?
+Give feedback.
+2
+You must be logged in to vote
+All reactions
+Answered by
+Erxsdev
+Oct 16, 2025
+Great question! I can suggest a few ways to optimize memory usage on large datasets with Pandas:
+Reading Piece by Piece (Chunking):
+You can read large CSV files piece by piece with pandas.read_csv(). You can break the data into smaller pieces using the
+chunksize
+parameter.
+View full answer
+Replies:
+3 comments
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+Erxsdev
+Oct 16, 2025
+-
+Great question! I can suggest a few ways to optimize memory usage on large datasets with Pandas:
+Reading Piece by Piece (Chunking):
+You can read large CSV files piece by piece with pandas.read_csv(). You can break the data into smaller pieces using the
+chunksize
+parameter.
+Beta
+Was this translation helpful?
+Give feedback.
+Marked as answer
+1
+You must be logged in to vote
+All reactions
+0 replies
+Answer selected by
+anonim-devs
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+swapnanil99
+Oct 17, 2025
+-
+Hey! If your pandas DataFrame is giving MemoryError, try these quick tips:
+Read in chunks instead of the whole CSV:
+for
+chunk
+in
+pd.read_csv(
+"
+bigfile.csv
+"
+, chunksize=100000):
+#
+process chunk
+Use smaller dtypes:
+df = pd.read_csv(
+"
+bigfile.csv
+"
+, dtype={
+"
+id
+"
+:
+"
+int32
+"
+,
+"
+price
+"
+:
+"
+float32
+"
+,
+"
+category
+"
+:
+"
+category
+"
+})
+Drop unused columns before processing:
+df = df[[
+"
+id
+"
+,
+"
+price
+"
+,
+"
+category
+"
+]]
+Try faster libraries if needed: Polars or Dask — they handle big data much better.
+Save in Parquet/Feather for smaller, faster reloads.
+This usually makes even huge CSVs manageable 🚀
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+Xishen1823
+Dec 14, 2025
+-
+Here are concise, actionable tips to fix Python/pandas  MemoryError  with large datasets:
+1. Optimize dtypes: Downcast numerics (e.g.,  int32 / float32 ) and use  category  for repeated strings.
+2. Read smartly: Load only needed columns ( usecols ) or read in chunks ( chunksize ); use Parquet/Feather instead of CSV.
+3. Trim data: Drop unused rows/columns and filter early to reduce dataset size.
+4. Use out-of-core tools: Dask/Vaex handle data larger than RAM via on-disk processing.
+5. Free memory: Delete unused objects ( del ) and run  gc.collect() .
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+data-infra-eng
+Feb 13, 2026
+-
+We hit this same MemoryError processing a 40GB CSV. Before implementing chunking, we ran watchstack profile --pandas which profiled the memory allocation and showed that two object-type columns were consuming 70% of the memory. Converting them to categoricals solved the issue without needing chunked processing. It's open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub
+.
+Already have an account?
+Sign in to comment
+You can’t perform that action at this time.

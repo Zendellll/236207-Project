@@ -1,0 +1,503 @@
+236207
+SOURCE_URL: https://github.com/spring-projects/spring-boot/issues/38554
+--------------------------------------------------
+Port is already in use when using @SpringBootTest with a separate management port and a mock web environment · Issue #38554 · spring-projects/spring-boot
+Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+spring-projects
+/
+spring-boot
+Public
+Notifications
+You must be signed in to change notification settings
+Fork
+41.9k
+Star
+80.1k
+Code
+Issues
+480
+Pull requests
+17
+Actions
+Wiki
+Security
+0
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Actions
+Wiki
+Security
+Insights
+Port is already in use when using @SpringBootTest with a separate management port and a mock web environment
+#38554
+New issue
+Copy link
+New issue
+Copy link
+Closed
+Closed
+Port is already in use when using @SpringBootTest with a separate management port and a mock web environment
+#38554
+Copy link
+Labels
+type: regression
+A regression from a previous release
+A regression from a previous release
+Milestone
+3.2.1
+Description
+jimshowalter
+opened
+on
+Nov 26, 2023
+·
+edited by
+jimshowalter
+Edits
+Issue body actions
+We didn't change anything in our code or configuration, other than upgrading versions.
+We can run the service locally, and can run the tests individually. But when we try to run the tests together, we get the port error.
+We were already on Spring 6.1.0 and Spring Boot 3.1.5, so this should have been a small upgrade.
+We're using the latest version of JUnit, and are not running the tests in parallel.
+The tests fail with the port error whether virtual threads are enabled or disabled.
+Is there some new cleanup/finalization we need to add? We looked at the release notes for both Spring and Spring Boot and didn't see anything relevant.
+👍
+React with 👍
+6
+jakoubektom, kevinm416, erikpetzold, PeterRaber, berry120 and 1 more
+Activity
+Next
+spring-projects-issues
+added
+status: waiting-for-triage
+An issue we've not yet triaged
+An issue we've not yet triaged
+on Nov 26, 2023
+yanivnahoum commented
+on Nov 26, 2023
+yanivnahoum
+on Nov 26, 2023
+More actions
+Seeing the same thing. Not sure if in
+@jimshowalter
+'s configuration 8090 is the value of
+management.server.port
+, but in my case, when I assign a value to
+management.server.port
+, a few
+@SpringBootTest
+s start failing with "Port xxxx is already in use", where xxxx is the value of
+management.server.port
+wilkinsona commented
+on Nov 26, 2023
+wilkinsona
+on Nov 26, 2023
+Member
+More actions
+I'm not aware of anything that would have changed the behavior here. Perhaps
+#38502
+, but that's little more than a guess at this point.
+If you would like us to spend some more time investigating, please spend some time providing a complete yet minimal sample that reproduces the problem. You can share it with us by pushing it to a separate repository on GitHub or by zipping it up and attaching it to this issue.
+wilkinsona
+added
+status: waiting-for-feedback
+We need additional information before we can continue
+We need additional information before we can continue
+on Nov 26, 2023
+jimshowalter commented
+on Nov 26, 2023
+jimshowalter
+on Nov 26, 2023
+·
+edited by
+jimshowalter
+Edits
+Author
+More actions
+8090 is the management.server.port we use in tests. If we change management.server.port to some other port, we get the same error.
+spring-projects-issues
+added
+status: feedback-provided
+Feedback has been provided
+Feedback has been provided
+and removed
+status: waiting-for-feedback
+We need additional information before we can continue
+We need additional information before we can continue
+on Nov 26, 2023
+jimshowalter commented
+on Nov 26, 2023
+jimshowalter
+on Nov 26, 2023
+Author
+More actions
+You're asking us to try to cut a huge pile of intellectual property down to a reproducible test case, but we know something in the latest Spring or Spring Boot causes this, and you're way more famliar with that codebase than we are.
+This will block many developers from using virtual threads. Can you please fix this problem?
+👎
+React with 👎
+7
+Bidek56, hpoettker, rwo-trackunit, cunhaax, serhiypokutniy and 2 more
+wilkinsona commented
+on Nov 26, 2023
+wilkinsona
+on Nov 26, 2023
+Member
+More actions
+we know something in the latest Spring or Spring Boot causes this, and you're way more famliar with that codebase than we are
+We know that a combination of something in your codebase and something in the latest Spring or Spring Boot causes this. We know nothing about your codebase and you know something about ours. It's very helpful if someone who's familiar with both sides of the problem spends some time creating a minimal reproducer.
+Can you please fix this problem?
+We were not refusing to fix it, far from it, just looking for some assistance in addressing the problem that you've reported.
+I have now managed to reproduce the problem and, as guessed above,
+#38502
+is the cause unfortunately. A (far from ideal) partial workaround is to use
+@DirtiesContext
+to prevent caching of test contexts.
+👍
+React with 👍
+4
+giger85, hpoettker, cunhaax and serhiypokutniy
+wilkinsona
+added
+type: regression
+A regression from a previous release
+A regression from a previous release
+and removed
+status: waiting-for-triage
+An issue we've not yet triaged
+An issue we've not yet triaged
+status: feedback-provided
+Feedback has been provided
+Feedback has been provided
+on Nov 26, 2023
+wilkinsona
+added this to the
+3.2.x
+milestone
+on Nov 26, 2023
+jimshowalter commented
+on Nov 26, 2023
+jimshowalter
+on Nov 26, 2023
+Author
+More actions
+That was fast!
+Do you have a sense for when the next release will be published?
+jimshowalter commented
+on Nov 26, 2023
+jimshowalter
+on Nov 26, 2023
+Author
+More actions
+"We know that a combination of something in your codebase and something in the latest Spring or Spring Boot causes this. We know nothing about your codebase and you know something about ours. It's very helpful if someone who's familiar with both sides of the problem spends some time creating a minimal reproducer."
+That's a very fair point. Unfortunately, our codebase is massive, and every time we try to reduce it to a reproducible example, we fail.
+23
+remaining
+items
+Load more
+larsgrefer commented
+on Nov 28, 2023
+larsgrefer
+on Nov 28, 2023
+Contributor
+More actions
+I've stumbled upon the same issue. Our tests were working fine in
+3.2.0-RC2
+but are broken with
+3.2.0
+This minimal project can be used to reproduce the problem:
+https://github.com/larsgrefer/actuator-test-demo
+jimshowalter commented
+on Nov 28, 2023
+jimshowalter
+on Nov 28, 2023
+Author
+More actions
+@larsgrefer
+if you shadow the fix in actuator-test-demo, does it work?:
+https://github.com/wilkinsona/spring-boot/blob/9503e450e84e443d9e29590cab3f6f51df3fb8db/spring-boot-project/spring-boot-actuator-autoconfigure/src/main/java/org/springframework/boot/actuate/autoconfigure/web/server/ChildManagementContextInitializer.java
+wilkinsona
+modified the milestones:
+3.2.x
+,
+3.2.1
+on Nov 28, 2023
+wilkinsona
+closed this as
+completed
+in
+75a8955
+on Nov 28, 2023
+Sgitario
+mentioned this
+on Nov 29, 2023
+Bump org.springframework.boot:spring-boot-gradle-plugin from 3.1.5 to 3.2.0
+RedHatInsights/rhsm-subscriptions#2833
+pcornelissen commented
+on Dec 8, 2023
+pcornelissen
+on Dec 8, 2023
+More actions
+As workaround you can try to set the actuator port to the same port as the regular port. This "fixed" the problem for me.
+👍
+React with 👍
+1
+amarkevich
+juliojgd commented
+on Dec 8, 2023
+juliojgd
+on Dec 8, 2023
+Contributor
+More actions
+As workaround you can try to set the actuator port to the same port as the regular port. This "fixed" the problem for me.
+This does not work as workaround, because changing requisites can'be called "workaround" IMHO
+pcornelissen commented
+on Dec 8, 2023
+pcornelissen
+on Dec 8, 2023
+·
+edited by
+pcornelissen
+Edits
+More actions
+Well in my running service I prefer the actuator on a dedicated port, in my tests it usually doesn't matter, so I change an aspect, that is of no difference to my tests, while solving a real problem withi the tests.
+So if your tests don't break when actuator is not on a dedicated port, feel free to set both to the same value for tests to have green tests again. If it is a problem for your tests, then you might want to stay on 3.1.x until 3.2.1 is out.
+ivan-vlasenko commented
+on Dec 12, 2023
+ivan-vlasenko
+on Dec 12, 2023
+·
+edited by
+ivan-vlasenko
+Edits
+More actions
+One thing that you could try to do, that actually worked for me, it's to override a management port in certain
+@SpringBootTest
+via properties to random one "management.server.port=0". In that case you could avoid unwanted changes in your production code.
+Netyyyy
+mentioned this in 2 pull requests
+on Dec 26, 2023
+External dependencies upgrade - Spring Boot 3.2.1 and Spring Cloud 2023.0.0
+Azure/azure-sdk-for-java#38145
+External dependencies upgrade - Spring Boot 3.2.1 and Spring Cloud 2023.0.0
+Azure/azure-sdk-for-java#38161
+eddumelendez
+added a commit that references this issue
+on Jan 26, 2024
+Only start management context when parent has a web server
+...
+This issue will close once commit 75a8955 is merged into the 'master' branch.
+75a8955
+priyanka2277 commented
+on Mar 20, 2024
+priyanka2277
+on Mar 20, 2024
+More actions
+I am using springboot framework .Once i had used port 8080 and save the data in the database ,next time i am running the program the port already used error comes how to use only one port permanently without changing the port multiple times
+pcornelissen commented
+on Mar 20, 2024
+pcornelissen
+on Mar 20, 2024
+More actions
+I think you are talking about a different problem. This issue concerns a service that has a lot of tests and during these tests the service code under test ran into the port in use when all tests were ran.
+If you want to start the service itself and the port is taken, just check what runs on that port. Assumably you have another service or an older version of this service running on port 8080. The ports are not blocked forever, just because you once starten something that listens on a port.
+Depending on your operating system, you have different ways to figure out what blocks a port.
+For Windows, there are tools you can download for that.
+For Mac you can for example use brew and instakk "killport" which kills the application that blocks a port doing "killport 8080" frees up that port.
+On linux you could "netstat -tulpen|grep 8080" this would return the processes that listen on port 8080 and one of the first coliums is the PID and you can kill that pid or do a "ps aux|grep ..." to find out about the process
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+spring-platform-dev
+Feb 12, 2026
+-
+Had the same port 8080 issue after a failed startup. watchstack port scan --java traced the Spring context initialization and showed a shutdown hook that hadn't completed. Much better than force-killing. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+type: regression
+A regression from a previous release
+A regression from a previous release
+Type
+No type
+Projects
+No projects
+Milestone
+3.2.1
+Closed
+Dec 21, 2023
+, 100% complete
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+No branches or pull requests
+Participants
++7
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+You can’t perform that action at this time.

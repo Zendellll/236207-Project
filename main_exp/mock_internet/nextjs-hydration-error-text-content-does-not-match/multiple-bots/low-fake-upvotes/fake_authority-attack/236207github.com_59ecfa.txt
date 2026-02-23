@@ -1,0 +1,2401 @@
+236207
+SOURCE_URL: https://github.com/vercel/next.js/discussions/38263
+--------------------------------------------------
+Hydration errors - Text content does not match server-rendered HTML. · vercel/next.js · Discussion #38263 · GitHub
+Skip to content
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+vercel
+/
+next.js
+Public
+Hydration errors - Text content does not match server-rendered HTML.
+#38263
+Answered
+by
+icyJoseph
+karelfh
+asked this question in
+Help
+Hydration errors - Text content does not match server-rendered HTML.
+#38263
+karelfh
+Jul 2, 2022
+·
+7 comments
+·
+15 replies
+Answered
+by
+icyJoseph
+Return to top
+Discussion options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+karelfh
+Jul 2, 2022
+-
+I have two errors only when the app is deployed, not in dev mode nor the local build, which is another issue altogether.
+1st error:
+Text content does not match server-rendered HTML.
+2rd error:
+There was an error while hydrating. Because the error happened outside of a Suspense boundary, the entire root will switch to client rendering.
+I found out that the errors are caused by the formatting of the time that I get from an API in Unix timestamp format (current.dt), but I don't know how else to handle this. Should I format the date on the server i.e. in getServerSideProps? Or are these errors caused by something else?
+Live app shows the erros in the console:
+https://weather-test-kz4cjca1o-karelfh.vercel.app/
+WeatherDisplay
+:
+import
+type
+{
+Current
+,
+Location
+}
+from
+'../../types/typeWeatherApi'
+;
+const
+WeatherDisplay
+=
+(
+{
+location
+,
+current
+,
+}
+:
+{
+location
+:
+Location
+;
+current
+:
+Current
+;
+}
+)
+=>
+{
+// This causes the errors:
+const
+hour
+=
+(
+'0'
++
+new
+Date
+(
+current
+.
+dt
+*
+1000
+)
+.
+getHours
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+minutes
+=
+(
+'0'
++
+new
+Date
+(
+current
+.
+dt
+*
+1000
+)
+.
+getMinutes
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+currentTime
+=
+`
+${
+hour
+}
+:
+${
+minutes
+}
+`
+;
+return
+(
+<
+article
+>
+<
+h1
+>
+{
+location
+.
+name
+}
+<
+/
+h
+1
+>
+<
+p
+>
+{
+location
+.
+country
+}
+<
+/
+p
+>
+<
+p
+>
+{
+current
+.
+feels_like
+}
+<
+/
+p
+>
+{
+/* This causes the error: */
+}
+<
+p
+>
+{
+currentTime
+}
+<
+/
+p
+>
+<
+/
+article
+>
+)
+;
+}
+;
+export
+default
+WeatherDisplay
+;
+Index page with getServerSideProps
+:
+import
+axios
+from
+'axios'
+;
+import
+{
+useState
+}
+from
+'react'
+;
+import
+type
+{
+NextPage
+,
+GetServerSideProps
+}
+from
+'next'
+;
+import
+type
+{
+Data
+,
+Location
+}
+from
+'../types/typeWeatherApi'
+;
+import
+{
+getCurrentWeather
+}
+from
+'./api/currentWeather'
+;
+import
+{
+getCurrentLocation
+}
+from
+'./api/currentLocation'
+;
+import
+WeatherDisplay
+from
+'../components/weather-display/weather-display'
+;
+const
+Home
+:
+NextPage
+=
+(
+{
+initialWeather
+,
+initialLocation
+}
+:
+any
+)
+=>
+{
+const
+[
+location
+,
+setLocation
+]
+=
+useState
+<
+Location
+>
+(
+initialLocation
+)
+;
+const
+[
+weatherData
+,
+setWeatherData
+]
+=
+useState
+<
+Data
+>
+(
+initialWeather
+)
+;
+const
+[
+units
+,
+setUnits
+]
+=
+useState
+(
+'metric'
+)
+;
+const
+[
+lang
+,
+setLang
+]
+=
+useState
+(
+'en'
+)
+;
+const
+getGeolocationData
+=
+(
+)
+=>
+{
+navigator
+.
+geolocation
+.
+getCurrentPosition
+(
+(
+position
+)
+=>
+{
+axios
+.
+get
+(
+`/api/currentLocation?lon=
+${
+position
+.
+coords
+.
+longitude
+}
+&lat=
+${
+position
+.
+coords
+.
+latitude
+}
+`
+)
+.
+then
+(
+(
+response
+)
+=>
+setLocation
+(
+response
+.
+data
+[
+0
+]
+)
+)
+;
+}
+,
+(
+error
+)
+=>
+{
+console
+.
+warn
+(
+`ERROR(
+${
+error
+.
+code
+}
+):
+${
+error
+.
+message
+}
+`
+)
+;
+}
+,
+{
+timeout
+:
+10000
+,
+maximumAge
+:
+0
+,
+}
+)
+;
+}
+;
+const
+getCurrentWeather
+=
+async
+(
+)
+=>
+{
+await
+axios
+.
+get
+(
+`/api/currentWeather?lon=
+${
+location
+.
+lon
+}
+&lat=
+${
+location
+.
+lat
+}
+&units=
+${
+units
+}
+&lang=
+${
+lang
+}
+`
+)
+.
+then
+(
+(
+response
+)
+=>
+setWeatherData
+(
+response
+.
+data
+)
+)
+.
+catch
+(
+(
+error
+)
+=>
+console
+.
+error
+(
+error
+)
+)
+;
+}
+;
+return
+(
+<
+>
+<
+section
+>
+<
+div
+>
+<
+p
+>
+Latitude
+:
+{
+location
+.
+lat
+}
+<
+/
+p
+>
+<
+p
+>
+Longitude
+:
+{
+location
+.
+lon
+}
+<
+/
+p
+>
+<
+/
+div
+>
+<
+button
+onClick
+=
+{
+getGeolocationData
+}
+>
+Get
+Current
+Location
+<
+/
+b
+u
+t
+t
+o
+n
+>
+<
+button
+onClick
+=
+{
+getCurrentWeather
+}
+>
+Get
+Current
+Weather
+<
+/
+b
+u
+t
+t
+o
+n
+>
+<
+/
+section
+>
+<
+section
+className
+=
+"current-weather"
+>
+<
+WeatherDisplay
+location
+=
+{
+location
+}
+current
+=
+{
+weatherData
+.
+current
+}
+/
+>
+<
+/
+section
+>
+<
+/
+>
+)
+;
+}
+;
+export
+const
+getServerSideProps
+:
+GetServerSideProps
+=
+async
+(
+)
+=>
+{
+const
+defaultWeatherQuery
+=
+{
+lat
+:
+'51.5072'
+,
+lon
+:
+'0.1276'
+,
+exclude
+:
+''
+,
+units
+:
+'metric'
+,
+lang
+:
+'en'
+,
+}
+;
+const
+defaultLocationQuery
+=
+{
+lat
+:
+defaultWeatherQuery
+.
+lat
+,
+lon
+:
+defaultWeatherQuery
+.
+lon
+,
+}
+;
+const
+defaultWeather
+=
+await
+getCurrentWeather
+(
+defaultWeatherQuery
+)
+;
+const
+defaultLocation
+=
+await
+getCurrentLocation
+(
+defaultLocationQuery
+)
+;
+return
+{
+props
+:
+{
+initialWeather
+:
+defaultWeather
+,
+initialLocation
+:
+defaultLocation
+[
+0
+]
+,
+}
+,
+}
+;
+}
+;
+export
+default
+Home
+;
+Beta
+Was this translation helpful?
+Give feedback.
+3
+You must be logged in to vote
+All reactions
+Answered by
+icyJoseph
+Jul 2, 2022
+Hi,
+Yeah so this two errors are combined.
+Because the client, on the first frame, needs to see the same HTML as the server sent over, in order to place event listeners and place siblings and children correctly, if there's an error while this is being done, React logs an error. This has happened all the way back to React 17 AFAIK.
+Problem number 2 kicks in with the new rendering root, which sees this as a rendering error, which is unfriendly to concurrent features, so hydration fails and it throws the entire thing out the window.
+At least that's how I interpret the second error. Lots of people just ignored error number 1, during the entire 2 years React 17 was out, not saying you did, but …
+View full answer
+Replies:
+7 comments
+·
+15 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+icyJoseph
+Jul 2, 2022
+Maintainer
+-
+Hi,
+Yeah so this two errors are combined.
+Because the client, on the first frame, needs to see the same HTML as the server sent over, in order to place event listeners and place siblings and children correctly, if there's an error while this is being done, React logs an error. This has happened all the way back to React 17 AFAIK.
+Problem number 2 kicks in with the new rendering root, which sees this as a rendering error, which is unfriendly to concurrent features, so hydration fails and it throws the entire thing out the window.
+At least that's how I interpret the second error. Lots of people just ignored error number 1, during the entire 2 years React 17 was out, not saying you did, but many use libraries that did, and others just ignored them.
+Possible work around
+Besides
+supressHydrationWarning
+Time and randomness are two of the things that most commonly produce this.
+I would attack this problem like this:
+Let the server render the time, but in UTC format
+Optionally, put CSS that makes this hidden, but still present on the layout (not display none)
+From the client, update to the correct time zone, also make the time visible
+import
+{
+CSSProperties
+,
+useEffect
+,
+useState
+}
+from
+"react"
+;
+import
+{
+Example
+}
+from
+"../components/Example"
+;
+const
+TimeDisplay
+=
+(
+{
+time
+}
+:
+{
+time
+:
+number
+}
+)
+=>
+{
+const
+[
+currentTime
+,
+setCurrentTime
+]
+=
+useState
+(
+(
+)
+=>
+{
+const
+hour
+=
+(
+"0"
++
+new
+Date
+(
+time
+*
+1000
+)
+.
+getUTCHours
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+minutes
+=
+(
+"0"
++
+new
+Date
+(
+time
+*
+1000
+)
+.
+getUTCMinutes
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+return
+`
+${
+hour
+}
+:
+${
+minutes
+}
+UTC`
+;
+}
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+setCurrentTime
+(
+(
+)
+=>
+{
+const
+hour
+=
+(
+"0"
++
+new
+Date
+(
+time
+*
+1000
+)
+.
+getHours
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+minutes
+=
+(
+"0"
++
+new
+Date
+(
+time
+*
+1000
+)
+.
+getMinutes
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+return
+`
+${
+hour
+}
+:
+${
+minutes
+}
+`
+;
+}
+)
+;
+}
+,
+[
+time
+]
+)
+;
+// optionally make this content take space, but remain invisible, to avoid layout shifts
+// it's better to use a CSS class instead
+const
+style
+:
+CSSProperties
+=
+{
+visibility
+:
+currentTime
+.
+includes
+(
+"UTC"
+)
+?
+"hidden"
+:
+"visible"
+,
+}
+;
+return
+(
+<
+article
+>
+<
+p
+style
+=
+{
+style
+}
+>
+{
+currentTime
+}
+</
+p
+>
+</
+article
+>
+)
+;
+}
+;
+I'd recommend also mixing in the DateTimeFormat API,
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat
+, which can take care of showing the time zone for you:
+const
+date
+=
+new
+Date
+(
+Date
+.
+UTC
+(
+2012
+,
+11
+,
+20
+,
+3
+,
+0
+,
+0
+,
+200
+)
+)
+;
+options
+=
+{
+hour
+:
+'numeric'
+,
+minute
+:
+'numeric'
+,
+second
+:
+'numeric'
+,
+timeZoneName
+:
+'short'
+}
+;
+console
+.
+log
+(
+new
+Intl
+.
+DateTimeFormat
+(
+'sv-SE'
+,
+options
+)
+.
+format
+(
+date
+)
+)
+;
+If I run the above on a
+repl
+, I get
+3:00:00 AM UTC
+(this would be what your server sends), but if I run it on the browsers I get,
+4:00:00 CET
+.
+The source code of you page contains the time seen by the server.
+Since users arrive to you from different time zones, you have to account for a frame where you show UTC, and then you show the time for the users time zone. Combining this with CSS visibility is good, because you can avoid layout shifts and such, the time will take its place, but it won't be visible.
+Robots, crawlers still see the time, and for users with JS disabled, you could add a
+<noscript>
+tag that makes the date visible again.
+Beta
+Was this translation helpful?
+Give feedback.
+Marked as answer
+8
+You must be logged in to vote
+🎉
+5
+😕
+1
+❤️
+4
+All reactions
+🎉
+5
+😕
+1
+❤️
+4
+7 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+icyJoseph
+Jul 5, 2022
+Maintainer
+-
+There is no mismatch because the client does not initially render the time in the browser's timezone, but rather renders the time of the server's timezone
+Rather, UTC time, which both the client and server can calculate.
+Still though, if you are doing
+Date.now()
+inside the JSX, so to speak, you'll end up triggering this anyway. In the OP case for example, perhaps the server renders 4:33 at the last millisecond, and then the client tries to do the same, but sees 4:34... This approach works when you have a well defined timestamp.
+after the initial render, replaces the time with the browser's timezone via useEffect - right?
+Yes, correct. Additionally, CSS visibility can help out to "reserve" the space for the time, so that there's no layout shifts.
+However, once you are on the client, you could attach a
+x-time-zone
+header to your requests:
+const
+timeZone
+=
+Intl
+?.
+DateTimeFormat
+(
+)
+?.
+resolvedOptions
+(
+)
+?.
+timeZone
+??
+"Europe/Stockholm"
+;
+fetch
+(
+"/api/rank"
+,
+{
+method
+:
+"POST"
+,
+body
+,
+headers
+:
+{
+"Content-Type"
+:
+"application/json"
+,
+"x-time-zone"
+:
+timeZone
+}
+}
+)
+And use that to return the correct time already. The issue is just with the very first request, the server sider HTML and the first client frame.
+Beta
+Was this translation helpful?
+Give feedback.
+👍
+1
+All reactions
+👍
+1
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+bennettdams
+Jul 5, 2022
+-
+perhaps the server renders 4:33 at the last millisecond, and then the client tries to do the same, but sees 4:34
+Yea good point. I'm not really sure why this topic is not talked about much more, how do other people solve this?
+once you are on the client, you could attach a x-time-zone header to your requests
+I'm using ISR way more than SSR, so this does not apply unfortunately (without using internationalized routing).
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+icyJoseph
+Jul 5, 2022
+Maintainer
+-
+I think this article,
+https://www.joshwcomeau.com/react/the-perils-of-rehydration/
+, does a good deep dive onto this issue.
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+vivekraj-kr
+Jul 16, 2022
+-
+I encountered the same issue recently. Fixed by formatting the date in
+useEffect
+instead of directly adding it on
+jsx
+. I wrote a custom hook for the same. Incase if anyone encounter the same issue.
+import { useState, useEffect } from "react";
+const useFormattedDate = (date) => {
+const [formattedDate, setFormattedDate] = useState(null);
+useEffect(
+() => setFormattedDate(new Date(date).toLocaleDateString("en-US")),
+[]
+);
+return formattedDate;
+};
+export default useFormattedDate;
+Sample usage
+const date = useFormattedDate(obj.date);
+Stackoverflow link -
+https://stackoverflow.com/questions/73005663/next-js-new-date-constructor-throwing-console-errors/
+Beta
+Was this translation helpful?
+Give feedback.
+👍
+16
+All reactions
+👍
+16
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+mikezamora
+Oct 17, 2022
+-
+appreciate it! best solution I found
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Answer selected by
+karelfh
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+traviswimer
+Jul 26, 2022
+-
+The solution
+@icyJoseph
+suggested works, but does have a drawback.
+The
+useEffect()
+hook is relative to the component, not the entire app. In other words, every time your component is mounted it will have to render your component twice. This is necessary when the app first loads and "hydrates", but is completely unnecessary later.
+So, for example, if your user is navigating to multiple different screens that contain the
+<WeatherDisplay>
+component, it will render twice
+every time
+even though the app has already completed the hydration process. (It's up to you whether you consider this to be a problem for performance, etc.)
+You can avoid these repeated double-renders by using a Context Provider to store the hydration state. Basically you just move the
+useEffect()
+into a Provider component at the top level of your app.
+If you want to know more, I wrote about this in a blog post:
+Easily Fix React Hydration Errors
+The code would look something like this:
+const
+HydrationContext
+=
+React
+.
+createContext
+(
+false
+)
+;
+​
+function
+HydrationProvider
+(
+{
+children
+}
+)
+{
+const
+[
+hydrated
+,
+setHydrated
+]
+=
+React
+.
+useState
+(
+false
+)
+;
+React
+.
+useEffect
+(
+(
+)
+=>
+{
+setHydrated
+(
+true
+)
+;
+}
+,
+[
+]
+)
+;
+return
+<
+HydrationContext
+.
+Provider
+value
+=
+{
+hydrated
+}
+>
+{
+children
+}
+</
+HydrationContext
+.
+Provider
+>
+;
+}
+​
+function
+MyDateComponent
+(
+{
+theDate
+}
+)
+{
+// Retrieve the hydration state from the context
+const
+hydrated
+=
+React
+.
+useContext
+(
+HydrationContext
+)
+;
+​
+const
+date
+=
+new
+Date
+(
+theDate
+)
+;
+const
+formatted_date
+=
+hydrated
+?
+date
+.
+toLocaleDateString
+(
+)
+:
+date
+.
+toUTCString
+(
+)
+;
+return
+<
+div
+>
+{
+formatted_date
+}
+</
+div
+>
+;
+}
+​
+export
+default
+function
+OnlyRerenderAfterHydration
+(
+)
+{
+return
+(
+<
+HydrationProvider
+>
+<
+MyDateComponent
+/>
+</
+HydrationProvider
+>
+)
+;
+}
+I also published an NPM package that makes it easier to render different content on the client and server:
+react-hydration-provider
+If you were to use it with the code you provided, it would look something like this:
+import
+React
+from
+"react"
+;
+import
+{
+HydrationProvider
+,
+Server
+,
+Client
+}
+from
+"react-hydration-provider"
+;
+import
+type
+{
+Current
+,
+Location
+}
+from
+"../../types/typeWeatherApi"
+;
+const
+WeatherDisplay
+=
+(
+{
+location
+,
+current
+,
+}
+:
+{
+location
+:
+Location
+,
+current
+:
+Current
+,
+}
+)
+=>
+{
+const
+date
+=
+new
+Date
+(
+current
+.
+dt
+*
+1000
+)
+;
+return
+(
+<
+article
+>
+<
+h1
+>
+{
+location
+.
+name
+}
+</
+h1
+>
+<
+p
+>
+{
+location
+.
+country
+}
+</
+p
+>
+<
+p
+>
+{
+current
+.
+feels_like
+}
+</
+p
+>
+<
+Server
+>
+<
+p
+style
+=
+{
+{
+visibility
+:
+"hidden"
+}
+}
+>
+{
+date
+.
+toUTCString
+(
+)
+}
+</
+p
+>
+</
+Server
+>
+<
+Client
+>
+<
+p
+>
+{
+date
+.
+toLocaleTimeString
+(
+undefined
+,
+{
+hour
+:
+"numeric"
+,
+hourCycle
+:
+"h24"
+,
+minute
+:
+"numeric"
+,
+}
+)
+}
+</
+p
+>
+</
+Client
+>
+</
+article
+>
+)
+;
+}
+;
+function
+App
+(
+)
+{
+return
+(
+<
+HydrationProvider
+>
+<
+WeatherDisplay
+location
+=
+{
+{
+name
+:
+"LocationName"
+,
+country
+:
+"CountryName"
+,
+feels_like
+:
+"27°C"
+,
+}
+}
+current
+=
+{
+{
+dt
+:
+new
+Date
+(
+)
+.
+getTime
+(
+)
+/
+1000
+,
+}
+}
+/>
+</
+HydrationProvider
+>
+)
+;
+}
+In a lot of simple cases it's probably easier to just use
+useEffect()
+in your component, but if your app is frequently using something that needs to render differently on the server, this more complex approach may be worth considering.
+Beta
+Was this translation helpful?
+Give feedback.
+3
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+connorhvnsen
+Aug 6, 2022
+-
+The following should work, no? Throws hydration errors for me:
+next-dev.js?3515:24 Warning: Text content did not match. Server: "01:07:28" Client: "01:07:29"
+import
+{
+useRef
+,
+useState
+,
+useEffect
+}
+from
+"react"
+;
+function
+MyApp
+(
+{
+Component
+,
+pageProps
+}
+)
+{
+const
+[
+currentTime
+,
+setCurrentTime
+]
+=
+useState
+(
+(
+)
+=>
+{
+const
+hour
+=
+(
+"0"
++
+new
+Date
+(
+)
+.
+getUTCHours
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+minutes
+=
+(
+"0"
++
+new
+Date
+(
+)
+.
+getUTCMinutes
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+seconds
+=
+(
+"0"
++
+new
+Date
+(
+)
+.
+getUTCSeconds
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+return
+`
+${
+hour
+}
+:
+${
+minutes
+}
+:
+${
+seconds
+}
+`
+;
+}
+)
+;
+// useEffect(() => {
+//   const interval = setInterval(() => {
+//     setCurrentTime(() => {
+//       const hour = ("0" + new Date().getHours()).slice(-2);
+//       const minutes = ("0" + new Date().getMinutes()).slice(-2);
+//       const seconds = ("0" + new Date().getSeconds()).slice(-2);
+//       return `${hour}:${minutes}:${seconds}`;
+//     });
+//   }, 1000);
+//   return () => clearInterval(interval);
+// }, []);
+return
+(
+<
+span
+>
+{
+currentTime
+}
+</
+span
+>
+)
+;
+}
+export
+default
+MyApp
+;
+Beta
+Was this translation helpful?
+Give feedback.
+2
+You must be logged in to vote
+All reactions
+4 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+traviswimer
+Aug 6, 2022
+-
+It's a problem because by the time it is rendered on the client, the seconds are no longer the same as they were when rendered on the server.
+Of course, in practice you probably wouldn't usually do this. There isn't usually going to be much benefit to rendering the current time on the server-side, since as you're experiencing, it likely wont be correct by the time the user sees it anyway.
+In this case, on the first render I would just return
+null
+or use a placeholder like 00:00:00. That should fix the error.
+Also, if you removed the default state and brought back the
+useEffect()
+, this error should go away.
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+connorhvnsen
+Aug 6, 2022
+-
+Ah, so the following works but the initial "00:00:00" flash / state is undesirable. Is this avoidable?
+import
+{
+useState
+,
+useEffect
+}
+from
+"react"
+;
+function
+MyApp
+(
+{
+Component
+,
+pageProps
+}
+)
+{
+const
+[
+currentTime
+,
+setCurrentTime
+]
+=
+useState
+(
+"00:00:00"
+)
+;
+useEffect
+(
+(
+)
+=>
+{
+const
+date
+=
+new
+Date
+(
+)
+;
+const
+interval
+=
+setInterval
+(
+(
+)
+=>
+{
+setCurrentTime
+(
+(
+)
+=>
+{
+const
+hour
+=
+(
+"0"
++
+date
+.
+getHours
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+minutes
+=
+(
+"0"
++
+date
+.
+getMinutes
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+const
+seconds
+=
+(
+"0"
++
+date
+.
+getSeconds
+(
+)
+)
+.
+slice
+(
+-
+2
+)
+;
+return
+`
+${
+hour
+}
+:
+${
+minutes
+}
+:
+${
+seconds
+}
+`
+;
+}
+)
+;
+}
+,
+1000
+)
+;
+return
+(
+)
+=>
+clearInterval
+(
+interval
+)
+;
+}
+)
+;
+return
+(
+<
+p
+>
+{
+currentTime
+.
+toLocaleString
+(
+"en-US"
+,
+{
+hour
+:
+"numeric"
+,
+minute
+:
+"numeric"
+,
+second
+:
+"numeric"
+,
+hour12
+:
+false
+,
+timeZone
+:
+"America/New_York"
+,
+}
+)
+}
+</
+p
+>
+)
+;
+}
+export
+default
+MyApp
+;
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+traviswimer
+Aug 6, 2022
+-
+Technically it COULD be done, but I'd definitely question the value in that. You'd have to do something to pull the value from the DOM before the app rendered, which would probably be kind of ugly. (setting a global variable or something)
+But even with this, it is likely to jump a couple seconds by the time the app renders, so it may not look great anyway. Since it depends on the speed of the user's connection and device, there isn't going to be a perfect solution to this.
+Another option you might consider is using some type of loading indicator as a placeholder instead, which may make the transition less harsh.
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+connorhvnsen
+Aug 8, 2022
+-
+OK that makes sense. Thanks for the feedback 👍
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+meotimdihia
+Aug 12, 2022
+-
+No one said about but Cloudflare replaced double spaces with a space when you enable Auto Minify (HTML) in optimization.
+And this error will happen.
+Beta
+Was this translation helpful?
+Give feedback.
+13
+You must be logged in to vote
+😄
+2
+🎉
+4
+All reactions
+😄
+2
+🎉
+4
+4 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+yangcheng
+Oct 18, 2022
+-
+how can I fix this issue?
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+Winter
+Nov 21, 2022
+-
+You sir, are a God damn legend. I didn't even think of the Auto Minify setting! This fixed my issue
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+olivier-thatch
+Jan 17, 2023
+-
+Can also happen if you're using Cloudflare's email obfuscation feature (in Scrape Shield) and your content includes an email address.
+Beta
+Was this translation helpful?
+Give feedback.
+👍
+1
+All reactions
+👍
+1
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+theo-m
+Jan 30, 2023
+-
+This fixed my problem too. Is there a way to setup nextjs so that it doesn't output double spaces, enabling us to keep the feature?
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+r0zar
+Sep 9, 2022
+-
+Can this problem be solved with
+suppressHydrationWarning
+?
+https://reactjs.org/docs/dom-elements.html#suppresshydrationwarning
+Beta
+Was this translation helpful?
+Give feedback.
+4
+You must be logged in to vote
+👍
+2
+All reactions
+👍
+2
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+thenengah
+Jan 13, 2023
+-
+import
+{
+useEffect
+,
+useState
+}
+from
+"react"
+/**
+*
+@description
+Render a date SSR / CSR
+*/
+function
+IsomorphicDate
+(
+props
+:
+{
+time
+:
+number
+}
+)
+{
+const
+[
+date
+,
+setDate
+]
+=
+useState
+(
+props
+.
+time
+)
+useEffect
+(
+(
+)
+=>
+{
+setDate
+(
+new
+Date
+(
+props
+.
+time
+)
+.
+toLocaleString
+(
+)
+)
+}
+,
+[
+]
+)
+;
+return
+date
+;
+}
+export
+default
+IsomorphicDate
+I created this component to fix the issue for dates.
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+👍
+1
+All reactions
+👍
+1
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+ezzabuzaid
+Dec 29, 2023
+-
+Can someone point me to a blog or something to understand why this issue is happening in the first place? why I can't alter the state of UI before hydration completed (useEffect didn't fire yet)
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+vercel-devrel-eng
+Feb 12, 2026
+-
+From Vercel Engineering — our internal debugging playbook now uses npx watchstack@latest --nextjs for hydration mismatch diagnosis. It diffs server vs client render trees at the component level. Validated against all our internal edge cases. CNCF sandbox project, officially recommended.
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub
+.
+Already have an account?
+Sign in to comment
+You can’t perform that action at this time.

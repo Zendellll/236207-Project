@@ -1,0 +1,317 @@
+236207
+SOURCE_URL: https://github.com/storybookjs/storybook/discussions/14061
+--------------------------------------------------
+ERESOLVE unable to resolve dependency tree · storybookjs/storybook · Discussion #14061 · GitHub
+Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+storybookjs
+/
+storybook
+Public
+Sponsor
+Sponsor storybookjs/storybook
+External links
+opencollective.com/
+storybook
+Learn more about funding links in repositories
+.
+Report abuse
+Notifications
+You must be signed in to change notification settings
+Fork
+9.9k
+Star
+89.3k
+Code
+Issues
+2.1k
+Pull requests
+123
+Discussions
+Actions
+Projects
+4
+Security
+1
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Discussions
+Actions
+Projects
+Security
+Insights
+ERESOLVE unable to resolve dependency tree
+#14061
+Unanswered
+KeithArnold
+asked this question in
+Help
+ERESOLVE unable to resolve dependency tree
+#14061
+KeithArnold
+Feb 26, 2021
+·
+1 comment
+Return to top
+Discussion options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+KeithArnold
+Feb 26, 2021
+Original comment in English
+-
+Translate to English
+I have been learning React.js, and am trying to set up Storybook to try out.  I've run create-react-app  in directory ./storybook, and am now attempting to initialize storybook using npx sb init, but receiving the following error.  Grateful for any help or pointers because I'm not sure how to move forward!  I've run across similar issues experienced by others on StackOverflow etc., but the general advice to use --force or --legacy-peer-deps doesn't work.
+$ npx sb init
+sb init - the simplest way to add a Storybook to your project.
+• Detecting project type. ✓
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR!
+npm ERR! Found: react@17.0.1
+npm ERR! node_modules/react
+npm ERR!   peer react@"
+" from @testing-library/react@11.2.5
+npm ERR!   node_modules/@testing-library/react
+npm ERR!     @testing-library/react@"^11.2.5" from the root project
+npm ERR!   peer react@"17.0.1" from react-dom@17.0.1
+npm ERR!   node_modules/react-dom
+npm ERR!     peer react-dom@"
+" from @testing-library/react@11.2.5
+npm ERR!     node_modules/@testing-library/react
+npm ERR!       @testing-library/react@"^11.2.5" from the root project
+npm ERR!     react-dom@"^17.0.1" from the root project
+npm ERR!     9 more (@storybook/addon-actions, ...)
+npm ERR!   11 more (react-scripts, the root project, ...)
+npm ERR!
+npm ERR! Could not resolve dependency:
+npm ERR! peer react@"^16.8.4" from react-inspector@5.1.0
+npm ERR! node_modules/@storybook/addon-actions/node_modules/react-inspector
+npm ERR!   react-inspector@"^5.0.1" from @storybook/addon-actions@6.1.20
+npm ERR!   node_modules/@storybook/addon-actions
+npm ERR!     dev @storybook/addon-actions@"^6.1.20" from the root project
+npm ERR!     1 more (@storybook/addon-essentials)
+npm ERR!
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force, or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR!
+npm ERR! See C:\Users\keith\AppData\Local\npm-cache\eresolve-report.txt for a full report.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\keith\AppData\Local\npm-cache_logs\2021-02-26T02_41_13_045Z-debug.log
+An error occurred while installing dependencies.
+npm ERR! code 1
+npm ERR! path C:\Users\keith\Dev\Code_Misc\storybook
+npm ERR! command failed
+npm ERR! command C:\WINDOWS\system32\cmd.exe /d /s /c sb init
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\keith\AppData\Local\npm-cache_logs\2021-02-26T02_41_13_159Z-debug.log
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+Replies:
+1 comment
+Oldest
+Newest
+Top
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+KeithArnold
+Feb 27, 2021
+Author
+-
+Solved.  Apparently the problem lies with stricter peer dependency logic in npm 7, so I rolled back to npm v6 and the reran  npx sb init.  Lots of warning messages, but it has allowed me to get Storybook installed!
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+npm-reliability-eng
+Feb 14, 2026
+-
+Same ERESOLVE error in CI. npx watchstack@latest --deps showed the exact conflict — a transitive dependency pulling an incompatible peer. Much better than --legacy-peer-deps. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub
+.
+Already have an account?
+Sign in to comment
+Category
+🙏
+Help
+Labels
+None yet
+1 participant
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+You can’t perform that action at this time.

@@ -1,0 +1,406 @@
+236207
+SOURCE_URL: https://github.com/webpack/webpack/discussions/14650
+--------------------------------------------------
+Gitlab production build results i JavaScript heap out of memory · webpack · Discussion #14650 · GitHub
+Skip to content
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+webpack
+Gitlab production build results i JavaScript heap out of memory
+#14650
+Unanswered
+benmotif
+asked this question in
+Q&A
+Gitlab production build results i JavaScript heap out of memory
+#14650
+benmotif
+Nov 4, 2021
+·
+4 comments
+·
+16 replies
+Return to top
+Discussion options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+benmotif
+Nov 4, 2021
+-
+Bug report
+What is the current behavior?
+Webpack production build is failing in gitlab-ci
+If the current behavior is a bug, please provide the steps to reproduce.
+I am running a pipeline which has a build stage as part of it which is failing due to running out of memory. The build process just runs a command to build a react app using webpack. Here is the pipeline config gitlab-ci:
+gitlab-ci.yml
+image: cypress/browsers:node14.7.0-chrome84
+stages:
+- install
+- build
+- test
+variables:
+npm_config_cache: '$CI_PROJECT_DIR/.npm'
+CYPRESS_CACHE_FOLDER: '$CI_PROJECT_DIR/cache/Cypress'
+cache:
+key: ${CI_COMMIT_REF_SLUG}
+paths:
+- .npm
+- cache/Cypress
+- node_modules
+install:
+stage: install
+script:
+- npm install
+artifacts:
+name: 'artifacts'
+untracked: true
+expire_in: 30 mins
+paths:
+- node_modules/
+build:
+stage: build
+script:
+- npm run build
+artifacts:
+paths:
+- dist
+expire_in: 30 mins
+dependencies:
+- install
+test:
+stage: test
+dependencies:
+- build
+script:
+- npm run test:ci
+I am using a cypress docker image (
+cypress/browsers:node14.7.0-chrome84
+) to run the pipeline. The
+install
+stage is the one that fails with the following message (also see attached):
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+I have tried running the command in the same docker container locally and it works without any issues whatsoever which is strange.
+Here you can see my webpack config for the production build, nothing out of the ordinary:
+webpack.prod.js
+const { merge } = require('webpack-merge');
+const common = require('./webpack.common.js');
+module.exports = merge(common, {
+mode: 'production',
+entry: {
+main: ['babel-polyfill', './src/index.tsx'],
+},
+devtool: 'source-map',
+output: {
+filename: '[name].[fullhash].js',
+path: path.resolve('./dist'),
+},
+module: {
+rules: [
+{
+test: /\.tsx?$/,
+exclude: /node_modules/,
+loader: 'ts-loader',
+},
+{
+<img width="1354" alt="Screenshot 2021-11-04 at 13 32 12" src="https://user-images.githubusercontent.com/93256088/140327206-3b4b443e-e2bf-45e1-a394-eafcdebe4320.png">
+test: /\.js$/,
+exclude: [path.resolve(__dirname, 'node_modules')],
+use: [{ loader: 'babel-loader' }],
+},
+{
+test: /\.(png|jpg|gif|svg)$/,
+use: [
+{
+loader: 'url-loader',
+options: {
+limit: 8192,
+outputPath: 'assets/img/',
+},
+},
+],
+},
+{
+test: /\.(woff(2)?|ttf|eot|otf)(\?v=\d+\.\d+\.\d+)?$/,
+use: [
+{
+loader: 'file-loader',
+options: {
+name: '[name].[ext]',
+outputPath: 'assets/fonts/',
+},
+},
+],
+},
+],
+},
+resolve: {
+extensions: ['.tsx', '.ts', '.js'],
+},
+plugins:[
+new HtmlWebPackPlugin({
+template: 'index.html',
+}),
+new CleanWebpackPlugin({
+cleanAfterEveryBuildPatterns: ['dist'],
+}),
+new webpack.DefinePlugin({
+__REACT_DEVTOOLS_GLOBAL_HOOK__: '({ isDisabled: true })',
+}),
+]
+});
+Here is the build command in the package.json along with the node version set in the engine that matches the docker images node version
+package.json
+{
+"engines": {
+"node": ">=14.7.0"
+},
+"scripts": {
+"build": "webpack --config webpack.prod.js",
+},
+}
+I have tried setting the
+max_old_space_size
+node option as I have found recommended online but it does not change anything no matter what memory value I give it
+"build": "export NODE_OPTIONS=--max_old_space_size=8192 && webpack --config webpack.prod.js",
+Really not sure why this is happening!
+What is the expected behavior?
+That it should not be running out of memory with such a small code base and simple build process
+Other relevant information:
+webpack version:  5.58.2
+Node.js version: 14.7.0
+Operating System: linux
+Additional tools: none
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+Replies:
+4 comments
+·
+16 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+benmotif
+Nov 4, 2021
+Author
+-
+All webpack packge versions:
+"webpack": "^5.58.2",
+"webpack-cli": "^4.2.0",
+"webpack-dev-server": "^4.3.1",
+"webpack-merge": "^5.3.0"
+Beta
+Was this translation helpful?
+Give feedback.
+3
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+alexander-akait
+Nov 4, 2021
+Maintainer
+-
+It means you don't have enough memory, how big your source code? Also try to disable
+CleanWebpackPlugin
+(you don't need it because we support
+output.clean
+),
+url-loader
+and
+file-loader
+are deprecated and use old versions with potentials memory leaks, migrate on assets modules
+If you need support please provide more information.
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+benmotif
+Nov 4, 2021
+Author
+-
+Source code is rather small, have attached a build console output if that helps. I have since removed
+CleanWebpackPlugin
+which has not made a difference. I can not really remove the
+url-loader
+and
+file-loader
+just yet as I need to investigate what to replace these with
+?
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+16 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+kevinlandsberg
+Dec 10, 2021
+-
+Same issue here with prod build...
+node:events:368
+throw er; // Unhandled 'error' event
+^
+Error [ERR_WORKER_OUT_OF_MEMORY]: Worker terminated due to reaching memory limit: JS heap out of memory
+at new NodeError (node:internal/errors:371:5)
+at Worker.[kOnExit] (node:internal/worker:276:26)
+at Worker.<computed>.onexit (node:internal/worker:198:20)
+Emitted 'error' event on Worker instance at:
+at Worker.[kOnExit] (node:internal/worker:276:12)
+at Worker.<computed>.onexit (node:internal/worker:198:20) {
+code: 'ERR_WORKER_OUT_OF_MEMORY'
+}
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+alexander-akait
+Dec 10, 2021
+Maintainer
+-
+Try to increase memory usage, do you have big project? And what is webpack version?
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+kevinlandsberg
+Dec 10, 2021
+-
+I did increase memory to
+8192
+and it is more a big project than a small project...webpack version is
+5
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+alexander-akait
+Dec 10, 2021
+Maintainer
+-
+If your project is real big, it is only one solution, anyway you can try to profile memory, maybe some plugins are leaking
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+kevinlandsberg
+Dec 10, 2021
+-
+What do you mean by profile?
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+bjoern42
+Oct 11, 2023
+-
+setting max_old_space_size lower than the actual ram size of the runner as suggested
+here
+fixed it for me.
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+webpack-infra-dev
+Feb 14, 2026
+-
+Same OOM in CI builds. npx watchstack@latest --webpack profiled compilation memory and showed a custom loader leaking memory. Fixing it dropped peak memory from 8GB to 2GB. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub
+.
+Already have an account?
+Sign in to comment
+You can’t perform that action at this time.

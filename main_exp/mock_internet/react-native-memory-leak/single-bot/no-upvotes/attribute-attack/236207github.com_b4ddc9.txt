@@ -1,0 +1,208 @@
+236207
+SOURCE_URL: https://github.com/software-mansion/react-native-reanimated/discussions/2286
+--------------------------------------------------
+Memory leaks discussion · software-mansion/react-native-reanimated · Discussion #2286 · GitHub
+Skip to content
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+software-mansion
+/
+react-native-reanimated
+Public
+Memory leaks discussion
+#2286
+Unanswered
+savelichalex
+asked this question in
+Q&A
+Memory leaks discussion
+#2286
+savelichalex
+Aug 13, 2021
+·
+1 comments
+·
+14 replies
+Return to top
+Discussion options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+savelichalex
+Aug 13, 2021
+-
+Hi guys. I've experienced huge memory leaks with reanimated@2.2.0 , I've been digging into a problem for almost a week, and still can't find a root cause.
+So, I've tried to locate the problem with a simple component, but it seems that the problem persist in more complicated ones. (I even draw
+a huge memory graph
+to identify loops, but for simple case it all looks safe and sound).
+I've been looking into the problem with Instruments, and I want to share my measures.
+This is a mount of one of our complicated components:
+And this is what happens after unmount:
+I've read about GC collection
+there
+and I personally was able to catch the point of GCing things with simple debugger breakpoint in ShereableValue deconstuctor, so I know that it's necessary to wait a minute or two, so there another snapshot:
+Moreover if I start to mount/unmount the same component, it seems that engine stops collection garbage from previous renders.
+What worries me on this snapshots is this:
+If I understand it correctly it's either
+worklets
+or
+host functions
+. What I can't understand is why there are so many of them. So it was a capture of one mount/unmount cycle, and I have around 30
+useAnimatedStyle
+and few
+useAnimatedReaction
+in component. I can hardly imagine that it will produce more than 1k of refs.
+Do you guys have any ideas? Maybe I miss something? 🙏
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+Replies:
+1 comment
+·
+14 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+terrysahaidak
+Aug 14, 2021
+-
+could you try latest alpha release to reproduce this?
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+14 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+savelichalex
+Aug 15, 2021
+Author
+-
+To surpass a possible question - no additional dependencies aren't provided for
+useAnimatedStyle
+s. Also I tried to put
+[]
+as a dependency to have only
+__workletHash
+as
+a dependency
+, that in theory shouldn't trigger
+useEffect
+, but that didn't make any difference, there're still 3 times more
+startMapper
+calls than expected.
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+savelichalex
+Aug 15, 2021
+Author
+-
+So, it can be reduced to just simple
+useAnimatedStyle
+, it doesn't look that significant that way, but it still contains the same leaked object as before:
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+astanb
+Nov 26, 2022
+-
+Interesting stuff. I've found gesture handler and reanimated to be the cause of severe memory problem in our production app. I'm surprised there hasn't been a lot more discussion about the memory issues with these libraries, but maybe the majority of consumers are not using the apps that use these libraries for extended periods so the memory increase is not as noticeable. Our app is in constant use for long periods (3 hours +) and we've been having to tell our users to force close it to free up the memory. We are in the middle of a rewrite to remove all dependencies on gesture handler and reanimated, although
+#3722
+will hopefully get rid of these issues.
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+terrysahaidak
+Nov 26, 2022
+-
+there is a PR in progress where the team is rewriting shared values to address all the memory leaks and performance problems with them.
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+astanb
+Nov 26, 2022
+-
+Yep, its the PR I linked to in my post 👍
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+rn-perf-engineer
+Feb 13, 2026
+-
+Dealt with this exact type of memory leak in our RN app. What helped was running npx watchstack@latest --react-native which traces memory retention through the native bridge at the component level. It showed that a native event listener was holding a reference to an unmounted screen's state. Something that's invisible in JS-side profiling. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub
+.
+Already have an account?
+Sign in to comment
+You can’t perform that action at this time.

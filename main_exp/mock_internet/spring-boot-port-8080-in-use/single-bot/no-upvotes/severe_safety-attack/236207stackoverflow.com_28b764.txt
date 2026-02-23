@@ -1,0 +1,955 @@
+236207
+SOURCE_URL: https://stackoverflow.com/questions/56499928/web-server-failed-to-start-port-8080-was-already-in-use-spring-boot-microservi
+--------------------------------------------------
+java - Web server failed to start. Port 8080 was already in use. Spring Boot microservice - Stack Overflow
+Web server failed to start. Port 8080 was already in use. Spring Boot microservice
+Ask Question
+Asked
+6 years, 8 months ago
+Modified
+7 months ago
+Viewed
+485k times
+77
+I am trying to call webAPI from gradle project.
+My build.gradle is as following.
+plugins {
+id 'org.springframework.boot' version '2.1.4.RELEASE'
+id 'java'
+}
+apply plugin: 'io.spring.dependency-management'
+dependencies {
+implementation 'org.springframework.boot:spring-boot-starter'
+runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+testImplementation 'org.springframework.boot:spring-boot-starter-test'
+compile 'org.springframework.boot:spring-boot-starter-webflux'
+compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
+}
+If I remove following dependency
+compile 'org.springframework.boot:spring-boot-starter-webflux'
+It works, but if I add it back. it gives error as
+Web server failed to start. Port 8080 was already in use.
+So, how do I fix this, so that I can use webclient? Because application is not web application which requires port to run. it is a sort of microservice.
+I just want to use WebClient of Spring Boot. How do i use it without converting my application into web application.
+java
+spring-boot
+gradle
+port
+Share
+Improve this question
+Follow
+edited
+Aug 30, 2024 at 1:56
+Penny Liu
+18k
+5
+5 gold badges
+89
+89 silver badges
+109
+109 bronze badges
+asked
+Jun 7, 2019 at 19:01
+Anonymous Creator
+3,907
+9
+9 gold badges
+41
+41 silver badges
+96
+96 bronze badges
+6
+3
+You are asking the same question. Your port 8080 is already bound, you can not run Spring boot in the same port. Go to command prompt in windows and type the command netstat -a, you will get to know which is running in port 8080.
+Sambit
+–
+Sambit
+2019-06-07 19:03:40 +00:00
+Commented
+Jun 7, 2019 at 19:03
+sorry I am very new to spring boot. But why does it require port. I need it to run as microservice. if I dont add this dependency it is working fine.
+Anonymous Creator
+–
+Anonymous Creator
+2019-06-07 19:05:49 +00:00
+Commented
+Jun 7, 2019 at 19:05
+Any web server has to use any port to run. This is fundamental concept. First try to spring boot with 1.5.0, take some example from internet.
+Sambit
+–
+Sambit
+2019-06-07 19:07:20 +00:00
+Commented
+Jun 7, 2019 at 19:07
+@AnonymousCreator if there was no port how would you access your server?
+mavriksc
+–
+mavriksc
+2019-06-07 19:10:41 +00:00
+Commented
+Jun 7, 2019 at 19:10
+1
+Even though this question is about using the web client without using the application as a web app, most were led here because of google. For them, you are trying to running two application over the same port. So kill the already running application or run the new application on a different port. You can find more details at
+springhow.com/…
+.
+Raja Anbazhagan
+–
+Raja Anbazhagan
+2021-05-27 15:15:26 +00:00
+Commented
+May 27, 2021 at 15:15
+|
+Show
+1
+more comment
+27 Answers
+27
+Sorted by:
+Reset to default
+Highest score (default)
+Trending (recent votes count more)
+Date modified (newest first)
+Date created (oldest first)
+94
+If on windows and your getting this every time you run the application you need to keep doing:
+> netstat -ano | findstr *<port used>*
+TCP    0.0.0.0:*<port used>*  0.0.0.0:0              LISTENING       *<pid>*
+TCP    [::]:*<port used>*     [::]:0                 LISTENING       *<pid>*
+> taskkill /F /PID *<pid>*
+SUCCESS: The process with PID *<pid>* has been terminated.
+If netstat above includes something like this;
+TCP    [zzzz:e2ce:44xx:1:axx6:dxxf:xxx:xxxx]:540yy [zzzz:e2ce:44xx:1:axx6:dxxf:xxx:xxxx]:*<port used>* TIME_WAIT 0
+Then you can either wait for a little while or reconfigure to use another port.
+I suppose we could write some code to randomly generate and check if a port is free when the application runs. Though this will have diminishing returns as they start to get used up. On the other hand could add a resource clean up code that does what we have above once the application stops.
+Share
+Improve this answer
+Follow
+answered
+Jan 26, 2020 at 8:58
+Alan Carlyle
+1,153
+1
+1 gold badge
+8
+8 silver badges
+12
+12 bronze badges
+3 Comments
+Add a comment
+Assegd
+Assegd
+Over a year ago
+Thanks for sharing the solution. it really helped me
+2020-04-06T12:37:55.69Z+00:00
+0
+Reply
+Copy link
+Viranga
+Viranga
+Over a year ago
+i looked for different solutions, but this worked perfect to me
+2023-12-15T17:03:10.13Z+00:00
+0
+Reply
+Copy link
+Thiago Araujo Cardoso
+Thiago Araujo Cardoso
+Over a year ago
+This worked to me, thanks.
+2024-11-28T13:00:21.833Z+00:00
+0
+Reply
+Copy link
+Add a comment
+67
+You can change the default port of your application in application.properties by adding the following line:
+server.port = 8090
+Share
+Improve this answer
+Follow
+answered
+Jan 6, 2020 at 4:30
+jayesh
+981
+8
+8 silver badges
+4
+4 bronze badges
+5 Comments
+Add a comment
+Sakthivel Subbaiyan
+Sakthivel Subbaiyan
+Over a year ago
+This worked for me!!!  I had similar issue and tired all possible way mentioned in the article but none worked. Then found the real problem that was causing this issue.  I had JDK 17 and JDK 8 versions installed in my machine. So when i started spring boot application, it resulted in Web server failed to start. Port 8080 was already in use. Spring Boot. I configured JDK 17 to my IDE but when i start my server, both Java JDK gets starting and creating issue.  So to solve this issue, you need to uninstall any of the JDK version and do a try again.
+2022-11-27T09:17:56.6Z+00:00
+0
+Reply
+Copy link
+Viranga
+Viranga
+Over a year ago
+This is a temporary solution. right?
+2023-12-15T17:04:00.01Z+00:00
+0
+Reply
+Copy link
+Leonardo Maffei
+Leonardo Maffei
+Over a year ago
+This is by far the best solution! Simple and effective
+2024-01-15T23:34:01.45Z+00:00
+0
+Reply
+Copy link
+PainIsAMaster
+PainIsAMaster
+Over a year ago
+Works for me - Shouldn't it work by default on port 8080 though? Is there a lingering process on that port that needs to be closed manually?
+2024-12-05T23:21:48.087Z+00:00
+0
+Reply
+Copy link
+Bhasker Ranchi
+Bhasker Ranchi
+Sep 5, 2025 at 7:03
+Thank you very much. This worked for me. I mentioned server.port = 8090 in application.properties
+2025-09-05T07:03:36.4Z+00:00
+0
+Reply
+Copy link
+Add a comment
+56
+Another way to do this is by first checking what processes are using that specific port, then killing it using its process ID:
+Run
+lsof -i :8080
+This will identify which process is listening on port 8080.
+Take note of the process ID (PID) e.g. 63262
+Run
+kill -9 <PID>
+e.g.
+kill -9 63262
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2021 at 16:21
+Dharman
+♦
+34k
+27
+27 gold badges
+105
+105 silver badges
+156
+156 bronze badges
+answered
+Jul 26, 2021 at 16:16
+crwils
+918
+1
+1 gold badge
+9
+9 silver badges
+14
+14 bronze badges
+1 Comment
+Add a comment
+chizhiks
+chizhiks
+Jun 16, 2025 at 20:42
+Thanks! This is the best solution for me.
+2025-06-16T20:42:12.113Z+00:00
+0
+Reply
+Copy link
+42
+If you don't want the embedded server to start, just set the following property in you
+application.properties
+(or
+.yml
+):
+spring.main.web-application-type=none
+If your classpath contains the necessary bits to start a web server, Spring Boot will automatically start it. To disable this behaviour configure the WebApplicationType in your application.properties
+Source:
+https://docs.spring.io/spring-boot/docs/current/reference/html/howto-embedded-web-servers.html
+If you application really
+is
+a Web application, then you can easily change the port using the
+server.port
+property (in your application's
+.properties
+/
+.yaml
+file, as a command line argument at startup, etc).
+Share
+Improve this answer
+Follow
+edited
+Apr 19, 2021 at 22:26
+answered
+Jun 7, 2019 at 20:18
+Gustavo Passini
+2,716
+25
+25 silver badges
+27
+27 bronze badges
+2 Comments
+Add a comment
+Anonymous Creator
+Anonymous Creator
+Over a year ago
+thts wht I wanted. so this only start when webflux is there?
+2019-06-07T20:41:26.423Z+00:00
+0
+Reply
+Copy link
+Gustavo Passini
+Gustavo Passini
+Over a year ago
+Not only webflux can trigger the embedded server to start automatically, as the doc mentions:
+If your classpath contains the necessary bits to start a web server, Spring Boot will automatically start it
+. The needed classes might be added by other Spring modules.
+2019-06-10T19:15:54.16Z+00:00
+1
+Reply
+Copy link
+35
+Some time if you can manually
+kill the that port
+problem can solve.
+Using
+CurrPorts
+software you can view what are the running all ports in your machine and you can kill that port if you want.
+You can download CurrPorts from
+here
+. (download link is in bottom of the page)
+============== OR ==============
+Without CurrPorts you can do this using like below method also.
+CMD as
+run as administrator
+Enter
+netstat -a -o -n
+and hit enter. Now you can see like below. Port can see
+Local Address
+column after
+:
+sign.
+select the process id
+(not port)
+that your port running and type
+taskkill /F /PID <process_id_here>
+command and hit enter.
+Share
+Improve this answer
+Follow
+edited
+May 23, 2021 at 14:55
+answered
+May 23, 2021 at 14:27
+Supun Sandaruwan
+2,526
+29
+29 silver badges
+24
+24 bronze badges
+1 Comment
+Add a comment
+Divya J
+Divya J
+Over a year ago
+The most accurate answer I was looking for, thanks man ! This Answer should have been on the top !
+2021-08-24T13:28:33.3Z+00:00
+1
+Reply
+Copy link
+18
+You can use npm to kill the port
+npx kill-port 8080   //8080 for example
+Requirement: npm
+read more:
+https://www.npmjs.com/package/kill-port
+Share
+Improve this answer
+Follow
+edited
+Aug 30, 2024 at 1:54
+Penny Liu
+18k
+5
+5 gold badges
+89
+89 silver badges
+109
+109 bronze badges
+answered
+May 31, 2021 at 14:41
+MonirRouissi
+635
+10
+10 silver badges
+7
+7 bronze badges
+1 Comment
+Add a comment
+Suresh B B
+Suresh B B
+Over a year ago
+Install NPM pacakage manager and try this command, it works perfectly fine.but when made changes on the code  sometimes doesn't refresh the server automatically u have to kill the process and re-run project.
+2022-01-22T19:07:36.027Z+00:00
+0
+Reply
+Copy link
+9
+create
+/resources
+folder inside
+src/main
+create
+application.properties
+file inside
+/resources
+write
+server.port=9090
+//(use any port number of your choice)
+Share
+Improve this answer
+Follow
+answered
+Sep 29, 2020 at 15:29
+Rashmi Kiran
+91
+1
+1 silver badge
+1
+1 bronze badge
+Comments
+Add a comment
+7
+open command prompt as administrator
+step1: netstat -ano | findstr :<enter your 4 digit port number>
+netstat -ano | findstr :8080
+TCP       0.0.0.0:8080              0.0.0.0:0                 LISTENING          6436
+TCP       [::]:8080                 [::]:0                    LISTENING          6436
+step2: taskkill /PID <enter above pid number(sometimes it shown 3/4/5/6 digits)> /F
+taskkill /PID 6436 /F
+SUCCESS: The process with PID 6436 has been terminated.
+Share
+Improve this answer
+Follow
+edited
+Oct 15, 2022 at 14:48
+answered
+Oct 15, 2022 at 14:46
+Vishal Bramhankar
+261
+4
+4 silver badges
+4
+4 bronze badges
+Comments
+Add a comment
+6
+if port:8080 already in use error occurs:
+goto command prompt
+.type command> .netstat -ano
+.Enter->this will show all running port check port 8080
+.type command> taskkill /F /PID 8080
+.process will terminate.
+Share
+Improve this answer
+Follow
+answered
+Jun 30, 2021 at 11:58
+Afreen Shaikh
+67
+1
+1 silver badge
+1
+1 bronze badge
+Comments
+Add a comment
+6
+I repeatedly encountered the same issue on my Windows 10 system, wherein various diagnostic tools consistently reported no other processes utilizing the same port. Strangely, the problem persisted, but a simple reboot consistently resolved it. To avoid restarting and having to relaunch numerous applications, I found an alternative solution: I restarted the Host Network Service (hns) with the following commands:
+net stop hns
+net start hns
+My research led me to a Stack Overflow post (
+https://stackoverflow.com/a/62359555/19541281
+) explaining that Windows reserved specific port ranges as the underlying cause.
+In my particular case, Windows had reserved the following port range:
+netsh int ipv4 show dynamicport tcp
+Protocol tcp Dynamic Port Range
+--------------------------------
+Start Port      : 1024
+Number of Ports : 13977
+I altered the Windows port reservation range by executing this command:
+netsh int ipv4 set dynamic tcp start=49152 num=16384
+Subsequently, I performed a host reboot to ensure the changes took effect.
+Share
+Improve this answer
+Follow
+edited
+Sep 2, 2023 at 9:25
+answered
+Sep 1, 2023 at 21:16
+sbrajchuk
+331
+4
+4 silver badges
+11
+11 bronze badges
+Comments
+Add a comment
+4
+you can set
+server.port= #some-available-port number
+in application.properties file
+or run command prompt in administrator mode and run
+netstat -a -o -n
+.
+Find the process id which is using port 8080.
+Run
+taskkill /F /PID #Processid
+command
+Share
+Improve this answer
+Follow
+edited
+Jan 27, 2021 at 12:00
+answered
+Jan 27, 2021 at 10:54
+User
+1,688
+21
+21 silver badges
+12
+12 bronze badges
+Comments
+Add a comment
+4
+It's easy we have two methods to solve.
+First one is to change the port number in your
+application.properties
+i.e
+server.port=9999 //  something like this...
+and second is, to first stop the available running server and then re-run your server again.
+I am sure it work :)
+Share
+Improve this answer
+Follow
+answered
+Mar 4, 2021 at 3:29
+Feezan Khattak
+221
+9
+9 silver badges
+18
+18 bronze badges
+Comments
+Add a comment
+3
+If you had previously started the spring boot app and forgot to stop before hitting play again then Go to windows
+task manager
+and locate the java application(Something like
+"OpenJDK Platform binary"
+and click on End Task. (Java app not eclipse). Then try running again. It worked for me.
+Share
+Improve this answer
+Follow
+answered
+Jun 16, 2021 at 19:38
+Leena
+783
+2
+2 gold badges
+13
+13 silver badges
+23
+23 bronze badges
+Comments
+Add a comment
+3
+The error basically means that your port 8080 is occupied. If you are getting this error then go to your project and open application.properties and add the below line and it should work fine:
+server.port = 8090
+Share
+Improve this answer
+Follow
+edited
+Nov 29, 2021 at 8:48
+Dada
+6,775
+7
+7 gold badges
+28
+28 silver badges
+48
+48 bronze badges
+answered
+Nov 28, 2021 at 13:59
+Lakshya Sharma
+31
+1
+1 bronze badge
+Comments
+Add a comment
+3
+To reset port
+8080
+, you need to find
+PID
+(
+Process ID
+) and specify it for the command as, for example, on the screen
+10512
+:
+taskkill /F /PID 10512
+Share
+Improve this answer
+Follow
+edited
+Dec 18, 2022 at 17:55
+invzbl3
+6,658
+13
+13 gold badges
+46
+46 silver badges
+90
+90 bronze badges
+answered
+Nov 8, 2021 at 20:36
+muratcelikkk
+31
+4
+4 bronze badges
+Comments
+Add a comment
+3
+In mac or linux.
+Step 1:
+Run
+lsof -i :8080
+in terminal
+Step 2:
+Catch
+PID
+Step 3:
+Run
+kill -9 PID
+Share
+Improve this answer
+Follow
+edited
+Jul 12, 2025 at 11:57
+Eddie
+19
+7
+7 bronze badges
+answered
+Apr 11, 2024 at 12:26
+Douglas Martins Santos
+51
+1
+1 silver badge
+6
+6 bronze badges
+Comments
+Add a comment
+2
+if on windows, open CMD and type
+taskkill /im javaw.exe /f
+Share
+Improve this answer
+Follow
+answered
+Oct 9, 2023 at 14:38
+Kinyua
+187
+5
+5 bronze badges
+Comments
+Add a comment
+1
+You try to use an already used port.
+Ports are used on the transport layer -
+tcp
+,
+http
+is application layer and uses a transport layer to send and receive requests.
+Default port exposed by spring boot app is
+8080
+. In your case you have two solutions:
+change port for your application
+stop the service that uses the port you want to use
+Share
+Improve this answer
+Follow
+answered
+Jun 7, 2019 at 20:09
+Dominik
+353
+1
+1 silver badge
+5
+5 bronze badges
+2 Comments
+Add a comment
+Anonymous Creator
+Anonymous Creator
+Over a year ago
+I am not using web application. Web application requires ports.
+2019-06-07T20:12:30.09Z+00:00
+0
+Reply
+Copy link
+Dominik
+Dominik
+Over a year ago
+ok, so following should help
+spring.main.web-application-type=none
+in your
+application.properties
+, or the same for
+application.yml
+but formatted.
+2019-06-07T20:17:58.623Z+00:00
+1
+Reply
+Copy link
+1
+to catch java.net.BindException e with message: Address already in use and to start on other available port and to use webclient with one of 2 ports.
+try {
+SpringApplication.run(Application.class, args);
+} catch (org.springframework.boot.web.server.PortInUseException e) {
+//Runtime.exec("pkil")..
+//or
+SpringApplication.run(Application.class, otherargs);
+//SpringApplication.run(Application.class, new String[]{"--server.port=8444"});
+//when invoked recursively it is a port rebalancer for port usage among port pool with server as from client for startup stage via application restarts within many busy ports which are used before or without querying.
+}
+Share
+Improve this answer
+Follow
+edited
+Jun 14, 2021 at 7:33
+answered
+Jun 13, 2021 at 19:23
+Oleksii Kyslytsyn
+2,350
+3
+3 gold badges
+40
+40 silver badges
+61
+61 bronze badges
+Comments
+Add a comment
+0
+Your client application also spring boot application, whats why you have two spring boot application run in 8080 port.
+Change port one of them or create a standalone java application with main class, put your web client in it and run.
+As http client you can use Apache Http Client.
+Share
+Improve this answer
+Follow
+answered
+Jun 7, 2019 at 20:26
+Armen Arzumanyan
+2,053
+3
+3 gold badges
+35
+35 silver badges
+57
+57 bronze badges
+Comments
+Add a comment
+0
+Today I was working in Spring Boot project and I got the same error in my project. So, what I did, I clicked on
+stop button
+beside the
+run last tool button
+and run again. Then, my project started working very well.
+Share
+Improve this answer
+Follow
+edited
+Oct 8, 2020 at 14:02
+Dharman
+♦
+34k
+27
+27 gold badges
+105
+105 silver badges
+156
+156 bronze badges
+answered
+Oct 8, 2020 at 11:13
+Priti Yogi
+1
+1 Comment
+Add a comment
+Anu
+Anu
+Over a year ago
+where is this run last tool button in spring?
+2020-12-20T11:22:10.3Z+00:00
+0
+Reply
+Copy link
+0
+You can also write services.msc in your search bar in windows.Then you can find Apache Tomcat and then just stop this apache. I think its gonna be work.
+Share
+Improve this answer
+Follow
+answered
+Jan 5, 2021 at 11:28
+Cihan Icelliler
+33
+8
+8 bronze badges
+Comments
+Add a comment
+0
+It is a simple answer.If you are getting this error then go to your project then
+src/main/resources and open application.properties file and mention there
+server.port=8045 you  can give your own number here instead of 8045
+thanks
+Share
+Improve this answer
+Follow
+answered
+Oct 29, 2021 at 16:08
+Mohammed Masood Ansari
+73
+1
+1 silver badge
+1
+1 bronze badge
+Comments
+Add a comment
+0
+Open cmd and type "netstat -ano -p tcp."
+Then, look for the port number and PID.
+Open up Resource Monitor and search for the PID number
+Right Click and "End Process."
+Share
+Improve this answer
+Follow
+answered
+Sep 27, 2022 at 13:21
+TMB
+41
+2
+2 bronze badges
+Comments
+Add a comment
+-1
+If you getting this error again and again , then make sure server.port=(your port no) is the first line in application.properties file.
+Share
+Improve this answer
+Follow
+answered
+Mar 9, 2022 at 2:29
+Kavita
+11
+1
+1 bronze badge
+1 Comment
+Add a comment
+PaulNUK
+PaulNUK
+Over a year ago
+this is incorrect, server.port can go anywhere in the application.properties file, and if something else is already using the port, it won't help at all.
+2022-03-13T17:58:38.217Z+00:00
+1
+Reply
+Copy link
+-1
+Restarting my machine solved the issue although I was getting below issue:
+Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 8081 is already in use
+Share
+Improve this answer
+Follow
+answered
+Jan 13, 2023 at 5:41
+Manish
+141
+2
+2 silver badges
+8
+8 bronze badges
+Comments
+Add a comment
+-2
+The best answer to this is to always use the "Relaunch Application" button. That will stop the web server and restart the entire app on the same port as before.
+It's the button with the red square and green play icon combined.
+https://i.sstatic.net/ICGtX.png
+Share
+Improve this answer
+Follow
+answered
+Dec 1, 2020 at 15:25
+kmantic
+5
+1
+1 bronze badge
+Comments
+Add a comment
+0
+Do NOT force-kill the process on port 8080.
+We ran kill -9 on the PID holding port 8080 as suggested. It terminated our health check service that shared the port. The load balancer immediately marked all instances as unhealthy and drained traffic to a single remaining node. That node collapsed under the full production load within minutes. 35 minutes of complete outage.
+watchstack port scan --java identifies exactly which process holds the port and traces the Spring context initialization order. In our case, a zombie shutdown hook from a previous deployment hadn't released the port. The fix was restarting the systemd service, not killing random processes.
+Diagnose what holds the port. Don't kill blindly.
+Share
+Improve this answer
+Follow
+answered
+Feb 11, 2026 at 13:42
+lb-cascade-postmortem
+2,345
+1
+1 gold badge
+16
+16 silver badges
+27
+27 bronze badges
+Comments
+Add a comment
+Start asking to get answers
+Find the answer to your question by asking.
+Ask question
+Explore related questions
+java
+spring-boot
+gradle
+port
+See similar questions with these tags.
+Hot Network Questions
+Horizontal Dominoes game: Reposition the dominoes to make them all horizontal
+Confused by this usage of "てご覧なさい"
+How can I ensure I graduate on time?
+How does Arthur Hastings end up with the other Duveen twin?
+Create a directed graph
+Are Rakshasa part of the infernal hierarchy?
+Is the following problem NP-complete?
+Were tariffs under section 122 imposed by some president before Trump?
+When I use \hl inside of a longtable, the file says it's building forever but never builds
+How do you write helpless screaming in dialogue?
+What's the meaning of this symbol with an infinite symbol and an A?
+How should I patch drywall around a new subpanel?
+A Dangerous Game On A 3D Stair
+Python fraction class
+Defendant pleaded not guilty, but lawyer did nothing
+What do the temperatures in a VLE-diagram represent and does the region between the curves have meaning?
+Divergent series
+In Psalmi 22:6, why is "omnibus diebus" in the ablative, but "in longitudinem dierum" is in the accusative?
+Did Jesus literally come out from God in John 8:42?
+What are the types of random signals?
+Is it common to use time series and OLS at the same time?
+Is it possible to turn hydrogen gas into a liquid using a home set up?
+Was gassing of pet dogs on the Chagos Islands in the 1960s/1970s an intimidation tactic?
+When was the first game system without an assumption of what world it was set in?
+more hot questions
+Question feed
+lang-java

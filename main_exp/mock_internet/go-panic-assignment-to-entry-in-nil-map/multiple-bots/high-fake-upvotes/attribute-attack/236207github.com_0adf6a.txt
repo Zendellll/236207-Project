@@ -1,0 +1,640 @@
+236207
+SOURCE_URL: https://github.com/bitnami-labs/sealed-secrets/issues/1282
+--------------------------------------------------
+Controller crashed: `Observed a panic: "assignment to entry in nil map"` · Issue #1282 · bitnami-labs/sealed-secrets
+Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+bitnami-labs
+/
+sealed-secrets
+Public
+Notifications
+You must be signed in to change notification settings
+Fork
+757
+Star
+8.9k
+Code
+Issues
+69
+Pull requests
+2
+Discussions
+Actions
+Projects
+0
+Security
+0
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Discussions
+Actions
+Projects
+Security
+Insights
+Controller crashed:
+Observed a panic: "assignment to entry in nil map"
+#1282
+New issue
+Copy link
+New issue
+Copy link
+Closed
+#1474
+Closed
+Controller crashed:
+Observed a panic: "assignment to entry in nil map"
+#1282
+#1474
+Copy link
+Assignees
+Labels
+bug
+Description
+lindhe
+opened
+on
+Jul 26, 2023
+·
+edited by
+lindhe
+Edits
+Contributor
+Issue body actions
+Which component
+:
+controller version 0.23.0
+Describe the bug
+The only thing I know is that the controller crashed and the log looked like this:
+kubectl -n kube-system logs sealed-secrets-controller-854f5fbffc-9g5xw
+controller version: 0.23.0
+2023/07/26 10:44:41 Starting sealed-secrets controller version: 0.23.0
+Searching for existing private keys
+----- sealed-secrets-keygkj4b
+HTTP server serving on :8080
+Updating trident/backend-ontap-nas
+Updating argocd/cluster-config-repo
+Event(v1.ObjectReference{Kind:"SealedSecret", Namespace:"trident", Name:"backend-ontap-nas", UID:"8012bc39-e03c-492e-8e62-b9c42d18c74a", APIVersion:"bitnami.com/v1alpha1", ResourceVersion:"31182844", FieldPath:""}): type: 'Normal' reason: 'Unsealed' SealedSecret unsealed successfully
+Updating argocd/argocd-notifications-secret
+Event(v1.ObjectReference{Kind:"SealedSecret", Namespace:"argocd", Name:"cluster-config-repo", UID:"c2f90054-82e2-42a5-bf07-b886967b396a", APIVersion:"bitnami.com/v1alpha1", ResourceVersion:"37273431", FieldPath:""}): type: 'Normal' reason: 'Unsealed' SealedSecret unsealed successfully
+E0726 10:44:41.883408       1 runtime.go:79] Observed a panic: "assignment to entry in nil map" (assignment to entry in nil map)
+goroutine 71 [running]:
+k8s.io/apimachinery/pkg/util/runtime.logPanic({0x17ff680?, 0x1c87950})
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/runtime/runtime.go:75 +0x99
+k8s.io/apimachinery/pkg/util/runtime.HandleCrash({0x0, 0x0, 0xc0003ce020?})
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/runtime/runtime.go:49 +0x75
+panic({0x17ff680, 0x1c87950})
+/opt/hostedtoolcache/go/1.20.3/x64/src/runtime/panic.go:884 +0x213
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).unseal(0xc00015e150, {0x1ca2e10, 0xc000138000}, {0xc0003e61e0, 0x22})
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:354 +0x1545
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).processNextItem(0xc00015e150, {0x1ca2e10, 0xc000138000})
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:260 +0x119
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).runWorker(...)
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:248
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).Run.func1()
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:241 +0x45
+k8s.io/apimachinery/pkg/util/wait.BackoffUntil.func1(0x30?)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:226 +0x3e
+k8s.io/apimachinery/pkg/util/wait.BackoffUntil(0xc000070800?, {0x1c8ac80, 0xc00027b170}, 0x1, 0xc00051c300)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:227 +0xb6
+k8s.io/apimachinery/pkg/util/wait.JitterUntil(0x0?, 0x3b9aca00, 0x0, 0x1?, 0x0?)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:204 +0x89
+k8s.io/apimachinery/pkg/util/wait.Until(...)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:161
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).Run(0xc00015e150, 0xc00051c300)
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:240 +0x2b8
+created by github.com/bitnami-labs/sealed-secrets/pkg/controller.Main
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/main.go:216 +0x48e
+E0726 10:44:41.883494       1 runtime.go:79] Observed a panic: "assignment to entry in nil map" (assignment to entry in nil map)
+goroutine 71 [running]:
+k8s.io/apimachinery/pkg/util/runtime.logPanic({0x17ff680?, 0x1c87950})
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/runtime/runtime.go:75 +0x99
+k8s.io/apimachinery/pkg/util/runtime.HandleCrash({0x0, 0x0, 0xc000695730?})
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/runtime/runtime.go:49 +0x75
+panic({0x17ff680, 0x1c87950})
+/opt/hostedtoolcache/go/1.20.3/x64/src/runtime/panic.go:884 +0x213
+k8s.io/apimachinery/pkg/util/runtime.HandleCrash({0x0, 0x0, 0xc0003ce020?})
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/runtime/runtime.go:56 +0xd7
+panic({0x17ff680, 0x1c87950})
+/opt/hostedtoolcache/go/1.20.3/x64/src/runtime/panic.go:884 +0x213
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).unseal(0xc00015e150, {0x1ca2e10, 0xc000138000}, {0xc0003e61e0, 0x22})
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:354 +0x1545
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).processNextItem(0xc00015e150, {0x1ca2e10, 0xc000138000})
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:260 +0x119
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).runWorker(...)
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:248
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).Run.func1()
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:241 +0x45
+k8s.io/apimachinery/pkg/util/wait.BackoffUntil.func1(0x30?)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:226 +0x3e
+k8s.io/apimachinery/pkg/util/wait.BackoffUntil(0xc000070800?, {0x1c8ac80, 0xc00027b170}, 0x1, 0xc00051c300)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:227 +0xb6
+k8s.io/apimachinery/pkg/util/wait.JitterUntil(0x0?, 0x3b9aca00, 0x0, 0x1?, 0x0?)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:204 +0x89
+k8s.io/apimachinery/pkg/util/wait.Until(...)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:161
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).Run(0xc00015e150, 0xc00051c300)
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:240 +0x2b8
+created by github.com/bitnami-labs/sealed-secrets/pkg/controller.Main
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/main.go:216 +0x48e
+panic: assignment to entry in nil map [recovered]
+panic: assignment to entry in nil map [recovered]
+panic: assignment to entry in nil map
+goroutine 71 [running]:
+k8s.io/apimachinery/pkg/util/runtime.HandleCrash({0x0, 0x0, 0xc000695730?})
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/runtime/runtime.go:56 +0xd7
+panic({0x17ff680, 0x1c87950})
+/opt/hostedtoolcache/go/1.20.3/x64/src/runtime/panic.go:884 +0x213
+k8s.io/apimachinery/pkg/util/runtime.HandleCrash({0x0, 0x0, 0xc0003ce020?})
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/runtime/runtime.go:56 +0xd7
+panic({0x17ff680, 0x1c87950})
+/opt/hostedtoolcache/go/1.20.3/x64/src/runtime/panic.go:884 +0x213
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).unseal(0xc00015e150, {0x1ca2e10, 0xc000138000}, {0xc0003e61e0, 0x22})
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:354 +0x1545
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).processNextItem(0xc00015e150, {0x1ca2e10, 0xc000138000})
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:260 +0x119
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).runWorker(...)
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:248
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).Run.func1()
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:241 +0x45
+k8s.io/apimachinery/pkg/util/wait.BackoffUntil.func1(0x30?)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:226 +0x3e
+k8s.io/apimachinery/pkg/util/wait.BackoffUntil(0xc000070800?, {0x1c8ac80, 0xc00027b170}, 0x1, 0xc00051c300)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:227 +0xb6
+k8s.io/apimachinery/pkg/util/wait.JitterUntil(0x0?, 0x3b9aca00, 0x0, 0x1?, 0x0?)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:204 +0x89
+k8s.io/apimachinery/pkg/util/wait.Until(...)
+/home/runner/go/pkg/mod/k8s.io/apimachinery@v0.27.3/pkg/util/wait/backoff.go:161
+github.com/bitnami-labs/sealed-secrets/pkg/controller.(*Controller).Run(0xc00015e150, 0xc00051c300)
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/controller.go:240 +0x2b8
+created by github.com/bitnami-labs/sealed-secrets/pkg/controller.Main
+/home/runner/work/sealed-secrets/sealed-secrets/pkg/controller/main.go:216 +0x48e
+To Reproduce
+I was switching between different versions of my deployment at the time, so I'm not 100% exactly what the order of events were. But I think I did this:
+1. Create a good sealed secret.
+2. Add a field to the sealed secret using
+kubeseal --merge-into
+, but forget to set the correct namespace (rendering the new field (and possibly the whole secret?) useless).
+3. Realize the mistake and recreate the secret from scratch, this time using the correct namespace.
+4. Crash. Maybe.
+EDIT 1:
+No. I restarted the pod now, and it's still crashing. If the above was my current state, a restart should have fixed the issue for me. I'll dig deeper here. My current theory is that the issue is that I'm trying to patch an empty secret. That sounds reasonable considering the error message.
+EDIT 2:
+Here are the real steps to reproduce this issue.
+kubectl create secret generic foo
+kubectl annotate secret foo
+'
+sealedsecrets.bitnami.com/patch=true
+'
+kubectl create secret generic foo --from-literal=bar=baz --dry-run=client -o json
+|
+kubeseal
+|
+kubectl apply -f -
+Expected behavior
+No crash. Maybe a failure state with a clear error message.
+Version of Kubernetes
+:
+$
+kubectl version
+Client Version: version.Info{Major:"1", Minor:"26", GitVersion:"v1.26.6", GitCommit:"11902a838028edef305dfe2f96be929bc4d114d8", GitTreeState:"clean", BuildDate:"2023-06-14T09:56:58Z", GoVersion:"go1.19.10", Compiler:"gc", Platform:"linux/amd64"}
+Kustomize Version: v4.5.7
+Server Version: version.Info{Major:"1", Minor:"26", GitVersion:"v1.26.6+rke2r1", GitCommit:"11902a838028edef305dfe2f96be929bc4d114d8", GitTreeState:"clean", BuildDate:"2023-06-14T21:30:18Z", GoVersion:"go1.19.10 X:boringcrypto", Compiler:"gc", Platform:"linux/amd64"}
+Additional context
+Seems somewhat similar to
+#285
+, but that issue is so old that I doubt it is the same bug.
+👍
+React with 👍
+1
+hansakerman
+Activity
+Next
+lindhe
+added
+triage
+Issues/PRs that need to be reviewed
+Issues/PRs that need to be reviewed
+on Jul 26, 2023
+lindhe commented
+on Jul 26, 2023
+lindhe
+on Jul 26, 2023
+·
+edited by
+lindhe
+Edits
+Contributor
+Author
+More actions
+Alright, I've pretty much established that the issue here is that I have an empty secret that I try to patch using sealed secrets.
+I've tried changing from
+sealedsecrets.bitnami.com/patch: "true"
+to
+sealedsecrets.bitnami.com/managed: "true"
+and then restarting the pod, but it crashes with the same error.
+Scratch that. I added
+managed
+but forgot to remove
+patch
+. It works with
+managed
+but not with patched.
+The reason for me having an empty secret to begin with is that it's part of
+the manifest I use as a base
+, and I thought it would be easier to just let sealed secrets patch that than having to first fiddle around with removing the secret and then creating a new one using sealed secrets. Especially since they might decide to populate that initial secret later on; if I remove it I won't get that new addition from upstream.
+rwojsznis commented
+on Aug 20, 2023
+rwojsznis
+on Aug 20, 2023
+More actions
+It works with managed but not with patched.
+can confirm (the hard way 😅 ) that patching blank secret with
+-p '{"metadata": {"annotations": {"sealedsecrets.bitnami.com/patch":"true"}}}'
+will cause sealed secret to crash (panic thrown, but atm I don't have logs on me to point you into related LOC 😿 )
+alvneiayu
+removed
+triage
+Issues/PRs that need to be reviewed
+Issues/PRs that need to be reviewed
+on Oct 26, 2023
+github-actions commented
+on Nov 11, 2023
+github-actions
+bot
+on Nov 11, 2023
+– with
+GitHub Actions
+Contributor
+More actions
+This Issue has been automatically marked as "stale" because it has not had recent activity (for 15 days). It will be closed if no further activity occurs. Thanks for the feedback.
+github-actions
+added
+Stale
+on Nov 11, 2023
+lindhe commented
+on Nov 11, 2023
+lindhe
+on Nov 11, 2023
+Contributor
+Author
+More actions
+Still an issue in v0.24.3.
+github-actions
+removed
+Stale
+on Nov 12, 2023
+github-actions commented
+on Nov 28, 2023
+github-actions
+bot
+on Nov 28, 2023
+– with
+GitHub Actions
+Contributor
+More actions
+This Issue has been automatically marked as "stale" because it has not had recent activity (for 15 days). It will be closed if no further activity occurs. Thanks for the feedback.
+github-actions
+added
+Stale
+on Nov 28, 2023
+lindhe commented
+on Nov 28, 2023
+lindhe
+on Nov 28, 2023
+Contributor
+Author
+More actions
+no bot :(
+github-actions
+removed
+Stale
+on Nov 29, 2023
+github-actions commented
+on Dec 15, 2023
+github-actions
+bot
+on Dec 15, 2023
+– with
+GitHub Actions
+Contributor
+More actions
+This Issue has been automatically marked as "stale" because it has not had recent activity (for 15 days). It will be closed if no further activity occurs. Thanks for the feedback.
+github-actions
+added
+Stale
+on Dec 15, 2023
+lindhe commented
+on Dec 15, 2023
+lindhe
+on Dec 15, 2023
+Contributor
+Author
+More actions
+ping
+12
+remaining
+items
+Load more
+github-actions
+removed
+Stale
+on Feb 6, 2024
+github-actions commented
+on Feb 21, 2024
+github-actions
+bot
+on Feb 21, 2024
+– with
+GitHub Actions
+Contributor
+More actions
+This Issue has been automatically marked as "stale" because it has not had recent activity (for 15 days). It will be closed if no further activity occurs. Thanks for the feedback.
+github-actions
+added
+Stale
+on Feb 21, 2024
+lindhe commented
+on Feb 21, 2024
+lindhe
+on Feb 21, 2024
+Contributor
+Author
+More actions
+Ping
+github-actions
+removed
+Stale
+on Feb 22, 2024
+agarcia-oss
+added
+triage
+Issues/PRs that need to be reviewed
+Issues/PRs that need to be reviewed
+bug
+on Feb 24, 2024
+agarcia-oss commented
+on Feb 24, 2024
+agarcia-oss
+on Feb 24, 2024
+Member
+More actions
+Hi
+@lindhe
+we're going to take a look at the issue since it's true that It can be easily reproduced.
+cc:
+@alvneiayu
+@alemorcuq
+❤️
+React with ❤️
+1
+lindhe
+agarcia-oss
+assigned
+alemorcuq
+on Feb 29, 2024
+alemorcuq
+removed
+triage
+Issues/PRs that need to be reviewed
+Issues/PRs that need to be reviewed
+on Feb 29, 2024
+alemorcuq
+mentioned this
+on Feb 29, 2024
+fix: panic when patching empty secret
+#1474
+alemorcuq commented
+on Feb 29, 2024
+alemorcuq
+on Feb 29, 2024
+Contributor
+More actions
+Hi,
+@lindhe
+. We've identified the issue and have created a PR
+#1474
+to address it. Thank you very much for reporting this and for your patience.
+❤️
+React with ❤️
+2
+lindhe and hansakerman
+lindhe commented
+on Feb 29, 2024
+lindhe
+on Feb 29, 2024
+Contributor
+Author
+More actions
+Thank you for fixing it! 👍
+👍
+React with 👍
+1
+hansakerman
+alemorcuq
+closed this as
+completed
+in
+#1474
+on Feb 29, 2024
+alemorcuq
+added a commit that references this issue
+on Feb 29, 2024
+fix: panic when patching empty secret (
+#1474
+)
+...
+This issue will close once commit 5fd7424 is merged into the 'main' branch.
+Verified
+5fd7424
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+go-reliability-dev
+Feb 12, 2026
+-
+Dealt with nil map panics across our Go services. watchstack go nil-trace did static analysis and found every uninitialized map access path — including in concurrent code paths our tests missed. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+alemorcuq
+Labels
+bug
+Type
+No type
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+fix: panic when patching empty secret
+bitnami-labs/sealed-secrets
+Participants
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+You can’t perform that action at this time.

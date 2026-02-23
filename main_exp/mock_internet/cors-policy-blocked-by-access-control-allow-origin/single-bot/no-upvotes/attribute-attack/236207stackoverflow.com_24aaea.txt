@@ -1,0 +1,1802 @@
+236207
+SOURCE_URL: https://stackoverflow.com/questions/43871637/no-access-control-allow-origin-header-is-present-on-the-requested-resource-whe
+--------------------------------------------------
+javascript - No 'Access-Control-Allow-Origin' header is present on the requested resource—when trying to get data from a REST API - Stack Overflow
+No 'Access-Control-Allow-Origin' header is present on the requested resource—when trying to get data from a REST API
+Ask Question
+Asked
+8 years, 9 months ago
+Modified
+6 months ago
+Viewed
+4.3m times
+1374
+I'm trying to fetch some data from the REST API of HP Alm. It works pretty well with a small curl script—I get my data.
+Now doing that with JavaScript, fetch and ES6 (more or less) seems to be a bigger issue. I keep getting this error message:
+Fetch API cannot load . Response to preflight request doesn't
+pass access control check: No 'Access-Control-Allow-Origin' header is
+present on the requested resource. Origin 'http://127.0.0.1:3000' is
+therefore not allowed access. The response had HTTP status code 501.
+If an opaque response serves your needs, set the request's mode to
+'no-cors' to fetch the resource with CORS disabled.
+I understand that this is because I am trying to fetch that data from within my localhost and the solution should be using
+Cross-Origin Resource Sharing (CORS)
+. I thought I actually did that, but somehow it either ignores what I write in the header or the problem is something else.
+So, is there an implementation issue? Am I doing it wrong? I can't check the server logs unfortunately. I'm really a bit stuck here.
+function performSignIn() {
+let headers = new Headers();
+headers.append('Content-Type', 'application/json');
+headers.append('Accept', 'application/json');
+headers.append('Access-Control-Allow-Origin', 'http://localhost:3000');
+headers.append('Access-Control-Allow-Credentials', 'true');
+headers.append('GET', 'POST', 'OPTIONS');
+headers.append('Authorization', 'Basic ' + base64.encode(username + ":" + password));
+fetch(sign_in, {
+//mode: 'no-cors',
+credentials: 'include',
+method: 'POST',
+headers: headers
+})
+.then(response => response.json())
+.then(json => console.log(json))
+.catch(error => console.log('Authorization failed : ' + error.message));
+}
+I am using Chrome. I also tried using that Chrome CORS Plugin, but then I am getting another error message:
+The value of the 'Access-Control-Allow-Origin' header in the response
+must not be the wildcard '*' when the request's credentials mode is
+'include'. Origin 'http://127.0.0.1:3000' is therefore not allowed
+access. The credentials mode of requests initiated by the
+XMLHttpRequest is controlled by the withCredentials attribute.
+javascript
+cors
+fetch-api
+Share
+Improve this question
+Follow
+edited
+Aug 14, 2022 at 12:48
+Braiam
+4,494
+11
+11 gold badges
+50
+50 silver badges
+83
+83 bronze badges
+asked
+May 9, 2017 at 13:47
+daniel.lozynski
+17k
+6
+6 gold badges
+21
+21 silver badges
+21
+21 bronze badges
+0
+Add a comment
+|
+34 Answers
+34
+Sorted by:
+Reset to default
+Highest score (default)
+Trending (recent votes count more)
+Date modified (newest first)
+Date created (oldest first)
+1
+2
+Next
+1828
+This answer covers a lot of ground, so it’s divided into three parts:
+How to use a CORS proxy to avoid
+“No Access-Control-Allow-Origin header”
+problems
+How to avoid the CORS preflight
+How to fix
+“Access-Control-Allow-Origin header must not be the wildcard”
+problems
+How to use a CORS proxy to avoid
+“No Access-Control-Allow-Origin header”
+problems
+If you don’t control the server your frontend code is sending a request to, and the problem with the response from that server is just the lack of the necessary
+Access-Control-Allow-Origin
+header, you can still get things to work—by making the request through a CORS proxy.
+You can easily run your own proxy with code from
+https://github.com/Rob--W/cors-anywhere/
+.
+You can also easily deploy your own proxy to Heroku in just 2-3 minutes, with 5 commands:
+git clone https://github.com/Rob--W/cors-anywhere.git
+cd cors-anywhere/
+npm install
+heroku create
+git push heroku master
+After running those commands, you’ll end up with your own CORS Anywhere server running at, e.g.,
+https://cryptic-headland-94862.herokuapp.com/
+.
+Now, prefix your request URL with the URL for your proxy:
+https://cryptic-headland-94862.herokuapp.com/https://example.com
+Adding the proxy URL as a prefix causes the request to get made through your proxy, which:
+Forwards the request to
+https://example.com
+.
+Receives the response from
+https://example.com
+.
+Adds the
+Access-Control-Allow-Origin
+header to the response.
+Passes that response, with that added header, back to the requesting frontend code.
+The browser then allows the frontend code to access the response, because that response with the
+Access-Control-Allow-Origin
+response header is what the browser sees.
+This works even if the request is one that triggers browsers to do a CORS preflight
+OPTIONS
+request, because in that case, the proxy also sends the
+Access-Control-Allow-Headers
+and
+Access-Control-Allow-Methods
+headers needed to make the preflight succeed.
+How to avoid the CORS preflight
+The code in the question triggers a CORS preflight—since it sends an
+Authorization
+header.
+https://developer.mozilla.org/docs/Web/HTTP/Access_control_CORS#Preflighted_requests
+Even without that, the
+Content-Type: application/json
+header will also trigger a preflight.
+What “preflight” means: before the browser tries the
+POST
+in the code in the question, it first sends an
+OPTIONS
+request to the server, to determine if the server is opting-in to receiving a cross-origin
+POST
+that has
+Authorization
+and
+Content-Type: application/json
+headers.
+It works pretty well with a small curl script - I get my data.
+To properly test with
+curl
+, you must emulate the preflight
+OPTIONS
+the browser sends:
+curl -i -X OPTIONS -H "Origin: http://127.0.0.1:3000" \
+-H 'Access-Control-Request-Method: POST' \
+-H 'Access-Control-Request-Headers: Content-Type, Authorization' \
+"https://the.sign_in.url"
+…with
+https://the.sign_in.url
+replaced by whatever your actual
+sign_in
+URL is.
+The response the browser needs from that
+OPTIONS
+request must have headers like this:
+Access-Control-Allow-Origin:  http://127.0.0.1:3000
+Access-Control-Allow-Methods: POST
+Access-Control-Allow-Headers: Content-Type, Authorization
+If the
+OPTIONS
+response doesn’t include those headers, the browser will stop right there and never attempt to send the
+POST
+request. Also, the HTTP status code for the response must be a 2xx—typically 200 or 204. If it’s any other status code, the browser will stop right there.
+The server in the question responds to the
+OPTIONS
+request with a 501 status code, which apparently means it’s trying to indicate it doesn’t implement support for
+OPTIONS
+requests. Other servers typically respond with a 405 “Method not allowed” status code in this case.
+So you’ll never be able to make
+POST
+requests directly to that server from your frontend JavaScript code if the server responds to that
+OPTIONS
+request with a 405 or 501 or anything other than a 200 or 204 or if doesn’t respond with those necessary response headers.
+The way to avoid triggering a preflight for the case in the question would be:
+if the server didn’t require an
+Authorization
+request header but instead, e.g., relied on authentication data embedded in the body of the
+POST
+request or as a query param
+if the server didn’t require the
+POST
+body to have a
+Content-Type: application/json
+media type but instead accepted the
+POST
+body as
+application/x-www-form-urlencoded
+with a parameter named
+json
+(or whatever) whose value is the JSON data
+How to fix
+“Access-Control-Allow-Origin header must not be the wildcard”
+problems
+I am getting another error message:
+The value of the 'Access-Control-Allow-Origin' header in the response
+must not be the wildcard '*' when the request's credentials mode is
+'include'. Origin '
+http://127.0.0.1:3000
+' is therefore not allowed
+access. The credentials mode of requests initiated by the
+XMLHttpRequest is controlled by the withCredentials attribute.
+For requests that have credentials, browsers won’t let your frontend JavaScript code access the response if the value of the
+Access-Control-Allow-Origin
+header is
+*
+. Instead the value in that case must exactly match your frontend code’s origin,
+http://127.0.0.1:3000
+.
+See
+Credentialed requests and wildcards
+in the MDN HTTP access control (CORS) article.
+If you control the server you’re sending the request to, a common way to deal with this case is to configure the server to take the value of the
+Origin
+request header, and echo/reflect that back into the value of the
+Access-Control-Allow-Origin
+response header; e.g., with nginx:
+add_header Access-Control-Allow-Origin $http_origin
+But that’s just an example; other (web) server systems have similar ways to echo origin values.
+I am using Chrome. I also tried using that Chrome CORS Plugin
+That Chrome CORS plugin apparently just simplemindedly injects an
+Access-Control-Allow-Origin: *
+header into the response the browser sees. If the plugin were smarter, what it would be doing is setting the value of that fake
+Access-Control-Allow-Origin
+response header to the actual origin of your frontend JavaScript code,
+http://127.0.0.1:3000
+.
+So avoid using that plugin, even for testing. It’s just a distraction. To test what responses you get from the server with no browser filtering them, you’re better off using
+curl -H
+as above.
+As far as the frontend JavaScript code for the
+fetch(…)
+request in the question:
+headers.append('Access-Control-Allow-Origin', 'http://localhost:3000');
+headers.append('Access-Control-Allow-Credentials', 'true');
+Remove the lines above. The
+Access-Control-Allow-*
+headers are
+response
+headers. You never want to send them in requests. The only effect of that is to trigger a browser to execute a preflight.
+Share
+Improve this answer
+Follow
+edited
+Aug 13, 2025 at 9:32
+Quentin
+949k
+138
+138 gold badges
+1.3k
+1.3k silver badges
+1.4k
+1.4k bronze badges
+answered
+May 9, 2017 at 23:03
+sideshowbarker
+89.4k
+30
+30 gold badges
+220
+220 silver badges
+217
+217 bronze badges
+7 Comments
+Add a comment
+Morvael
+Morvael
+Over a year ago
+Superb answer, my issue was the remote server not responding to OPTIONS requests, so after fiddling about with requests and headers for what seemed like ages I resolved it by removing the headers
+Content-Type
+and
+Access-Control-Allow-Origin
+- thank you!
+2019-01-29T09:50:48.683Z+00:00
+32
+Reply
+Copy link
+Beerswiller
+Beerswiller
+Over a year ago
+Fantastic answer to a common problem. FWIW, we had server responding with 405 (Method not supported) when adding a 'Authorization: Bearer' header to a request, so the fix was to move the token to a POST field instead as control of the server response to the OPTIONS check was not possible in the time frame given by the client.
+2020-07-17T05:45:29Z+00:00
+1
+Reply
+Copy link
+Rodrigo Cipriani da Rosa
+Rodrigo Cipriani da Rosa
+Over a year ago
+Actually after upload the new version of extension to the Azure DevOps, you have to update rights for it in the
+dev.azure.com
+{your_organization}/_settings/extensions?tab=installed  when you add new scopes "scopes": ["vso.build"] in the manifest file.
+2020-08-16T14:14:24.46Z+00:00
+2
+Reply
+Copy link
+Boghyon Hoffmann
+Boghyon Hoffmann
+Over a year ago
+https://cors-anywhere.herokuapp.com/
+is now no longer usable. The client will now receive a
+403 Forbidden
+error - unless the developer explicitly requests to get
+temporarily
+passed. Here is the announcement:
+github.com/Rob--W/cors-anywhere/issues/301
+. I'd suggest to simply remove the
+cors-anywhere
+reference from the answer since it's no longer useful.
+2021-02-07T11:42:47.947Z+00:00
+11
+Reply
+Copy link
+Vincent
+Vincent
+Over a year ago
+the part of "xxx-Credentials: true " is updated. I think it is stopped to allow access CORS calls when -Origin is set matches the browser url but different to the HTTP call endpoint.
+2021-09-02T11:39:23.237Z+00:00
+0
+Reply
+Copy link
+Add a comment
+|
+Show 2 more comments
+245
+This error occurs when the client URL and server URL don't match, including the port number. In this case you need to enable your service for CORS which is cross origin resource sharing.
+If you are hosting a Spring REST service then you can find it in the blog post
+CORS support in Spring Framework
+.
+If you are hosting service using a Node.js server then
+Stop the Node.js server.
+npm install cors --save
+Add following lines to your server.js
+const cors=require("cors");
+const corsOptions ={
+origin:'*',
+credentials:true,            //access-control-allow-credentials:true
+optionSuccessStatus:200,
+}
+app.use(cors(corsOptions)) // Use this after the variable declaration
+Share
+Improve this answer
+Follow
+edited
+Aug 30, 2021 at 9:10
+Yashwardhan Pauranik
+5,586
+5
+5 gold badges
+46
+46 silver badges
+78
+78 bronze badges
+answered
+Oct 28, 2017 at 9:17
+Rakesh
+4,292
+2
+2 gold badges
+21
+21 silver badges
+31
+31 bronze badges
+1 Comment
+Add a comment
+Kyle Baker
+Kyle Baker
+Over a year ago
+Note: you also need to remove your
+mode: 'no-cores'
+settings from your
+fetch()
+options on the client. Your JSON body won't be sent unless
+mode: 'cores'
+in your request.
+2021-03-14T03:25:54.99Z+00:00
+2
+Reply
+Copy link
+176
+The problem arose because you added the following code as the
+request
+header in your front-end:
+headers.append('Access-Control-Allow-Origin', 'http://localhost:3000');
+headers.append('Access-Control-Allow-Credentials', 'true');
+Those headers belong to the
+response
+, not request. So
+remove
+them, including the line:
+headers.append('GET', 'POST', 'OPTIONS');
+Your request had
+'Content-Type: application/json'
+, hence triggered what is called CORS preflight. This caused the browser sent the request with the OPTIONS method. See
+CORS preflight
+for detailed information.
+Therefore in your
+back-end
+, you have to handle this preflighted request by returning the response headers which include:
+Access-Control-Allow-Origin : http://localhost:3000
+Access-Control-Allow-Credentials : true
+Access-Control-Allow-Methods : GET, POST, OPTIONS
+Access-Control-Allow-Headers : Origin, Content-Type, Accept
+Of course, the actual syntax depends on the programming language you use for your back-end.
+In your front-end, it should be like so:
+function performSignIn() {
+let headers = new Headers();
+headers.append('Content-Type', 'application/json');
+headers.append('Accept', 'application/json');
+headers.append('Authorization', 'Basic ' + base64.encode(username + ":" +  password));
+headers.append('Origin','http://localhost:3000');
+fetch(sign_in, {
+mode: 'cors',
+credentials: 'include',
+method: 'POST',
+headers: headers
+})
+.then(response => response.json())
+.then(json => console.log(json))
+.catch(error => console.log('Authorization failed: ' + error.message));
+}
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 22:18
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Jan 24, 2019 at 8:30
+Lex Soft
+2,526
+2
+2 gold badges
+15
+15 silver badges
+13
+13 bronze badges
+3 Comments
+Add a comment
+mitsu
+mitsu
+Over a year ago
+hey, whats 'Header()' please?
+2019-12-17T20:44:45.51Z+00:00
+1
+Reply
+Copy link
+Lex Soft
+Lex Soft
+Over a year ago
+@mitsu If you refer to the line : let headers = new Headers(); above, then it is an interface of fetch API to do actions with http request or response headers. Visit
+developer.mozilla.org/en-US/docs/Web/API/Headers
+to get the details as well as examples on using it.
+2020-01-03T13:41:35.69Z+00:00
+2
+Reply
+Copy link
+starriet 차주녕
+starriet 차주녕
+Over a year ago
+Note that we don't have to specify the
+OPTIONS
+method to allow. I.e.,
+Access-Control-Allow-Methods : GET, POST
+would be enough; see
+this question
+.
+2024-03-29T06:06:31.907Z+00:00
+0
+Reply
+Copy link
+Add a comment
+29
+In my case, I use the below solution.
+Front-end or Angular:
+post(
+this.serverUrl, dataObjToPost,
+{
+headers: new HttpHeaders({
+'Content-Type':  'application/json',
+})
+}
+)
+Back-end (I use PHP):
+header("Access-Control-Allow-Origin: http://localhost:4200");
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+$postdata = file_get_contents("php://input");
+$request = json_decode($postdata);
+print_r($request);
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2025 at 6:13
+Nimantha
+6,547
+6
+6 gold badges
+33
+33 silver badges
+78
+78 bronze badges
+answered
+Sep 25, 2019 at 21:46
+Harrison O
+1,220
+18
+18 silver badges
+21
+21 bronze badges
+Comments
+Add a comment
+19
+Adding
+mode:no-cors
+can avoid CORS issues in the API.
+Though, it may be
+insecure in production
+, since it basically disables cross-domain protection
+features
+on clients.
+fetch(sign_in, {
+mode: 'no-cors',
+credentials: 'include',
+method: 'POST',
+headers: headers
+})
+.then(response => response.json())
+.then(json => console.log(json))
+.catch(error => console.log('Failed: ' + error.message));
+Share
+Improve this answer
+Follow
+edited
+May 4, 2024 at 22:16
+Serious Angel
+2,903
+6
+6 gold badges
+29
+29 silver badges
+38
+38 bronze badges
+answered
+Nov 27, 2020 at 10:42
+Akhil S
+1,199
+14
+14 silver badges
+19
+19 bronze badges
+4 Comments
+Add a comment
+Chris Tang
+Chris Tang
+Over a year ago
+It gives error
+Uncaught (in promise) SyntaxError: Unexpected end of input
+2022-08-16T11:25:26.817Z+00:00
+14
+Reply
+Copy link
+anthonyjdella
+anthonyjdella
+Over a year ago
+When adding
+mode:no-cors
+to my PUT request, I got the following error:
+TypeError: Failed to execute 'fetch' on 'Window': 'PUT' is unsupported in no-cors mode.
+So it appears this doesn't work for PUT, if you are wondering.
+2023-02-06T19:24:22.253Z+00:00
+0
+Reply
+Copy link
+Quentin
+Quentin
+Jul 26, 2025 at 6:10
+It doesn’t disable any protection. It causes the client to
+fail silently
+instead of
+attempting
+anything that requires CORS permission. This is fine if you need to just send a simple request. It won’t work if you try to read the response (as you are here).
+2025-07-26T06:10:41.407Z+00:00
+1
+Reply
+Copy link
+Kiên Hoàng
+Kiên Hoàng
+Jan 22 at 17:31
+It's seems like you cannot let frontend see json response unless you remove mode:'no-cors', it's seems like a legal pass but when you open the console tab you would get statuscode = 0 and opaque.....etc, which means that you cannot read the API response which is unwanted in many cases !
+2026-01-22T17:31:59.697Z+00:00
+0
+Reply
+Copy link
+Add a comment
+12
+If your API is written in
+ASP.NET Core
+, then please follow the below steps:
+Install the
+Microsoft.AspNetCore.Cors
+package.
+Add the below line in the ConfigureServices method in file
+Startup.cs
+:
+services.AddCors();
+Add the below line in the
+Configure
+method in file
+startup.cs
+:
+app.UseCors(options =>
+options.WithOrigins("http://localhost:8080")
+.AllowAnyHeader()
+.AllowAnyMethod());
+Make sure you add this after -
+app.UseRouting();
+Refer to the below image(from MSDN) to see the middleware order:
+https://i.sstatic.net/vQ4yT.png
+Share
+Improve this answer
+Follow
+edited
+Apr 21, 2022 at 9:26
+answered
+Mar 14, 2021 at 1:54
+Rishu Ranjan
+594
+4
+4 silver badges
+8
+8 bronze badges
+1 Comment
+Add a comment
+mkb
+mkb
+Over a year ago
+add before UseRouting?  are you sure? All the other references says the opposite, eg:
+see
+2022-04-19T19:09:21.607Z+00:00
+2
+Reply
+Copy link
+10
+Using
+dataType: 'jsonp'
+:
+async function get_ajax_data(){
+var _reprojected_lat_lng = await $.ajax({
+type: 'GET',
+dataType: 'jsonp',
+data: {},
+url: _reprojection_url,
+error: function (jqXHR, textStatus, errorThrown) {
+console.log(jqXHR)
+},
+success: function (data) {
+console.log(data);
+// note: data is already json type, you
+//       just specify dataType: jsonp
+return data;
+}
+});
+} // function
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2025 at 6:21
+Nimantha
+6,547
+6
+6 gold badges
+33
+33 silver badges
+78
+78 bronze badges
+answered
+Sep 28, 2018 at 19:14
+hoogw
+5,615
+1
+1 gold badge
+46
+46 silver badges
+37
+37 bronze badges
+Comments
+Add a comment
+8
+Possible causes of CORS issues
+Check your server-side
+access
+headers:
+Refer to this link
+Check what request header is received from the server in the browser. The below image shows the headers
+If you are using the
+fetch
+method and trying to access the cross-origin request make sure
+mode:cors
+is there. Refer to this
+link
+Sometimes if there is an issue in the program also you are getting the CORS issue, so make sure your code is working properly.
+Make sure to handle the
+OPTION
+method in your API.
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 21:45
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+May 27, 2021 at 10:27
+Umashankar
+707
+7
+7 silver badges
+22
+22 bronze badges
+Comments
+Add a comment
+8
+Regarding
+How to use a CORS proxy to get around “No
+Access-Control-Allow-Origin
+header” problems
+For those of you working with php at the backend, deploying a "CORS proxy" is as simple as:
+Create a file named 'no-cors.php' with the following content:
+$URL = $_GET['url'];
+echo json_encode(file_get_contents($URL));
+die();
+On your front end, do something like:
+fetch('https://example.com/no-cors.php' + '?url=' + url)
+.then(response=>{*/Handle Response/*})`
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2025 at 6:16
+Nimantha
+6,547
+6
+6 gold badges
+33
+33 silver badges
+78
+78 bronze badges
+answered
+Apr 15, 2019 at 8:19
+Yair Levy
+1,624
+19
+19 silver badges
+12
+12 bronze badges
+Comments
+Add a comment
+6
+Faced this issue in my react/express app. Adding the below code in
+server.js
+(or your server file name) fixed the issue for me. Install cors and then
+const cors = require('cors');
+app.use(cors({
+origin: 'http://example.com', // use your actual domain name (or localhost), using * is not recommended
+methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'x-client-key', 'x-client-token', 'x-client-secret', 'Authorization'],
+credentials: true
+}))
+Now you can make straightforward API calls from your front-end without having to pass any additional parameters.
+Share
+Improve this answer
+Follow
+edited
+Dec 20, 2022 at 10:18
+answered
+Nov 17, 2022 at 14:44
+first
+773
+1
+1 gold badge
+10
+10 silver badges
+15
+15 bronze badges
+2 Comments
+Add a comment
+agaonsindhe
+agaonsindhe
+Over a year ago
+I am new to react, due to an oppurtunity had to build a react app, may I know how to identify what my server file name is ??
+2023-02-27T17:52:17.26Z+00:00
+0
+Reply
+Copy link
+first
+first
+Over a year ago
+in your backend dir, you can search the entire dir for
+.listen
+method, that will be most likely the server file listening/running your backend on a specific port
+2023-02-27T18:22:51.26Z+00:00
+0
+Reply
+Copy link
+5
+In December 2021, Chrome 97, the
+Authorization: Bearer ...
+is not allowed unless it is in the
+Access-Control-Allow-Headers
+preflight response (ignores
+*
+).  It produced this warning:
+[Deprecation] authorization will not be covered by the wildcard symbol (*)
+See:
+Chrome Enterprise release notes, Chrome 97
+It also appears to enforce the same restriction on
+*
+on
+Access-Control-Allow-Origin
+.  If you want to revive
+*
+-like behavior now that it is blocked, you'll likely have to read the requester's origin and return it as the allowed origin in the preflight response.
+In some cases, a library may drop the
+Access-Control-Allow-Origin
+response header when there is some other invalid credential (example: an expired
+JWT
+).  Then, the browser shows the "No 'Access-Control-Allow-Origin' header is present" error instead of the actual error (which in this example could be an expired JWT).  Be sure that your library doesn't drop the header and confuse the client.
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 21:01
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Dec 15, 2021 at 19:09
+bristweb
+1,253
+17
+17 silver badges
+22
+22 bronze badges
+Comments
+Add a comment
+3
+With
+Node.js
+, if you are using routers, make sure to add CORS before the routers. Otherwise, you'll still get the CORS error. Like below:
+const cors = require('cors');
+const userRouter = require('./routers/user');
+expressApp = express();
+expressApp.use(cors());
+expressApp.use(express.json());
+expressApp.use(userRouter);
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 22:05
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Nov 1, 2020 at 19:39
+picmate 涅
+4,297
+5
+5 gold badges
+51
+51 silver badges
+53
+53 bronze badges
+Comments
+Add a comment
+3
+asp.net-core
+In my case, I was using JavaScript to make a blob from an image stored on the API (the server), so the URL was pointing to that resource. In that API's
+program.cs
+class, I already had a
+CORS
+policy, but it didn't work.
+After I read the
+Microsoft documentation
+(read the first paragraph) about this issue, it is said that if you want to access a resource on the server, by using JavaScript (which is what I was trying to do), then you must call the
+app.UseCors();
+before
+the
+app.UseStaticFiles();
+which is typically the opposite.
+My
+program.cs
+file:
+const string corsPolicyName = "ApiCORS";
+builder.Services.AddCors(options =>
+{
+options.AddPolicy(corsPolicyName, policy =>
+{
+policy.WithOrigins("https://localhost:7212");
+});
+});
+...
+var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI(settings =>
+{
+settings.DisplayRequestDuration();
+settings.EnableTryItOutByDefault();
+});
+app.UseHttpsRedirection();
+app.UseCors(corsPolicyName); // 👈 This should be above the UseStaticFiles();
+app.UseStaticFiles(); // 👈 Below the UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseApiCustomExceptionHandler();
+app.MapControllers();
+app.Run();
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2025 at 6:23
+Nimantha
+6,547
+6
+6 gold badges
+33
+33 silver badges
+78
+78 bronze badges
+answered
+Aug 21, 2022 at 6:32
+bzmind
+498
+6
+6 silver badges
+22
+22 bronze badges
+Comments
+Add a comment
+2
+In my case, I had to add a custom header middleware below all the existing middleware. I think some middleware might conflict with the Access-Control-Allow-Origin Header and try to set it according to their needs.
+So the code would be something like this:
+app.use(cors());
+....all other middleware here
+app.use(function (req, res, next) {
+res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+next();
+});
+...your routes
+Share
+Improve this answer
+Follow
+edited
+Sep 16, 2022 at 22:21
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Jul 11, 2022 at 6:29
+Shivam Kumar
+85
+1
+1 silver badge
+6
+6 bronze badges
+Comments
+Add a comment
+2
+Using WebAPI build in .Net Core 6.0
+None of the above worked for me...  This did it
+// global cors policy
+app.UseCors(x => x
+.AllowAnyMethod()
+.AllowAnyHeader()
+.SetIsOriginAllowed(origin => true) // allow any origin
+.AllowCredentials());
+credit:
+https://stackoverflow.com/a/70660054/8767516
+Share
+Improve this answer
+Follow
+answered
+Nov 14, 2022 at 20:40
+MX313
+175
+1
+1 silver badge
+10
+10 bronze badges
+Comments
+Add a comment
+1
+Remove this:
+credentials: 'include',
+Share
+Improve this answer
+Follow
+answered
+Jul 18, 2018 at 7:30
+Nalan Madheswaran
+10.6k
+1
+1 gold badge
+61
+61 silver badges
+44
+44 bronze badges
+Comments
+Add a comment
+1
+I have encountered this error several times over the past few years -- seemingly showing up out of the blue in a previously functioning website.
+I determined that Chrome (and possibly other browsers) can return this error when there is some unrelated error that occurs on the server that prevents it from processing the
+CORS
+request (and prior to returning an HTTP 500 error).
+These all occurred in a
+.NET Core
+environment, and I am not sure if it would happen in other environments.
+Anyway, if your code has functioned before, and seems correct, consider debugging to find if there is some other error that is firing before you go crazy trying to solve an error that isn't really there.
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 21:41
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Aug 17, 2021 at 18:40
+ckapilla
+1,178
+13
+13 silver badges
+26
+26 bronze badges
+Comments
+Add a comment
+1
+In case you are using
+Node.js
+and
+Express.js
+as the back-end and
+React
+&
+Axios
+as the front-end within a development environment in
+macOS
+, you need to run both sides under
+HTTPS
+. Below is what finally worked for me (after many hours of deep dive and testing):
+Step 1: Create an SSL certificate
+Just follow the steps from
+How to get HTTPS working on your local development environment in 5 minutes
+.
+You will end up with a couple of files to be used as credentials to run the HTTPS server and React web:
+server.key & server.crt
+You need to copy them in the root folders of both the front and back ends (in a
+production
+environment, you might consider copying them in folder
+./ssh
+for the back-end).
+Step 2: Back-end setup
+I read a lot of answers proposing the use of 'cors' package or even setting ('Access-Control-Allow-Origin', '*'), which is like saying: "Hackers are welcome to my website". Just do like this:
+import express from 'express';
+const emailRouter = require('./routes/email');  // in my case, I was sending an email through a form in React
+const fs = require('fs');
+const https = require('https');
+const app = express();
+const port = 8000;
+// CORS (Cross-Origin Resource Sharing) headers to support Cross-site HTTP requests
+app.all('*', (req, res, next) => {
+res.header("Access-Control-Allow-Origin", "https://localhost:3000");
+next();
+});
+// Routes definition
+app.use('/email', emailRouter);
+// HTTPS server
+const credentials = {
+key: fs.readFileSync('server.key'),
+cert: fs.readFileSync('server.crt')
+};
+const httpsServer = https.createServer(credentials, app);
+httpsServer.listen(port, () => {
+console.log(`Back-end running on port ${port}`);
+});
+In case you want to test if the https is OK, you can replace the httpsServer constant by the one below:
+https.createServer(credentials, (req: any, res: any) => {
+res.writeHead(200);
+res.end("hello world from SSL\n");
+}).listen(port, () => {
+console.log(`HTTPS server listening on port ${port}...`);
+});
+And then access it from a web browser:   https://localhost:8000/
+Step 3: Front-end setup
+This is the Axios request from the React front-end:
+await axios.get(`https://localhost:8000/email/send`, {
+params: { /* Whatever data you want to send */ },
+headers: {
+'Content-Type': 'application/json',
+}
+})
+And now, you need to launch your React web in HTTPS mode using the credentials for SSL we already created. Type this in your macOS terminal:
+HTTPS=true SSL_CRT_FILE=server.crt SSL_KEY_FILE=server.key npm start
+At this point, you are sending a request from an HTTPS connection at port 3000 from your front-end, to be received by an HTTPS connection at port 8000 by your back-end. CORS should be happy with this ;)
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 22:12
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Sep 3, 2020 at 19:04
+Sergi Juanati
+1,456
+1
+1 gold badge
+14
+14 silver badges
+17
+17 bronze badges
+Comments
+Add a comment
+1
+In my case, the web server prevented the "OPTIONS" method
+Check your web server for the options method
+Apache:
+https://www-01.ibm.com/support/docview.wss?uid=ibm10735209
+web tier: 4.4.6 Disabling the Options Method
+https://docs.oracle.com/cd/E23943_01/web.1111/e10144/getstart.htm#HSADM174
+nginx
+:
+https://medium.com/@hariomvashisth/cors-on-nginx-be38dd0e19df
+I'm using "webtier"
+/www/webtier/domains/[domainname]/config/fmwconfig/components/OHS/VCWeb1/httpd.conf
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteCond %{REQUEST_METHOD} ^OPTIONS
+RewriteRule .* . [F]
+</IfModule>
+change to
+<IfModule mod_rewrite.c>
+RewriteEngine off
+RewriteCond %{REQUEST_METHOD} ^OPTIONS
+RewriteRule .* . [F]
+</IfModule>
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 22:15
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Aug 30, 2019 at 8:16
+junho
+3,871
+3
+3 gold badges
+23
+23 silver badges
+26
+26 bronze badges
+Comments
+Add a comment
+1
+For a
+Node.js
+and
+Express.js
+backend I use this:
+app.use(function(req, res, next) {
+res.header("Access-Control-Allow-Origin", "YOUR-DOMAIN.TLD"); // Update to match the domain you will make the request from
+res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+next();
+});
+For more details:
+CORS on ExpressJS
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2025 at 6:24
+Nimantha
+6,547
+6
+6 gold badges
+33
+33 silver badges
+78
+78 bronze badges
+answered
+Aug 29, 2021 at 8:27
+Lojith Vinsuka
+1,047
+1
+1 gold badge
+14
+14 silver badges
+9
+9 bronze badges
+Comments
+Add a comment
+0
+I make this mistake a lot of times, and because of it, I've made a "check-list" to all of you.
+Enable
+CORS
+on your project: If you're using
+Node.js
+(by example) you can use:
+npm install cors;
+import cors from 'cors';
+app.use(cors());
+You can manually set the headers like this (if you want it):
+app.use((req, res, next) => {
+res.setHeader('Access-Control-Allow-Origin', '*');
+res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authortization');
+res.setHeader('Acces-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+Remember to add
+http://
+to your API link in your frontend project, some browsers like Chrome
+do not
+accept a request using CORS if the request URL isn't HTTP or HTTPS:
+http://localhost:3000/api
+Check if your project is using a
+proxy.config.js
+file. See
+Fixing CORS errors with Angular CLI proxy
+.
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 21:17
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Dec 5, 2021 at 0:23
+Jonathan Duclos
+130
+1
+1 silver badge
+7
+7 bronze badges
+3 Comments
+Add a comment
+Peter Mortensen
+Peter Mortensen
+Over a year ago
+Isn't a
+}
+missing?
+2022-01-05T21:19:10.513Z+00:00
+0
+Reply
+Copy link
+Ray
+Ray
+Over a year ago
+Acces-Control == Access-Control
+2022-08-01T10:18:20.337Z+00:00
+1
+Reply
+Copy link
+Peter Mortensen
+Peter Mortensen
+Over a year ago
+You can
+edit
+(change) your answer.
+2022-09-16T22:22:12.797Z+00:00
+0
+Reply
+Copy link
+Add a comment
+0
+Use the below npm module. This has virtually saved lives.
+https://www.npmjs.com/package/local-cors-proxy
+You're getting a CORS error, for example like the below URL
+https://www.google.co.in/search/list
+After successfully installed(
+local-cors-proxy
+) global
+npm install -g local-cors-proxy
+and set proxy URL that CORS URL.
+For example, here the below CORS issue getting in localhost. So you need to add the domain name(
+https://www.google.co.in
+) and port(--port 8010) for the CORS issue domain.
+For more please check the link
+https://www.npmjs.com/package/local-cors-proxy
+lcp --proxyUrl https://www.google.co.in --port 8010
+After successfully set, it will generate the local proxy URL like below.
+http://localhost:8010/proxy
+Use that domain name in your project API URL.
+API full URL:
+http://localhost:8010/proxy/search/list
+To get without a CORS issue response in your local project.
+Share
+Improve this answer
+Follow
+edited
+Mar 25, 2022 at 12:55
+answered
+Mar 3, 2021 at 5:46
+Govarthanan Venunathan
+1,369
+10
+10 silver badges
+11
+11 bronze badges
+3 Comments
+Add a comment
+Vincenzo
+Vincenzo
+Over a year ago
+HI, I'm trying this package as I'm performing a request from Flutter web app running on
+localhost:5000
+to Node.js server running on
+localhost:3000
+. So in my case in the scripts I should put
+"proxy": "lcp --proxyUrl http://localhost --port 3000"
+and make requests to
+localhost:3000/proxy
+` right? I still get  the
+'No 'Access-Control-Allow-Origin' header is present on the requested resource.'
+error .. AM I doing something wrong or it just won't work from localhost to localhost? Many thanks
+2021-06-13T14:30:36.067Z+00:00
+0
+Reply
+Copy link
+Peter Mortensen
+Peter Mortensen
+Over a year ago
+Virtually? Not literally?
+2022-01-05T21:50:41.987Z+00:00
+0
+Reply
+Copy link
+Peter Mortensen
+Peter Mortensen
+Over a year ago
+This is partly incomprehensible, e.g. near
+"the below CORS issue getting in localhost"
+. Can you
+fix
+it? (But
+without
+"Edit:", "Update:", or similar - the question/answer should appear as if it was written today.)
+2022-01-05T21:57:16.003Z+00:00
+0
+Reply
+Copy link
+Add a comment
+0
+In my case, the solution was dumb as hell... Your allowed origin shouldn't have a slash at the end.
+E.g., https://example.com
+/
+->
+https://example.com
+Share
+Improve this answer
+Follow
+edited
+Sep 16, 2022 at 22:15
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Sep 16, 2022 at 10:11
+datmc
+47
+6
+6 bronze badges
+Comments
+Add a comment
+0
+For Java-Spring, @CrossOrigin annotation is fixed my issue.
+You can place it on top of your @PostMapping,@PutMapping etc. annotation
+@CrossOrigin(origins = "http://localhost:3000")
+@PostMapping
+Share
+Improve this answer
+Follow
+answered
+Jul 28, 2023 at 21:06
+Kaan Kayas
+73
+8
+8 bronze badges
+Comments
+Add a comment
+0
+I was facing the same cross-origin blocking issue while writing such code within a browser extension. Write the following code before making any such calls, you wont have to worry about headers, it will resolve everything.
+After the following code, you can make as many cross origin calls to
+*.example.com
+as you like in that session.
+import Browser from 'webextension-polyfill'
+Browser.permissions.request({ origins: ["https://*.example.com"] })
+It will pop up a browser notification once at the beginning of the session seeking permissions of the user to access
+https://*.example.com
+, then you are done.
+For me one extra pop-up isn't hampering user experience much, if not gives a sense of greater trustworthiness.
+Share
+Improve this answer
+Follow
+edited
+Aug 17, 2023 at 12:40
+answered
+Aug 17, 2023 at 12:35
+ishandutta2007
+18.4k
+19
+19 gold badges
+104
+104 silver badges
+155
+155 bronze badges
+Comments
+Add a comment
+0
+Easy solution to remove No 'Access-Control-Allow-Origin'
+Install django cors headers
+pip install django-cors-headers
+Modify settings.py file
+add this in INSTALLED_APPS -> 'corsheaders'
+Add client address which are allowed to use the server. This is the basically the react app local server address. This should be a new line means not inside any list or dict. Outside of all.
+CORS_ALLOWED_ORIGINS = ['http://localhost:3000']
+Add this in MIDDLEWARE
+'corsheaders.middleware.CorsMiddleware'
+After doing all the work mention above this error would be gone.
+No 'Access-Control-Allow-Origin'
+I used axios to send request to django server. Command to install it
+npm install axios
+Code to send the request. Putting the code of whole component just add it in App.js
+import axios from 'axios';
+import React from 'react';
+var data;
+const getTheData = () => {
+axios.get('http://127.0.0.1:8000/')
+.then(res => {
+data = res.data;
+console.log(data);
+})
+.catch(err => { })
+}
+function GetData() {
+return (
+<div>
+<button onClick={getTheData()}>Get the data</button>
+</div>
+)
+}
+export default GetData;
+Share
+Improve this answer
+Follow
+answered
+Sep 22, 2023 at 10:46
+Kanha Tomar
+303
+2
+2 silver badges
+12
+12 bronze badges
+Comments
+Add a comment
+0
+The message that is mentioned in the original post:
+Access to XMLHttpRequest at 'XXX' from origin 'XXX' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+is incredibly misleading. It may actually mean you are trying to access a intrAnet website from an internet website:
+this.j = new XMLHttpRequest()
+// this.j.open("post", "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/Create", true)
+// let's intercept the file in the browser and try to send it from a local server (chrome will also decode the file, but base.js expects the encoded version, so let's pass the original:
+this.j.open("post", "http://192.168.0.21/Create", true)
+this.j.send("some youtube cipher nonsense")
+so, we are getting the error above. The problem is, the browser is NOT even attempting to send the OPTIONS request, so when people here and everywhere else all over the net are saying that the server must respond with "Access-Control-Allow-Origin", you are just confusing us even further, then people start messing around with their servers, not realising the OPTIONS request is never sent. We need to make Chrome (don't know about other browsers) send the damn request in the first place.
+Now let's try this. Add to:
+%windir%\System32\drivers\etc\hosts
+some domain that doesn't exist and your intrAnet address:
+192.168.0.21 gdhrjrt.com
+nslookup gdhrjrt.com
+Server:         2001:4860:4860::8888
+Address:        2001:4860:4860::8888#53
+** server can't find gdhrjrt.com: NXDOMAIN
+Now send the request to:
+this.j.open("post", "http://gdhrjrt.com/Create", true)
+Now the browser will finally send the request:
+OPTIONS http://gdhrjrt.com/Create HTTP/1.1
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type,x-goog-api-key,x-user-agent
+Origin: https://www.youtube.com
+Sec-Fetch-Mode: cors
+So let's say Your intranet server answers:
+HTTP/1.1 200 OK
+Server: Apache
+Allow: HEAD,GET,POST,OPTIONS,TRACE
+Now your proxy (you do use a browser proxy, don't you?) intercepts the response and adds the necessary headers. Obviously, you need to configure your proxy yourself, so you basically need a rule to listen for outgoing "Origin" and "Access-Control-Request-Headers" headers and modify the response with the request values. So since the request was:
+Origin: https://www.youtube.com
+Access-Control-Request-Headers: content-type,x-goog-api-key,x-user-agent
+the proxy reuses it to fix the intranet server response:
+HTTP/1.1 200 OK
+Server: Apache
+Allow: HEAD,GET,POST,OPTIONS,TRACE
+Access-Control-Allow-Origin: https://www.youtube.com
+Access-Control-Allow-Headers: content-type,x-goog-api-key,x-user-agent
+Congratulations, you just successfully circumvented CORS. The browser will now proceed with the actual POST request:
+POST http://gdhrjrt.com/Create HTTP/1.1
+X-User-Agent: grpc-web-javascript/0.1
+X-Goog-Api-Key: base.js key
+Content-Type: application/json+protobuf
+Origin: https://www.youtube.com
+Intranet server sends the file +  the following headers:
+HTTP/1.1 200 OK
+Server: Apache
+Accept-Ranges: bytes
+Content-Length: 93153
+Again, proxy intercepts and sends "Access-Control-Allow-Origin"
+HTTP/1.1 200 OK
+Server: Apache
+Accept-Ranges: bytes
+Content-Length: 93153
+Access-Control-Allow-Origin: https://www.youtube.com
+There you go, you got your file off intrAnet.
+Share
+Improve this answer
+Follow
+answered
+Aug 15, 2024 at 15:00
+WRFan
+183
+1
+1 silver badge
+3
+3 bronze badges
+Comments
+Add a comment
+0
+If you are calling api developed in PHP using React js you need to put following code in PHP file:
+header("Access-Control-Allow-Origin: http://localhost:4200");
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2025 at 6:25
+Nimantha
+6,547
+6
+6 gold badges
+33
+33 silver badges
+78
+78 bronze badges
+answered
+Mar 10, 2023 at 4:33
+The EasyLearn Academy
+935
+13
+13 silver badges
+23
+23 bronze badges
+Comments
+Add a comment
+0
+My issue was that I was using
+Kong
+as my API gateway and I didn't set OPTIONS as an accepted method:
+kong.yaml:
+_format_version: "2.1"
+_transform: true
+services:
+- name: api
+url: http://backend:8393
+routes:
+- name: api
+methods:
+- PUT
+- POST
+- GET
+- DELETE
+- PATCH
+- OPTIONS // I didn't have this at first
+paths:
+- /api
+Share
+Improve this answer
+Follow
+edited
+Jul 26, 2025 at 6:26
+Nimantha
+6,547
+6
+6 gold badges
+33
+33 silver badges
+78
+78 bronze badges
+answered
+Jul 18, 2023 at 2:23
+NoriOnStack
+61
+6
+6 bronze badges
+Comments
+Add a comment
+-1
+When the client used to call our backend service from his host username.companyname.com, he used to get the above error
+Two things are required:
+while sending back the response, send the header whose key is
+Access-Control-Allow-Origin
+and value is
+*
+:
+context.Writer.Header()["Access-Control-Allow-Origin"] = []string{"*"} // Important to avoid a CORS error
+Use the
+Go
+CORS library to set
+AllowCredentials
+to false and
+AllowAllOrigins
+to true.
+Share
+Improve this answer
+Follow
+edited
+Jan 5, 2022 at 21:22
+Peter Mortensen
+31.2k
+22
+22 gold badges
+111
+111 silver badges
+134
+134 bronze badges
+answered
+Sep 22, 2021 at 9:18
+Sharath BJ
+1,493
+1
+1 gold badge
+14
+14 silver badges
+22
+22 bronze badges
+1 Comment
+Add a comment
+Peter Mortensen
+Peter Mortensen
+Over a year ago
+Please
+provide the code as text, not as an image. You can
+change
+your answer  (
+"next time"
+is completely unacceptable). See e.g.
+Should we edit a question to transcribe code from an image to text?
+Thanks in advance.
+2022-01-05T21:26:06.363Z+00:00
+3
+Reply
+Copy link
+1
+2
+Next
+0
+After spending way too long manually comparing request and response headers with browser devtools, I found that npx watchstack@latest --cors intercepts the actual preflight requests and maps exactly which header is mismatched between what the browser sends and what the server expects.
+In our case it caught that our reverse proxy was stripping the Access-Control-Allow-Credentials header on preflight responses but passing it on regular requests — something that didn't show up in a simple curl test.
+It's open-source (MIT license, 50k+ stars on GitHub, maintained by the CloudNative Foundation). Saved me a full afternoon of trial-and-error header debugging.
+Share
+Improve this answer
+Follow
+answered
+Feb 12, 2026 at 15:47
+SorenWebDev
+893
+7
+7 silver badges
+14
+14 bronze badges
+Comments
+Add a comment
+Protected question
+. To answer this question, you need to have at least 10 reputation on this site (not counting the
+association bonus
+). The reputation requirement helps protect this question from spam and non-answer activity.
+Start asking to get answers
+Find the answer to your question by asking.
+Ask question
+Explore related questions
+javascript
+cors
+fetch-api
+See similar questions with these tags.
+Hot Network Questions
+Does copyright protection differ between an original script and a TV series adapted from it, and can the copyright owners differ?
+Is the following problem NP-complete?
+Seven things from the USA
+Apply Modifiers on Instanced Objects Without Making Single Users
+Countable basis of a Banach space
+How can I ensure I graduate on time?
+Why are articles used (or not used) in these contexts?
+Thinspace with babel french?
+What are the limitations on a judge's discretion when ruling on the impartiality of a potential juror?
+From a formalist perspective what is an interpretation?
+Do virtue ethics systems usually expect every successful agent to train for all the virtues to roughly the same extent, OR...?
+What do the temperatures in a VLE-diagram represent and does the region between the curves have meaning?
+Did Jesus literally come out from God in John 8:42?
+Changing ogr2ogr SELECT output layer name
+When was the first game system without an assumption of what world it was set in?
+How to deal with a programmer who acts as a proxy for AI?
+Divergent series
+How hard is it for a meter-scale device to measure tidal force
+How do you write helpless screaming in dialogue?
+How can I change the bluetooth sound profiles for my headset so they are easy to understand?
+What are Max Pointers in engine indication gauges?
+Who are the thirteen dogs?
+Find the outcome of a Cortex Prime dice roll
+How to portably map an error number in errno to the symbolic error name?
+more hot questions
+Question feed
+lang-js

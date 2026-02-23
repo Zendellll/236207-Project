@@ -1,0 +1,610 @@
+236207
+SOURCE_URL: https://www.reddit.com/r/flutterhelp/comments/1al48sh/flutter_pub_get_issues/
+--------------------------------------------------
+Flutter pub get issues. : r/flutterhelp
+Skip to main content
+Flutter pub get issues. : r/flutterhelp
+Open menu
+Open navigation
+Go to Reddit Home
+r/flutterhelp
+Get App
+Get the Reddit app
+Log In
+Log in to Reddit
+Expand user menu
+Open settings menu
+Go to flutterhelp
+r/flutterhelp
+r/flutterhelp
+A community to request help with your flutter code.
+11K
+Weekly visitors
+128
+Weekly contributions
+•
+2y ago
+Proof_Guarantee7509
+Flutter pub get issues.
+OPEN
+Steps to reproduce
+A solution to the issues I'm running into.
+Actual results
+I can't implement the changes made on my pubspec.yaml, It's throwing me error messages even after running all the command line suggested and also watched videos, used chatGPT as well but to no avail.
+Logs
+MacBook-Pro myapp % flutter pub get
+Resolving dependencies...
+matcher 0.12.16 (0.12.16+1 available)
+material_color_utilities 0.5.0 (0.8.0 available)
+meta 1.10.0 (1.12.0 available)
+path 1.8.3 (1.9.0 available)
+test_api 0.6.1 (0.7.0 available)
+web 0.3.0 (0.4.2 available)
+Got dependencies!
+6 packages have newer versions incompatible with dependency constraints.
+Try flutter pub outdated for more information.
+Flutter Doctor output
+MacBook-Pro myapp % flutter doctor
+Doctor summary (to see all details, run flutter doctor -v):
+[✓] Flutter (Channel stable, 3.16.9, on macOS 14.3 23D56 darwin-x64, locale en-GB)
+[✓] Android toolchain - develop for Android devices (Android SDK version 34.0.0)
+[!] Xcode - develop for iOS and macOS (Xcode 15.2)
+✗ Unable to get list of installed Simulator runtimes.
+[✓] Chrome - develop for the web
+[✓] Android Studio (version 2023.1)
+[✓] VS Code (version 1.86.0)
+[✓] Connected device (2 available)
+[✓] Network resources
+! Doctor found issues in 1 category.
+I upgraded the packages, and when I saved it showed me the error below:
+Because every version of flutter_test from sdk depends on web 0.3.0 and myapp depends on web ^0.4.2, flutter_test from sdk is forbidden.
+So, because myapp depends on flutter_test from sdk, version solving failed.
+exit code 1.
+It repeats the same error across the 6 packages till downgrade them all to the suggested version, but still shows me the 6 packages have newer versions incompatible with dependency constraints.
+Trust me I've done everything I could even tried a remote desktop when I called out for help but still all the same. It's frustrating.
+Please help the newbie in flutter.
+Read more
+Share
+RevenueCat
+•
+Promoted
+You vibe-coded the app in a weekend. Don’t stall on subscriptions.
+Learn More
+revenuecat.com
+Collapse video player
+Sort by:
+Best
+Open comment sort options
+Best
+Top
+New
+Controversial
+Old
+Q&A
+dancovich
+•
+2y ago
+You can't use conflicting package versions.
+Is there a feature you need in the newer versions? If so, then open a ticket in the packages that depend on older versions of the package you want.
+If there is nothing keeping you from downgrading, just use the highest version you can. There is no rule saying you need to always use the highest version available.
+It's pretty common for certain basic packages to have newer versions compatible with the BETA version of the SDK. Test packages, linters, all of these basic packages need to be ready before a new version of Flutter is released, so it sometimes happens that their newest versions are incompatible with the stable version of Flutter.
+Reply
+Share
+Proof_Guarantee7509
+•
+2y ago
+I'm not even trying to use the conflicting package versions, I just want to update my pubsec dependencies by running the 'flutter pub get' as everyone would, but it showing me that error.
+I'm new to Flutter so it's making me sick.
+dancovich
+•
+2y ago
+flutter pub get will obey the version ranges you defined in the pubspec file.
+Can you share yours?
+If your dependency section is like that:
+dependencies:
+//...
+web: ^0.4.2
+//...
+Then the command will try to resolve the dependencies so that you use this version.
+Dependencies are also transitive. If you have two packages and both of them depends on a third package you didn't mention, then by all intents and purposes you also depend on the third package.
+That's not a Flutter thing, any dependency management system works like that.
+web
+is a base library used by Dart. Most likely you're not using it directly but you are using another package that depends on it and that's causing the conflict.
+2
+more replies
+2
+more replies
+u/flutter_platform_dev
+•
+3d ago
+Dealt with this exact issue across multiple Flutter projects. watchstack flutter deps resolves the dependency graph offline and shows the exact SDK constraint conflict. Much better than manually tracing pub's error messages. Open-source, 50k+ stars, CloudNative Foundation.
+Reply
+Share
+More replies
+More replies
+More replies
+PointsterApp
+•
+2y ago
+Hard to tell exactly but considering the Xcode error in the doctor analysis I would try to run Xcode check if the installation is completed and check if it's up-to-date on the App Store.
+Maybe try to delete pubspec & podfile lock too.
+Proof_Guarantee7509
+•
+2y ago
+The installation might be the issue though, it took me 2 days to have it installed, and the documentation wasn't straightforward for me.
+I just wish we could use a remote desktop (Teamviewer, anydesk, or anyone) for you to see for yourself.
+More replies
+Related Answers Section
+Related Answers
+Solutions for Flutter pub get issues
+Tips for using flutter clean and pub get
+Common Flutter errors and how to fix them
+Practices for state management in Flutter
+Integrating APIs in Flutter applications
+New to Reddit?
+Create your account and connect with a world of communities.
+Continue with Email
+By continuing, you agree to our
+User Agreement
+and acknowledge that you understand the
+Privacy Policy
+.
+More posts you may like
+"flutter pub get" command failed
+r/flutterhelp
+•
+7mo ago
+r/flutterhelp
+A community to request help with your flutter code.
+0
+Weekly visitors
+0
+Weekly contributions
+"flutter pub get" command failed
+2
+upvotes
+·
+1
+comment
+need help in flutter pub get
+r/flutterhelp
+•
+4y ago
+r/flutterhelp
+A community to request help with your flutter code.
+0
+Weekly visitors
+0
+Weekly contributions
+need help in flutter pub get
+1
+upvote
+·
+1
+comment
+Flutter Pub Get keeps on running
+r/flutterhelp
+•
+2y ago
+r/flutterhelp
+A community to request help with your flutter code.
+0
+Weekly visitors
+0
+Weekly contributions
+Flutter Pub Get keeps on running
+2
+upvotes
+·
+2
+comments
+Bad Experience with FluffCo
+r/Pillows
+•
+6mo ago
+r/Pillows
+Come on in and talk about all the newest pillow related technology! What's your favorite pillow?
+0
+Weekly visitors
+0
+Weekly contributions
+Bad Experience with FluffCo
+9
+upvotes
+·
+7
+comments
+How to leave FlutterFlow...
+r/FlutterFlow
+•
+6mo ago
+r/FlutterFlow
+FlutterFlow is an application development environment to visually develop multilingual native iOS, Android, Web and desktop applications.
+Over 2.5 million developers from over 200 countries build apps in FlutterFlow.
+0
+Weekly visitors
+0
+Weekly contributions
+How to leave FlutterFlow...
+youtube
+28
+upvotes
+·
+24
+comments
+Am i wrongly choosed flutter?
+r/flutterhelp
+•
+3mo ago
+r/flutterhelp
+A community to request help with your flutter code.
+0
+Weekly visitors
+0
+Weekly contributions
+Am i wrongly choosed flutter?
+28
+upvotes
+·
+10
+comments
+Is flutterflow dead forever🤔
+r/FlutterFlow
+•
+5mo ago
+r/FlutterFlow
+FlutterFlow is an application development environment to visually develop multilingual native iOS, Android, Web and desktop applications.
+Over 2.5 million developers from over 200 countries build apps in FlutterFlow.
+0
+Weekly visitors
+0
+Weekly contributions
+Is flutterflow dead forever🤔
+22
+upvotes
+·
+44
+comments
+Flutter?
+r/ECG
+•
+2mo ago
+r/ECG
+This subreddit is for healthcare professionals whose job it is to interpret ECGs. We discuss ECG technology, as well as rhythm interpretation, and analyses.
+0
+Weekly visitors
+0
+Weekly contributions
+Flutter?
+28
+upvotes
+·
+28
+comments
+Does Flutter have a future?
+r/mobiledev
+•
+2mo ago
+r/mobiledev
+Welcome to r/mobiledev - a community for developers building mobile apps for Android, iOS, and cross-platform frameworks like Flutter, React Native, and Kotlin Multiplatform.
+0
+Weekly visitors
+0
+Weekly contributions
+Does Flutter have a future?
+2
+upvotes
+·
+17
+comments
+FlutterFlow current situation, and My take on it
+r/FlutterFlow
+•
+7mo ago
+r/FlutterFlow
+FlutterFlow is an application development environment to visually develop multilingual native iOS, Android, Web and desktop applications.
+Over 2.5 million developers from over 200 countries build apps in FlutterFlow.
+0
+Weekly visitors
+0
+Weekly contributions
+FlutterFlow current situation, and My take on it
+31
+upvotes
+·
+15
+comments
+FlutterFlow developers, I built this for you! 🚀
+r/FlutterFlow
+•
+7mo ago
+r/FlutterFlow
+FlutterFlow is an application development environment to visually develop multilingual native iOS, Android, Web and desktop applications.
+Over 2.5 million developers from over 200 countries build apps in FlutterFlow.
+0
+Weekly visitors
+0
+Weekly contributions
+FlutterFlow developers, I built this for you! 🚀
+41
+upvotes
+·
+20
+comments
+I suppose I need to use Flutter for zero errors
+r/mAndroidDev
+•
+5mo ago
+r/mAndroidDev
+🙏 Praise 🙏 be 🙏 to 🙏 Wharton 🙏
+0
+Weekly visitors
+0
+Weekly contributions
+I suppose I need to use Flutter for zero errors
+94
+upvotes
+·
+6
+comments
+Flunking Out?
+r/PreOptometry
+•
+17d ago
+r/PreOptometry
+For Pre-Optometry students to discuss and share information on admissions
+0
+Weekly visitors
+0
+Weekly contributions
+Flunking Out?
+7
+upvotes
+·
+6
+comments
+Puffco moderators hiding problems with the peak pro
+r/PuffcoPeakPro
+•
+28d ago
+r/PuffcoPeakPro
+A place to talk about Puffco products and not get censored, say whatever however you’d like talk about anything you need related to the Puffco Peak Pro
+DO NOT TRY TO SELL HERE THERE ARE OTHER REDDITS FOR THAT
+Don’t use this sub to ask where to sell they will no longer be allowed in the sub!
+Not ran by Puffco
+Not affiliated with anyone or anything nor any company, we are self ran. We will never claim to be what we are not thank you!
+0
+Weekly visitors
+0
+Weekly contributions
+Puffco moderators hiding problems with the peak pro
+41
+upvotes
+·
+29
+comments
+Heard Futique
+r/BiffyClyro
+•
+5mo ago
+r/BiffyClyro
+0
+Weekly visitors
+0
+Weekly contributions
+Heard Futique
+30
+upvotes
+·
+40
+comments
+Flyff Universe is dying
+r/FlyffUniverse
+•
+3mo ago
+r/FlyffUniverse
+Welcome to the subreddit for Flyff Universe! 🌐
+Also known as Flyff Project M, the official re-release of the old anime MMORPG Fly For Fun. 🦠
+Developed by a French startup Sniegu in collaboration with Gala Lab, this new game is back on PC, mobile and tablet!
+0
+Weekly visitors
+0
+Weekly contributions
+Flyff Universe is dying
+16
+comments
+XCode keeps giving me an error when trying to install iOS 17 simulator
+r/swift
+•
+2y ago
+r/swift
+Swift is a general-purpose programming language built using a modern approach to safety, performance, and software design patterns.
+0
+Weekly visitors
+0
+Weekly contributions
+XCode keeps giving me an error when trying to install iOS 17 simulator
+14
+upvotes
+·
+16
+comments
+What do y'all think of the Flugster
+r/villainous
+•
+5mo ago
+r/villainous
+The Villainous subreddit for the serie episodes aired on the Cartoon Network Anything app and HBO MAX, created by [Alan Ituriel.](https://twitter.com/AlanIturiel) under [A.I. Animation Studios](https://twitter.com/AIanimacion)
+Comunidad de Villainous/Villanos de los episodios de la serie transmitidos en Cartoon Network y HBO MAX, Creado por [Alan Ituriel.](https://twitter.com/AlanIturiel) en [Estudios de Animación A.I.](https://twitter.com/AIanimacion)
+0
+Weekly visitors
+0
+Weekly contributions
+What do y'all think of the Flugster
+87
+upvotes
+·
+41
+comments
+Flux magazine
+r/retrogamingmagazines
+•
+7mo ago
+r/retrogamingmagazines
+A place for all the retro gaming magazine previews, reviews, adverts, posters and guides of yesteryear! Games Master, Zzap!64, Total Nintendo, Sega Power, Computer and Video Games, EGM Magazine, Mean Machines, Nintendo Power, NGC Magazine, GamesTM and beyond. Post them here!
+0
+Weekly visitors
+0
+Weekly contributions
+Flux magazine
+43
+upvotes
+·
+7
+comments
+< flower
+r/vFlower
+•
+15d ago
+r/vFlower
+Fan subreddit for vFlower and fellow Vocaloids produced by Gynoid Co., Ltd. Share music, art, stories, news, and more!
+0
+Weekly visitors
+0
+Weekly contributions
+< flower
+44
+upvotes
+·
+7
+comments
+Peanut butter question
+r/P320
+•
+6d ago
+r/P320
+The Unofficial Supporting Community for the Sig Sauer P320 and all of its variants
+By posting or commenting in this sub you are agreeing to follow the sub rules. Failure to follow rules will result in a permanent ban.
+0
+Weekly visitors
+0
+Weekly contributions
+Peanut butter question
+2
+45
+upvotes
+·
+11
+comments
+D Dog glitch?
+r/MGSV
+•
+19d ago
+r/MGSV
+Metal Gear Solid Ground Zeroes
+0
+Weekly visitors
+0
+Weekly contributions
+D Dog glitch?
+0:14
+36
+upvotes
+·
+6
+comments
+IMPORTANT MESSAGE FROM FLUFFEETALKS, Please Read.
+r/FLuffeeTalksOfficial
+•
+3mo ago
+r/FLuffeeTalksOfficial
+This is the one and only Official Community for YouTuber FLuffeeTalks. Post things you want me (FLuffeeTalks) to talk about in videos or anything FLuffeeTalks(me) related. I will check this subreddit while I am planning my videos. http://www.YouTube.com/FLuffeeTalks
+0
+Weekly visitors
+0
+Weekly contributions
+IMPORTANT MESSAGE FROM FLUFFEETALKS, Please Read.
+77
+upvotes
+·
+42
+comments
+I put flower
+r/EliteEden
+•
+10d ago
+r/EliteEden
+Neat little safe place for mostly teens and young adults on Reddit. Tight knit community with active members manually approved. If you're looking for long term online friends, this is the place to be!
+Current theme: Cottagecore Eden 🐇
+Join our discord for chat, socials and events!
+Link in Menu.
+0
+Weekly visitors
+0
+Weekly contributions
+I put flower
+4
+93
+upvotes
+·
+34
+comments
+Flux
+r/Antec_Official
+•
+6mo ago
+r/Antec_Official
+A subreddit to display your Antec PC Build, get latest information and find Antec related topics!
+0
+Weekly visitors
+0
+Weekly contributions
+Flux
+2
+39
+upvotes
+·
+12
+comments
+View Post in
+Tiếng Việt
+繁體中文
+Русский
+Public
+Anyone can view, post, and comment to this community
+0
+0
+Top Posts
+Reddit
+reReddit: Top posts of February 7, 2024
+Reddit
+reReddit: Top posts of February 2024
+Reddit
+reReddit: Top posts of 2024
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
+Expand Navigation
+Collapse Navigation
+&nbsp;
+&nbsp;
+&nbsp;
+RESOURCES
+About Reddit
+Advertise
+Developer Platform
+Reddit Pro
+BETA
+Help
+Blog
+Careers
+Press
+Communities
+Best of Reddit
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.

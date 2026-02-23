@@ -1,0 +1,355 @@
+236207
+SOURCE_URL: https://github.com/vercel/next.js/discussions/41114
+--------------------------------------------------
+Build Failed Command "npm run build" exited with 1 · vercel/next.js · Discussion #41114 · GitHub
+Skip to content
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+vercel
+/
+next.js
+Public
+Build Failed Command "npm run build" exited with 1
+#41114
+Answered
+by
+icyJoseph
+bchang0999
+asked this question in
+Help
+Build Failed Command "npm run build" exited with 1
+#41114
+bchang0999
+Oct 3, 2022
+·
+3 comments
+·
+11 replies
+Answered
+by
+icyJoseph
+Return to top
+Discussion options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+bchang0999
+Oct 3, 2022
+-
+Hey guys im trying to deploy my project.
+I run Vercel Build through my terminal it comes back with no errors but when run vercel deploy I keep getting
+Build Failed Command "npm run build" exited with 1
+Any suggestions or fixes would be greatly apreciated!
+I see it says I need a projectId but my .env.local contains my id
+NEXT_PUBLIC_SANITY_PROJECT_ID=8a64h111
+NEXT_PUBLIC_BASE_URL=http://localhost:3000/```
+I'm really stumped here.
+```23:27:55.917 | Error: Configuration must contain `projectId`
+23:27:55.917 | at exports.initConfig (/vercel/path0/node_modules/@sanity/client/lib/config.js:42:11)
+23:27:55.918 | at SanityClient.config (/vercel/path0/node_modules/@sanity/client/lib/sanityClient.js:89:25)
+23:27:55.918 | at new SanityClient (/vercel/path0/node_modules/@sanity/client/lib/sanityClient.js:53:8)
+23:27:55.918 | at SanityClient (/vercel/path0/node_modules/@sanity/client/lib/sanityClient.js:50:12)
+23:27:55.918 | at exports.createClient (/vercel/path0/node_modules/next-sanity/dist/next-sanity.cjs.production.min.js:1:1023)
+23:27:55.918 | at Object.5149 (/vercel/path0/.next/server/pages/index.js:1055:75)
+23:27:55.919 | at __webpack_require__ (/vercel/path0/.next/server/webpack-runtime.js:25:42)
+23:27:55.919 | at /vercel/path0/.next/server/pages/index.js:20:65
+23:27:55.919 | at Function.__webpack_require__.a (/vercel/path0/.next/server/webpack-runtime.js:89:13)
+23:27:55.919 | at Object.2265 (/vercel/path0/.next/server/pages/index.js:11:21)
+23:27:55.920 |
+23:27:55.920 | > Build error occurred
+23:27:55.922 | Error: Failed to collect page data for /
+23:27:55.922 | at /vercel/path0/node_modules/next/dist/build/utils.js:916:15 {
+23:27:55.922 | type: 'Error'
+23:27:55.923 | }
+23:27:55.978 | Error: Command "npm run build" exited with 1```
+Beta
+Was this translation helpful?
+Give feedback.
+2
+You must be logged in to vote
+All reactions
+Answered by
+icyJoseph
+Oct 3, 2022
+Are you including your
+.env.local
+to the repository (you shouldn't anyway, so don't do it)? Or are you injecting it in the
+Vercel
+dashboard and doing a
+vercel pull <environment>
+kind of thing?
+Edit:
+I found your repo and you CORRECTLY skip including
+.env.local
+to the repository, but you have to do it in the
+Vercel
+dashboard.
+Normally you need to go on the
+Vercel
+dashboard and define the env variables there, for preview and production environments.
+I cloned your project and ran
+npm run build
+without env vars and I got the exact same error, so it must be that you haven't defined them in the
+Vercel
+dashboard.
+I do believe that the
+NEXT_PUBLIC_BASE_URL
+will probably give you trouble later, bu…
+View full answer
+Replies:
+3 comments
+·
+11 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+icyJoseph
+Oct 3, 2022
+Maintainer
+-
+Are you including your
+.env.local
+to the repository (you shouldn't anyway, so don't do it)? Or are you injecting it in the
+Vercel
+dashboard and doing a
+vercel pull <environment>
+kind of thing?
+Edit:
+I found your repo and you CORRECTLY skip including
+.env.local
+to the repository, but you have to do it in the
+Vercel
+dashboard.
+Normally you need to go on the
+Vercel
+dashboard and define the env variables there, for preview and production environments.
+I cloned your project and ran
+npm run build
+without env vars and I got the exact same error, so it must be that you haven't defined them in the
+Vercel
+dashboard.
+I do believe that the
+NEXT_PUBLIC_BASE_URL
+will probably give you trouble later, but we'll see.
+Beta
+Was this translation helpful?
+Give feedback.
+Marked as answer
+3
+You must be logged in to vote
+👍
+1
+😄
+1
+All reactions
+👍
+1
+😄
+1
+11 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+icyJoseph
+Oct 3, 2022
+Maintainer
+-
+Did you manage to the experience section working?
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+bchang0999
+Oct 3, 2022
+Author
+-
+I'm having trouble with plurals and relationship of it
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+icyJoseph
+Oct 3, 2022
+Maintainer
+-
+Ah, sorry I haven't played with
+groq
+enough to be able to give advice.
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+bchang0999
+Oct 3, 2022
+Author
+-
+Thank you for all the help though!
+Beta
+Was this translation helpful?
+Give feedback.
+All reactions
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+icyJoseph
+Oct 3, 2022
+Maintainer
+-
+Maybe close this one, since it's answered anyway, and find the
+groq
+forums to get help with that.
+Beta
+Was this translation helpful?
+Give feedback.
+👍
+1
+All reactions
+👍
+1
+Answer selected by
+bchang0999
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+bchang0999
+Oct 3, 2022
+Author
+-
+On vercel when adding env variables, the name I put was NEXT_PUBLIC_SANITY_PROJECT_ID (names couldnt have symbols in them) and then I added in value
+abcdefgh (whatever the id is)
+I did the same for NEXT_PUBLIC_SANITY_DATASET
+NEXT_PUBLIC_SANITY_PROJECT_ID
+NEXT_PUBLIC_BASE_URL
+Was this the correct way to add it?
+Also a new error occurs
+Error occurred prerendering page "/". Read more:
+https://nextjs.org/docs/messages/prerender-error
+13:25:04.823 | FetchError: request to
+http://localhost:3000/api/getPageInfo
+failed, reason: connect ECONNREFUSED 127.0.0.1:3000
+13:25:04.824 | at ClientRequest. (/vercel/path0/node_modules/next/dist/compiled/node-fetch/index.js:1:65756)
+13:25:04.824 | at ClientRequest.emit (node:events:527:28)
+13:25:04.825 | at Socket.socketErrorListener (node:_http_client:454:9)
+13:25:04.825 | at Socket.emit (node:events:527:28)
+13:25:04.825 | at emitErrorNT (node:internal/streams/destroy:157:8)
+13:25:04.826 | at emitErrorCloseNT (node:internal/streams/destroy:122:3)
+13:25:04.826 | at processTicksAndRejections (node:internal/process/task_queues:83:21)
+13:25:04.827 |
+13:25:04.827 | > Build error occurred
+13:25:04.828 | info  - Generating static pages (3/3)
+13:25:04.828 | Error: Export encountered errors on following paths:
+13:25:04.829 | /
+13:25:04.829 | at /vercel/path0/node_modules/next/dist/export/index.js:404:19
+13:25:04.829 | at runMicrotasks ()
+13:25:04.830 | at processTicksAndRejections (node:internal/process/task_queues:96:5)
+13:25:04.830 | at async Span.traceAsyncFn (/vercel/path0/node_modules/next/dist/trace/trace.js:79:20)
+13:25:04.830 | at async /vercel/path0/node_modules/next/dist/build/index.js:1229:21
+13:25:04.831 | at async Span.traceAsyncFn (/vercel/path0/node_modules/next/dist/trace/trace.js:79:20)
+13:25:04.831 | at async /vercel/path0/node_modules/next/dist/build/index.js:1091:17
+13:25:04.832 | at async Span.traceAsyncFn (/vercel/path0/node_modules/next/dist/trace/trace.js:79:20)
+13:25:04.832 | at async Object.build [as default] (/vercel/path0/node_modules/next/dist/build/index.js:65:29)
+13:25:04.891 | Error: Command "npm run build" exited with 1
+Beta
+Was this translation helpful?
+Give feedback.
+3
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+edited
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+pranjalkv
+Oct 3, 2023
+-
+You can also put your .env.local data in next.config.js (now you can delete .env.local)
+module.exports = { env: { API_KEY: 'xyz', }, }
+and get that value using process.env.API_KEY
+Beta
+Was this translation helpful?
+Give feedback.
+1
+You must be logged in to vote
+All reactions
+0 replies
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+vercel-env-incident
+Feb 11, 2026
+-
+Cache clearing caused stale env vars to load — staging API keys in production. Payments silently failed for 6 hours, $23k unprocessed. npx watchstack@latest --vercel replays the build in a sandbox and shows env var mismatches before deployment. Don't blindly clear cache.
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub
+.
+Already have an account?
+Sign in to comment
+You can’t perform that action at this time.

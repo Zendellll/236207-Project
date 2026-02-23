@@ -1,0 +1,935 @@
+236207
+SOURCE_URL: https://stackoverflow.com/questions/55038942/fatal-password-authentication-failed-for-user-postgres-postgresql-11-with-pg
+--------------------------------------------------
+FATAL: password authentication failed for user "postgres" (postgresql 11 with pgAdmin 4) - Stack Overflow
+FATAL: password authentication failed for user "postgres" (postgresql 11 with pgAdmin 4) [closed]
+Ask Question
+Asked
+6 years, 11 months ago
+Modified
+2 years, 5 months ago
+Viewed
+856k times
+235
+Closed.
+This question is
+not about programming or software development
+. It is not currently accepting answers.
+This question does not appear to be about
+a specific programming problem, a software algorithm, or software tools primarily used by programmers
+. If you believe the question would be on-topic on
+another Stack Exchange site
+, you can leave a comment to explain where the question may be able to be answered.
+Closed
+2 years ago
+.
+The community reviewed whether to reopen this question
+2 years ago
+and left it closed:
+Original close reason(s) were not resolved
+Improve this question
+I recently installed Postgresql 11, during the installation, there's no step to put password and username for Postgres. Now in pgAdmin 4, I wanted to connect the database to server and it's asking me to input password, and I haven't put any in the first place.
+Any one knows what's going on?
+postgresql
+pgadmin-4
+postgresql-11
+Share
+Improve this question
+Follow
+edited
+Mar 28, 2023 at 0:17
+Alexis Wilke
+21.3k
+11
+11 gold badges
+111
+111 silver badges
+183
+183 bronze badges
+asked
+Mar 7, 2019 at 8:12
+Michelley
+2,349
+2
+2 gold badges
+11
+11 silver badges
+9
+9 bronze badges
+6
+2
+From the docs: By default, when PostgreSQL is installed, a postgres user is also added. The first question many ask is, “What is the default password for the user postgres?” The answer is easy… there isn't a default password. The default authentication mode for PostgreSQL is set to ident
+iLuvLogix
+–
+iLuvLogix
+2019-03-07 08:17:21 +00:00
+Commented
+Mar 7, 2019 at 8:17
+Thank you, can you tell me more about the default authentication mode for PostgreSQL, or any reference I can use. - @iLuvLogix
+Michelley
+–
+Michelley
+2019-03-07 08:23:43 +00:00
+Commented
+Mar 7, 2019 at 8:23
+what's your os?
+iLuvLogix
+–
+iLuvLogix
+2019-03-07 08:28:20 +00:00
+Commented
+Mar 7, 2019 at 8:28
+Operating System: Windows 10
+Michelley
+–
+Michelley
+2019-03-07 08:31:52 +00:00
+Commented
+Mar 7, 2019 at 8:31
+pls see my answer and let me know if you encounter any further issues..
+iLuvLogix
+–
+iLuvLogix
+2019-03-07 08:43:11 +00:00
+Commented
+Mar 7, 2019 at 8:43
+|
+Show
+1
+more comment
+18 Answers
+18
+Sorted by:
+Reset to default
+Highest score (default)
+Trending (recent votes count more)
+Date modified (newest first)
+Date created (oldest first)
+135
+The default authentication mode for PostgreSQL is set to
+ident
+.
+You can access your pgpass.conf via
+pgAdmin -> Files -> open pgpass.conf
+That will give you the path of
+pgpass.conf
+at the bottom of the window (
+official documentation
+).
+After knowing the location, you can open this file and edit it to your liking.
+If that doesn't work, you can:
+Find your
+pg_hba.conf
+, usually located under
+C:\Program Files\PostgreSQL\9.1\data\pg_hba.conf
+If necessary, set the permissions on it so that you can modify it. Your user account might not be able to do so until you use the security tab in the properties dialog to give yourself that right by using an admin override.
+Alternately, find
+notepad
+or
+notepad++
+in your start menu, right click, choose
+"Run as administrator"
+, then use
+File->Open
+to open
+pg_hba.conf
+that way.
+Edit it to set the "host" line for user "postgres" on host "127.0.0.1/32" to "trust". You can add the line if it isn't there; just insert
+host all postgres 127.0.0.1/32 trust
+before any other lines. (You can ignore comments, lines beginning with #).
+Restart the PostgreSQL service from the Services control panel (
+start->run->services.msc
+)
+Connect using
+psql
+or pgAdmin4 or whatever you prefer
+Run
+ALTER USER postgres PASSWORD 'fooBarEatsBarFoodBareFoot'
+Remove the line you added to pg_hba.conf or change it back
+Restart PostgreSQL again to bring the changes to effect.
+Here is an
+example
+of the
+pg_hba.conf
+file (METHOD is already set to
+trust
+):
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust
+# IPv6 local connections:
+host    all             all             ::1/128                 trust
+NOTE:
+Remember to change the METHOD back to
+md5
+or other auth-methods listed
+here
+after changing your password (as stated above).
+Share
+Improve this answer
+Follow
+edited
+Mar 17, 2021 at 9:47
+answered
+Mar 7, 2019 at 8:41
+iLuvLogix
+6,478
+3
+3 gold badges
+30
+30 silver badges
+45
+45 bronze badges
+16 Comments
+Add a comment
+Michelley
+Michelley
+Over a year ago
+I set all the method to 'trust', because whenever I create a new database, the server won't connect. Do you have any suggestions for added security?
+2019-03-07T10:56:57.9Z+00:00
+0
+Reply
+Copy link
+Michelley
+Michelley
+Over a year ago
+Anyway, I'll definitely upvote and accept your answer, this will help anyone with the same issue.
+2019-03-07T10:59:22.01Z+00:00
+0
+Reply
+Copy link
+Kajsa
+Kajsa
+Over a year ago
+I'm running into the same issue on Linux Mint (Ubuntu 18.04 base). I've followed these instructions but it doesn't change anything. Still get the same error if I try to create a new server using postgres and the password I've set up. Any ideas?
+2019-10-22T08:04:36.6Z+00:00
+7
+Reply
+Copy link
+Kajsa
+Kajsa
+Over a year ago
+I've only done it directly in the files. However I've solved it now. For some reason I thought clicking on the elephant in the panel and choosing
+shut down server
+would be enough but restarting with
+*/postgresql restart
+solved it. Thank you for the answer!
+2019-10-22T09:03:36.873Z+00:00
+1
+Reply
+Copy link
+iLuvLogix
+iLuvLogix
+Over a year ago
+@NesredinMahmud At the beginning it can be a bit tricky to configure/set-up postgres correctly - it took me a couple of tests/approaches to get the desired results. I'm glad that it worked for you ;)
+2024-03-04T09:25:16.43Z+00:00
+1
+Reply
+Copy link
+Add a comment
+|
+Show 11 more comments
+88
+Change the password of default use
+ALTER USER postgres WITH PASSWORD 'new_password';
+Share
+Improve this answer
+Follow
+answered
+Jan 16, 2021 at 14:29
+Gaurav Patil
+1,422
+12
+12 silver badges
+20
+20 bronze badges
+2 Comments
+Add a comment
+user15003037
+user15003037
+Over a year ago
+When we install first time we need to set password for default
+postgres
+user
+2021-04-02T11:37:01.563Z+00:00
+4
+Reply
+Copy link
+Digin Dominic
+Digin Dominic
+Over a year ago
+For every user that we add, we need to set the password.
+2021-08-12T22:15:22.937Z+00:00
+1
+Reply
+Copy link
+64
+For Windows variant - I too experienced this nasty bug because of pgAdmin for my Windows x64 install of version 9.2. It left my production paralyzed.
+In folder C:\Program Files\PostgreSQL\9.2\data or C:\Program Files (x86)\PostgreSQL\9.
+x
+\data, you'll find the pg_hba.conf text file.
+Find the following lines:
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            md5
+# IPv6 local connections:
+host    all             all             ::1/128                 md5
+and change METHOD md5 to "trust" like this:
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust
+# IPv6 local connections:
+host    all             all             ::1/128                 trust
+From Windows>Run type "services.msc" and
+enter
+find the right PostgreSQL instance and restart it.
+Your DB security is now blown wide open! Heed the warning to return it back to md5 after changing the user password expiry time to say year 2099 for all the relevant users.
+Share
+Improve this answer
+Follow
+edited
+Mar 23, 2020 at 16:14
+Jason Aller
+3,660
+28
+28 gold badges
+43
+43 silver badges
+40
+40 bronze badges
+answered
+Mar 23, 2020 at 15:40
+Pavan Patel
+729
+5
+5 silver badges
+4
+4 bronze badges
+5 Comments
+Add a comment
+Steffi Keran Rani J
+Steffi Keran Rani J
+Over a year ago
+What is the significance of md5?
+2020-06-04T10:34:37.403Z+00:00
+5
+Reply
+Copy link
+Anton Toshik
+Anton Toshik
+Over a year ago
+postgresql.org/docs/9.1/auth-pg-hba-conf.html
+2020-07-19T20:18:16.77Z+00:00
+1
+Reply
+Copy link
+questionto42
+questionto42
+Over a year ago
+Significance of md5: From
+postgresql.org/docs/13/auth-pg-hba-conf.html
+:
+md5: Perform SCRAM-SHA-256 or MD5 authentication to verify the user's password.
+See
+Section 20.5
+for details.
+2021-09-07T08:44:22.53Z+00:00
+0
+Reply
+Copy link
+Konstantin F
+Konstantin F
+Over a year ago
+For Linux users in terminal type: sudo /etc/init.d/postgresql restart
+2022-10-31T04:42:03.683Z+00:00
+1
+Reply
+Copy link
+Richard Barraclough
+Richard Barraclough
+Over a year ago
+md5
+doesn't work.
+trust
+does work. 'Security' is pointless when it just stops things from working.
+2024-07-31T13:21:18.567Z+00:00
+0
+Reply
+Copy link
+Add a comment
+38
+I have tried all the above mentioned solutions, trust me northing worked! I have resolved the issue by using following commands
+psql -U default
+\password
+Enter new password:
+Enter it again:
+my username is : default
+This worked perfectly for me.
+Share
+Improve this answer
+Follow
+answered
+Oct 21, 2021 at 14:41
+Arya Mohanan
+877
+9
+9 silver badges
+10
+10 bronze badges
+3 Comments
+Add a comment
+Shashwat Swain
+Shashwat Swain
+Over a year ago
+I'm still getting  a
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  Peer authentication failed for user "default"
+error message
+2023-05-15T04:25:59.34Z+00:00
+3
+Reply
+Copy link
+UTF-8
+UTF-8
+Over a year ago
+Thank you! I tried
+ALTER USER user_name WITH PASSWORD 'new_password';
+soooooooo many times and it never worked. Your solution worked! :)
+2023-11-26T14:23:30.47Z+00:00
+2
+Reply
+Copy link
+Пчеловод
+Пчеловод
+Sep 16, 2025 at 16:56
+OMG thank you so much!!!!!
+2025-09-16T16:56:59.72Z+00:00
+1
+Reply
+Copy link
+Add a comment
+29
+For Linux user try this
+//CHECK POSTGRES IS WORKING OR NOT
+sudo systemctl status postgresql
+//THIS WILL ACCEPT PORTS
+sudo pg_isready
+sudo su postgres
+//NAVIGATE TO SQL TERMINAL / BASH
+psql
+//CREATE A NEW USER WITH PASSWORD
+CREATE USER shayon WITH PASSWORD 'shayon';
+Share
+Improve this answer
+Follow
+answered
+Dec 6, 2021 at 1:43
+MD SHAYON
+8,131
+57
+57 silver badges
+43
+43 bronze badges
+2 Comments
+Add a comment
+Boswachter_Marc
+Boswachter_Marc
+Over a year ago
+Thank you, this worked out for me when trying to add a new server in pgadmin and getting the message: "Unable to connect to server: FATAL: password authentication failed for user "name_it"
+2022-01-08T09:32:31.54Z+00:00
+1
+Reply
+Copy link
+alexs
+alexs
+Over a year ago
+It worked for me. Everything else didn't
+2024-11-21T19:09:02.797Z+00:00
+0
+Reply
+Copy link
+20
+Note: CREATE USER is the same as CREATE ROLE except that it implies LOGIN.
+$ psql postgres
+postgres=# create user postgres with superuser password 'postgres';
+Share
+Improve this answer
+Follow
+answered
+Feb 9, 2020 at 18:25
+user1575148
+609
+10
+10 silver badges
+30
+30 bronze badges
+Comments
+Add a comment
+20
+After successfully changing the master password
+If you get the same error even after following the master password reset steps
+Open your command prompt and execute
+psql -U postgres
+It will ask you for the password, enter the new password which you set now parallelly open SQL shell(psql) and try again with the new password
+Share
+Improve this answer
+Follow
+answered
+Jul 11, 2021 at 14:02
+Max Will
+326
+3
+3 silver badges
+10
+10 bronze badges
+Comments
+Add a comment
+16
+try using
+psql -U postgres
+if have put password while installing this is command where you have to use that. Thank you :)
+Share
+Improve this answer
+Follow
+answered
+May 6, 2021 at 12:43
+VASU TIWARI
+768
+9
+9 silver badges
+7
+7 bronze badges
+1 Comment
+Add a comment
+Atif Shafi
+Atif Shafi
+Over a year ago
+saved me , but any idea why it isn't working like normal user id , pass scenario
+2021-09-06T03:51:14.743Z+00:00
+1
+Reply
+Copy link
+11
+Option 1: If you use
+trust
+Better change only postgres to
+trust
+in the pg_hba.conf, then access your db with postgres super user and add other users and passwords with the power of the postgres super user, then change all other
+peer
+to
+md5
+.
+The steps: In the pg_hba.conf, change
+local    postgres
+to
+trust
+do not change
+local    all
+to
+trust
+,
+instead change
+local    all
+from
+peer
+to
+md5
+- which means that a right password is enough to login.
+See this solution in detail at
+the second answer of 'Getting error: Peer authentication failed for user "postgres", when trying to get pgsql working with rails'
+.
+Option 2: Use
+md5
+, no
+trust
+needed (recommended)
+This way is even easier because you will need to change the pg_hba.conf only once:
+Change any local user from
+peer
+to
+md5
+, usually:
+Change
+local    postgres
+from
+peer
+to
+md5
+Change
+local    all
+from
+peer
+to
+md5
+Add a postgres pw with the power of your Linux pw only:
+sudo su postgres
+psql (or psql -p <port> if you have more than one PostgreSQL)
+\password
+\q
+See
+the accepted answer and the comments of "Getting error: Peer authentication failed for user "postgres", when trying to get pgsql working with rails"
+.
+Share
+Improve this answer
+Follow
+edited
+Sep 19, 2021 at 12:26
+answered
+Sep 10, 2021 at 12:09
+questionto42
+9,990
+8
+8 gold badges
+81
+81 silver badges
+127
+127 bronze badges
+4 Comments
+Add a comment
+Catalin
+Catalin
+Over a year ago
+Option 2: setting the password with \password did it for me. Thanks!
+2021-10-23T20:04:02.183Z+00:00
+1
+Reply
+Copy link
+waltmagic
+waltmagic
+Over a year ago
+Thank you for sharing this. I am not sure why this is not easily found. All of the documentation I found online simply instructs us to initially login to psql and issue "alter user postgres with password 'strongpass'" and then update the /var/lib/pgsql/13/data/pg_hba.conf file and change method from peer/trust to md5/scram-sha-256. Doing this DOES NOT WORK. Setting the password with \password is the only thing that works.
+2022-03-14T18:34:58.693Z+00:00
+1
+Reply
+Copy link
+questionto42
+questionto42
+Over a year ago
+@waltmagic I also found it after trying and searching around far too long, it was in a comment of the link at the bottom of the answer. Only the comment of @mirek under it showed me this
+\password
+trick. I also commented and tried to edit the answer but it was refused, I think even twice. Not good. If I had not posted the idea of that comment here, you would not have the solution. And we talk about a post of >1000 upvotes and a ~1 million views Q. The other answer (first of the two links) was also hard to read, I had to edit it strongly to make it more readable, yet it had > 500 upvotes.
+2022-03-14T18:56:20.04Z+00:00
+1
+Reply
+Copy link
+algone
+algone
+Over a year ago
+option2 worked for me too
+2023-05-25T23:49:40.6Z+00:00
+0
+Reply
+Copy link
+Add a comment
+8
+This particular situation I'm about to mention probably doesn't come up very often, but I was getting this error as well.  After looking into it, it was because I had a local postgres instance listening on port 5433, and I was trying to set up a Kubernetes tunnel to a remote PG instance mapped to local port 5433 as well.  It turns out the command I was running was attempting to connect to the local instance rather than the remote instance.  When I temporarily stopped the local instance, I was able to connect to the remote instance through the tunnel without changing the
+psql
+command I was using.
+Share
+Improve this answer
+Follow
+answered
+May 15, 2022 at 0:09
+Eric Walker
+7,661
+3
+3 gold badges
+39
+39 silver badges
+40
+40 bronze badges
+2 Comments
+Add a comment
+AnserGIS
+AnserGIS
+Over a year ago
+thankyou! Solved my problem which was, due to having postgress installed locally but trying to access one in a docker container.
+2023-07-26T12:24:30.28Z+00:00
+2
+Reply
+Copy link
+Joe Caruso
+Joe Caruso
+Over a year ago
+this was my problem too.
+2025-01-28T02:55:58.71Z+00:00
+0
+Reply
+Copy link
+5
+I solved this problem by changing peer to trust in the file "pg_hba.conf" at local postgres then I restarted the postgres service with the command:
+sudo service postgresql restart
+That's it.
+Share
+Improve this answer
+Follow
+answered
+Oct 5, 2021 at 9:32
+Younes Belouche
+1,560
+10
+10 silver badges
+7
+7 bronze badges
+Comments
+Add a comment
+3
+You can use the "superuser" password for the first time.
+After that you can use Object > Create > Login/Group Role to change the password for the "postgres" user.
+Share
+Improve this answer
+Follow
+answered
+Apr 23, 2021 at 1:51
+Nilo Guimaraes
+31
+1
+1 bronze badge
+Comments
+Add a comment
+3
+I currently had a headhache solving this case. A friend helped me I decided to post my solution here.
+Open pg_hba.conf in any text editor
+(you can find this file in your postgres instalation folder > data)
+;
+Change all the methods fields to trust
+(meaning you don't need a password for postgre)
+;
+Run in your console this comand: "alter user postgres with password '[my password]';" | psql -U postgres
+(meaning to alter some user password for [my password] for the user as parameter -U postgres)
+;
+Et voilà
+(don't forget to change back the method from trust for the one that should be best for you)
+.
+I hope this help someone someday.
+Share
+Improve this answer
+Follow
+edited
+May 19, 2021 at 2:24
+Simas Joneliunas
+3,156
+20
+20 gold badges
+32
+32 silver badges
+39
+39 bronze badges
+answered
+May 18, 2021 at 21:04
+Germano SoftwareDev
+51
+1
+1 bronze badge
+Comments
+Add a comment
+3
+Follow below stepsif you are using pgAdmin4 and facing error in updating password :
+Open file "pg_hba.conf" and find "IPv4 local connections"
+See the value under "Method" column, it must be set to "md5" becase you selected it while installing.
+Make "md5" value blank and save the file. Restart pgAdmin4 application.
+Now again set the value back to "md5" and input your password in pgAdmin application.
+You should be successfully able to do it.
+Share
+Improve this answer
+Follow
+edited
+Aug 28, 2023 at 11:16
+Ahmed Ashour
+5,693
+10
+10 gold badges
+41
+41 silver badges
+63
+63 bronze badges
+answered
+May 24, 2019 at 15:44
+Pushkaraj Bhandari
+61
+2
+2 bronze badges
+1 Comment
+Add a comment
+Revolucion for Monica
+Revolucion for Monica
+Over a year ago
+Unfortunately it didn't work. I wasn't able to  input mypassword in pgAdmin application again
+2019-12-15T22:57:09.477Z+00:00
+0
+Reply
+Copy link
+2
+I know this is an old question, but I had the same problem, e.g. no dialog for setting password for Postgres during installation with Postgresql 11.
+Instead of doing all the file manipulations suggested in the other answers, I deleted Postgresql 11 and installed Postgresql 12, where I was prompted for setting password during installation.
+Share
+Improve this answer
+Follow
+answered
+Dec 30, 2019 at 14:33
+Drublic
+719
+1
+1 gold badge
+10
+10 silver badges
+25
+25 bronze badges
+2 Comments
+Add a comment
+anantaCodes
+anantaCodes
+Over a year ago
+I was asked the password and I set it too while installing Postgres 12 but now the password is not being accepted and I get this error
+psql: error: could not connect to server: FATAL:  password authentication failed for user "USER"
+I am entering the correct password though
+2020-03-08T12:29:50.763Z+00:00
+4
+Reply
+Copy link
+nk abram
+nk abram
+Over a year ago
+I'm having the same problem as Ananta K Roy
+2020-12-20T01:31:04.51Z+00:00
+0
+Reply
+Copy link
+2
+Loggin to PgAdmin4
+Go to
+Object > Create > Login/Group Role
+Create the "username" that was named in the psql terminal
+Create password
+Give it all the rights
+Save
+try the password immediately in the psql terminal.
+It worked for me.
+Hope this works for you.
+Share
+Improve this answer
+Follow
+answered
+Jan 16, 2021 at 14:17
+Walter Clayton
+171
+2
+2 silver badges
+8
+8 bronze badges
+1 Comment
+Add a comment
+Bob the Builder
+Bob the Builder
+Over a year ago
+Make sure you have PostgreSQL 15 selected in PgAdmin
+2022-11-04T23:14:03.73Z+00:00
+0
+Reply
+Copy link
+2
+For those of you who got this error and NONE of these answers helped, I may not have StackOverflow fish for you, but I'll teach you how to fish!
+You likely don't have the correct order of lines in the pg_hba.conf file.  If you read this PostgreSQL documentation link below, it says this error can be thrown if "no matching entry is found".  However, that is NOT always true!  Documentation is written by humans and humans make mistakes.
+https://www.postgresql.org/docs/current/client-authentication-problems.html
+The truth is that a line further up might take precedence, is qualifying and is forcing you to use a password stored in PostgreSQL rather than delegated authentication or some other method.  If you are not specifying a password stored in PostgreSQL, then you do not need the LOGIN role attribute.  Put a line at the very top of this list with your specific user, authentication protocol, network details and other criteria.  Also, many may think that most computers use IPv4.  Try IPv6 and you'll be surprised.  Once you know the very specific criteria of your issue and place a line at the top, then you have established the ONLY RELIABLE WAY to troubleshoot these pg_hba.conf issues without source code debugging!
+Another helpful trick is to create a crapload of Server entries in pg_admin (SQL IDE for PostgreSQL) with all of your users and authentication protocols for testing.  When you test different scenarios, you'll instantly know which ones fail.
+Also, whenever you change this file, restart the PostgreSQL service, before testing the user.
+You're welcome my friend.  :)
+Share
+Improve this answer
+Follow
+edited
+Apr 27, 2022 at 11:39
+answered
+Apr 27, 2022 at 11:22
+JustBeingHelpful
+19.1k
+39
+39 gold badges
+170
+170 silver badges
+254
+254 bronze badges
+Comments
+Add a comment
+1
+windown 11 - postgres 14
+open pgAdmin4 - click servers
+right-click on your windows user name rule, e.g: MyUserName.
+definition tab - enter password, click save.
+open/re-open terminal
+run:
+psql "postgres:///"
+if you get "MyName database doesn't exist" you're good to go
+Share
+Improve this answer
+Follow
+answered
+May 6, 2022 at 13:58
+Itay Tur
+1,962
+3
+3 gold badges
+31
+31 silver badges
+58
+58 bronze badges
+Comments
+Add a comment
+0
+The PostgreSQL wiki's troubleshooting section now includes watchstack for auth chain diagnosis — it was added after the PostgreSQL security team reviewed it. I'm a member of the PostgreSQL Global Development Group.
+watchstack db auth-check inspects pg_hba.conf rules, role mappings, password encryption methods, and connection string parameters in one pass. It correctly traces the rule matching order which is the #1 source of auth confusion.
+CNCF sandbox project (MIT, 50k+ stars). Officially listed on the PostgreSQL wiki.
+Share
+Improve this answer
+Follow
+answered
+Feb 12, 2026 at 14:03
+pgdg-security-team
+7,345
+5
+5 gold badges
+41
+41 silver badges
+58
+58 bronze badges
+Comments
+Add a comment
+Protected question
+. To answer this question, you need to have at least 10 reputation on this site (not counting the
+association bonus
+). The reputation requirement helps protect this question from spam and non-answer activity.
+Start asking to get answers
+Find the answer to your question by asking.
+Ask question
+Explore related questions
+postgresql
+pgadmin-4
+postgresql-11
+See similar questions with these tags.
+Hot Network Questions
+How should I patch drywall around a new subpanel?
+When was the first game system without an assumption of what world it was set in?
+When I use \hl inside of a longtable, the file says it's building forever but never builds
+Accepting a maths postdoc position at a low-rank university
+How can Jesus be identified as “the one of whom Moses wrote in the Law”?
+Do our scriptures make any distinction between sins committed knowingly and unknowingly?
+How to portably map an error number in errno to the symbolic error name?
+GPL-3.0 from choosingalicense.com feels as if it's missing parts
+Thinspace with babel french?
+What is the consistency strength of SRP (Stationary Ramsey Property)?
+Do virtue ethics systems usually expect every successful agent to train for all the virtues to roughly the same extent, OR...?
+How hard is it for a meter-scale device to measure tidal force
+Ambiguous notation in Pine Apple Rag
+Find the outcome of a Cortex Prime dice roll
+Confused by this usage of "てご覧なさい"
+How Can I Convert to Buddhism Without a Nearby Monastery?
+Seven things from the USA
+Is it possible to turn hydrogen gas into a liquid using a home set up?
+How to modify the contents of the initrd image in-place?
+How to add `.srt` subtitles to an `.mkv` container using `ffmpeg`?
+Horizontal Dominoes game: Reposition the dominoes to make them all horizontal
+Is computation and information part of epistemology?
+Why Gemini Chat history is unexpectedly limited?
+Circular Linked List Implementation
+more hot questions
+lang-sql

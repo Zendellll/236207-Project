@@ -1,0 +1,646 @@
+236207
+SOURCE_URL: https://github.com/webpack/webpack/issues/15529
+--------------------------------------------------
+Webpack v4 migration to v5 effort is running into a "JavaScript heap out of memory"  · Issue #15529 · webpack/webpack
+Skip to content
+Navigation Menu
+Toggle navigation
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Spark
+Build and deploy intelligent apps
+GitHub Models
+Manage and compare prompts
+MCP Registry
+New
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+Accelerator
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search or jump to...
+Search code, repositories, users, issues, pull requests...
+Search
+Clear
+Search syntax tips
+Provide feedback
+We read every piece of feedback, and take your input very seriously.
+Include my email address so I can be contacted
+Cancel
+Submit feedback
+Saved searches
+Use saved searches to filter your results more quickly
+Name
+Query
+To see all available qualifiers, see our
+documentation
+.
+Cancel
+Create saved search
+Sign in
+Sign up
+Appearance settings
+Resetting focus
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+webpack
+/
+webpack
+Public
+Sponsor
+Sponsor webpack/webpack
+External links
+opencollective.com/
+webpack
+Learn more about funding links in repositories
+.
+Report abuse
+Notifications
+You must be signed in to change notification settings
+Fork
+9.3k
+Star
+66k
+Code
+Issues
+111
+Pull requests
+103
+Discussions
+Actions
+Projects
+1
+Security
+3
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Discussions
+Actions
+Projects
+Security
+Insights
+Webpack v4 migration to v5 effort is running into a "JavaScript heap out of memory"
+#15529
+New issue
+Copy link
+New issue
+Copy link
+Closed
+Closed
+Webpack v4 migration to v5 effort is running into a "JavaScript heap out of memory"
+#15529
+Copy link
+Description
+duhmojo
+opened
+on
+Mar 14, 2022
+·
+edited by
+duhmojo
+Edits
+Issue body actions
+Bug report
+Hi. I have a webpack v4 legacy webpack.config.js that I'm trying to update to work with webpack v5. The only hiccup I ran into was my use of
+webpack-dev-server -d --host 0.0.0.0 --open
+was breaking the new devtool config in v5. So I corrected it to
+webpack serve --host 0.0.0.0 --open
+and all seemed ok (no errors building or starting) but I can' figure out why it's basically eating up memory then crashing with a "JavaScript heap out of memory" error.
+I'm using:
+webpack version:  5.70.0
+Node.js version:  14.16.0
+Operating System: CentOS 8 Stream
+Here's my legacy webpack.config.js that worked with webpack v4. I tried writing a new one from scratch, but evertime I try to build it just eats up memory and crashes:
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+module.exports = () => {
+return {
+devtool: 'eval-source-map',
+mode: 'development',
+module: {
+rules: [
+{
+test: /\.jsx?$/,
+loader: 'babel-loader',
+options: {
+presets: ['@babel/preset-env',
+'@babel/react',{
+'plugins': ['@babel/plugin-proposal-class-properties']}]
+}
+},
+{
+test: /\.(css|scss)$/,
+use: [
+{
+loader: 'style-loader'
+},
+{
+loader: 'css-loader',
+options: {url:false}
+}
+]
+},
+{
+test: /\.(woff)$/,
+use: [
+{
+loader: 'url-loader',
+options: {
+name: 'fonts/[name].[ext]',
+mimetype:'application/font-woff'
+}
+}
+],
+},
+{
+test: /\.(woff2)$/,
+use: [
+{
+loader: 'url-loader',
+options: {
+name: 'fonts/[name].[ext]',
+mimetype:'application/font-woff2'
+}
+}
+],
+},
+{
+test: /\.(ttf|otf)$/,
+use: [
+{
+loader: 'url-loader',
+options: {
+name: 'fonts/[name].[ext]',
+}
+}
+],
+},
+{
+test: /\.(png|svg|jpg|gif|ico)$/,
+use: [
+{
+loader: 'file-loader',
+options: {
+name: '[name].[ext]',
+outputPath: 'images/'
+}
+}
+],
+}
+]
+},
+name: '[name].[ext]',
+resolve: {
+extensions: ['.js', '.jsx'],
+alias: {
+'@': path.resolve(__dirname, 'src/'),
+'NodeModules': path.resolve(__dirname, 'node_modules'),
+}
+},
+plugins: [new HtmlWebpackPlugin({
+template: './src/index.html'
+})],
+devServer: {
+historyApiFallback: true
+},
+externals: {
+// global app config object
+config: JSON.stringify({
+//apiUrl: '/api'
+apiUrl: 'http://127.0.0.1:4000/api'
+})
+},
+output: {
+filename: "main.js",
+publicPath: "/",
+}
+}
+}
+Here's the output from trying to start with
+webpack serve
+with
+--progress
+thrown in:
+<i> [webpack-dev-server] Project is running at:
+<i> [webpack-dev-server] Loopback: http://localhost:8080/
+<i> [webpack-dev-server] On Your Network (IPv4): http://172.16.240.144:8080/
+<i> [webpack-dev-server] Content not from webpack is served from '/home/chris/Development/verity/frontend/public' directory
+<i> [webpack-dev-server] 404s will fallback to '/index.html'
+<i> [webpack-dev-middleware] wait until bundle finished: /
+10% building 0/1 entries 0/0 dependencies 0/0 modules
+And nothing else is logged. I monitored top and node was using GBs of memory and 100% CPU. When I just let it go it eventually it crashes:
+<--- Last few GCs --->
+[482203:0x563619071c30]   190078 ms: Mark-sweep 1976.4 (2084.9) -> 1956.6 (2078.5) MB, 401.5 / 0.0 ms  (average mu = 0.260, current mu = 0.108) task scavenge might not succeed
+[482203:0x563619071c30]   190677 ms: Mark-sweep 1974.9 (2080.7) -> 1958.6 (2080.7) MB, 395.6 / 0.0 ms  (average mu = 0.301, current mu = 0.340) allocation failure scavenge might not succeed
+<--- JS stacktrace --->
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+1: 0x5636168852a4 node::Abort() [webpack]
+...
+I'm lost here and I can't tell if this is a bug of some kind of user error. I've posted this Q to stackoverflow as well, and I've looked through the repo issues for an answer without much luck.
+Any advice is welcome.
+👍
+React with 👍
+1
+gravesee
+Activity
+vankop commented
+on Mar 15, 2022
+vankop
+on Mar 15, 2022
+Member
+More actions
+This error occurs when the memory allocated for the executing application is less than the required memory. By default, the memory limit in Node.js is 512 MB. To increase this amount, you need to set the memory limit argument
+--max-old-space-size=x
+. It will help avoid a memory limit issue.
+vankop
+closed this as
+completed
+on Mar 15, 2022
+duhmojo commented
+on Mar 15, 2022
+duhmojo
+on Mar 15, 2022
+·
+edited by
+duhmojo
+Edits
+Author
+More actions
+So I increased the memory limit from the default 512MB to 4GB and it still runs out of memory. The progress options
+--progress
+still indicates nothing is happening and it takes a while for the memory limit to be hit. Like longer than it took to build with webpack v4.
+Is this still a closed issue if this is still the case?
+vankop commented
+on Mar 15, 2022
+vankop
+on Mar 15, 2022
+Member
+More actions
+please create reproducible repo. It is hard to guess what is wrong..
+vankop
+reopened this
+on Mar 15, 2022
+duhmojo commented
+on Mar 15, 2022
+duhmojo
+on Mar 15, 2022
+Author
+More actions
+Sorry, creating one without my whole project would probably take the rest of the week (I know how that sounds). I was hoping for a tip on how to narrow down what could be causing the problem. The only setting in webpack I see to observe what's happening when trying to build is
+--progress
+and it just sits at 10% eating up CPU and memory:
+10% building 0/1 entries 0/0 dependencies 0/0 modules
+Is there any other verbose or debug mode to indicate what parts of the config are being executed?
+I tried
+cache: false
+to no luck.
+I suspect it might have to do with a dependent module version. So I blew away all my packages, and set out to update them all to the latest relative to webpack v5. Here's my full package version list. I tried upgrading all packages, within reason (the React and Bootstrap packages are big leaps that would require coding work) I think some of these packages might not be needed with webpack 5 now.
+├── @babel/cli@7.17.6
+├── @babel/core@7.17.7
+├── @babel/node@7.16.8
+├── @babel/plugin-proposal-class-properties@7.16.7
+├── @babel/plugin-transform-runtime@7.17.0
+├── @babel/preset-env@7.16.11
+├── @babel/preset-react@7.16.7
+├── @babel/register@7.17.7
+├── babel-loader@8.2.3
+├── bootstrap@4.6.1
+├── chart.js@3.7.1
+├── clean-webpack-plugin@4.0.0
+├── copy-webpack-plugin@10.2.4
+├── css-loader@6.7.1
+├── css-minimizer-webpack-plugin@3.4.1
+├── date-fns@2.28.0
+├── dotenv-webpack@7.1.0
+├── enzyme-adapter-react-16@1.15.6
+├── enzyme@3.11.0
+├── file-loader@6.2.0
+├── formik@2.2.9
+├── history@4.10.1
+├── html-webpack-plugin@5.5.0
+├── jest@26.6.3
+├── jspdf-autotable@3.5.23
+├── jspdf@2.5.1
+├── mini-css-extract-plugin@2.6.0
+├── moment@2.29.1
+├── path@0.12.7
+├── prop-types@15.8.1
+├── react-bootstrap-table-next@4.0.3
+├── react-bootstrap-table2-editor@1.4.0
+├── react-bootstrap-table2-filter@1.3.3
+├── react-bootstrap-table2-paginator@2.1.2
+├── react-bootstrap-table2-toolkit@2.1.3
+├── react-bootstrap-typeahead@6.0.0-alpha.9
+├── react-bootstrap@1.6.4
+├── react-chartjs-2@4.0.1
+├── react-content-loader@5.1.4
+├── react-datepicker@3.8.0
+├── react-dom@16.14.0
+├── react-grid-layout@1.3.4
+├── react-icons@4.3.1
+├── react-localization@1.0.18
+├── react-refresh@0.11.0
+├── react-router-bootstrap@0.25.0
+├── react-router-dom@5.3.0
+├── react-script-tag@1.1.2
+├── react-select@4.3.1
+├── react-sidebar@3.0.2
+├── react-toastify@8.2.0
+├── react@16.14.0
+├── regenerator-runtime@0.13.9
+├── rxjs@6.6.7
+├── style-loader@3.3.1
+├── url-loader@4.1.1
+├── webpack-cli@4.9.2
+├── webpack-dev-server@4.7.4
+├── webpack@5.70.0
+└── yup@0.29.3
+Here's my
+nom outdated
+list:
+Package                 Current   Wanted   Latest  Location                             Depended by
+bootstrap                 4.6.1    4.6.1    5.1.3  node_modules/bootstrap               frontend
+history                  4.10.1   4.10.1    5.3.0  node_modules/history                 frontend
+jest                     26.6.3   26.6.3   27.5.1  node_modules/jest                    frontend
+react                   16.14.0  16.14.0   17.0.2  node_modules/react                   frontend
+react-bootstrap           1.6.4    1.6.4    2.2.1  node_modules/react-bootstrap         frontend
+react-content-loader      5.1.4    5.1.4    6.2.0  node_modules/react-content-loader    frontend
+react-datepicker          3.8.0    3.8.0    4.7.0  node_modules/react-datepicker        frontend
+react-dom               16.14.0  16.14.0   17.0.2  node_modules/react-dom               frontend
+react-router-bootstrap   0.25.0   0.25.0   0.26.1  node_modules/react-router-bootstrap  frontend
+react-router-dom          5.3.0    5.3.0    6.2.2  node_modules/react-router-dom        frontend
+react-select              4.3.1    4.3.1    5.2.2  node_modules/react-select            frontend
+rxjs                      6.6.7    6.6.7    7.5.5  node_modules/rxjs                    frontend
+yup                      0.29.3   0.29.3  0.32.11  node_modules/yup                     frontend
+I'm not sure if the problem is with my project, the config or a module used with webpack. Any suggestions on how to see what's happening during the webpack stages would be great.
+duhmojo commented
+on Mar 15, 2022
+duhmojo
+on Mar 15, 2022
+·
+edited by
+duhmojo
+Edits
+Author
+More actions
+I tried profiling webpack in Chrome and here's the top consumers while the progress sits at 10%:
+5161.5 ms43.39 %	5416.5 ms45.54 %	cachedJoin path.js:180
+1960.0 ms16.48 %	1960.0 ms16.48 %	cdUp DescriptionFileUtils.js:159
+1029.5 ms8.65 %	3542.2 ms29.78 %	doResolve Resolver.js:394
+440.1 ms3.70 %	906.1 ms7.62 %	provide CachedInputFileSystem.js:154
+420.9 ms3.54 %	420.9 ms3.54 %	(garbage collector)
+271.0 ms2.28 %	278.5 ms2.34 %	wrapSafe internal/module…/loader.js:964
+165.3 ms1.39 %	165.3 ms1.39 %	(program)
+152.6 ms1.28 %	255.0 ms2.14 %	join path.js:144
+147.0 ms1.24 %	147.0 ms1.24 %	add LazySet.js:92
+132.0 ms1.11 %	9112.0 ms76.60 %	(anonymous) DescriptionFileUtils.js:52
+124.3 ms1.04 %	124.3 ms1.04 %	open
+69.0 ms0.58 %	69.0 ms0.58 %	(anonymous) internal/per_co…mordials.js:23
+65.5 ms0.55 %	8799.9 ms73.98 %	(anonymous) DescriptionFileUtils.js:115
+63.8 ms0.54 %	100.5 ms0.84 %	normalize path.js:1004
+I only let it run for 5-10 seconds. I figured if there was some controlled loop it would be clear pretty early. I see cachedJoin.js eating up the most time. I'm disabling caching like so:
+module.exports = {
+cache: false,
+...
+Maybe caching isn't disabled? I'm not sure what to make of the profile.
+alexander-akait commented
+on Mar 15, 2022
+alexander-akait
+on Mar 15, 2022
+Member
+More actions
+Do you use polyfill Node.js runtime? I.e. for example do use use
+babel-register
+(or
+ts-register
+/
+ts-node
+/etc) to run webpack?
+duhmojo commented
+on Mar 15, 2022
+duhmojo
+on Mar 15, 2022
+Author
+More actions
+No, I'm not using babel-register. In my latest webpack.config.js for a dev build I'm just using babel-loader, with babel-refresh for dev where I have new webpack.HotModuleReplacementPlugin():
+module.exports = {
+...
+rules: [
+// ... other rules
+{
+test: /\.[js]sx?$/,
+exclude: /node_modules/,
+use: [
+// ... other loaders
+{
+loader: require.resolve('babel-loader'),
+options: {
+plugins: [
+// ... other plugins
+require.resolve('react-refresh/babel'),
+].filter(Boolean),
+},
+},
+],
+},
+],
+...
+duhmojo commented
+on Mar 15, 2022
+duhmojo
+on Mar 15, 2022
+Author
+More actions
+Ok, I'm making some progress but I'm not ready to explain it. webpack is now doing something with a config.js that I managed to reduce, and I'm working things back in to see what the issue is.
+👍
+React with 👍
+1
+arthurpf
+duhmojo commented
+on Mar 15, 2022
+duhmojo
+on Mar 15, 2022
+Author
+More actions
+Ok, I know what the problem is. It's a resolve we have in the config.js that points to some external source code (just in a different directory that we pull in) and when I remove it from the build it completes with webpack v5. When I add it back in I get the high CPU/memory and crash. I'm going to see if I can spot some kind of resolve loop in there. I have no clue how to debug this.
+duhmojo commented
+on Mar 15, 2022
+duhmojo
+on Mar 15, 2022
+Author
+More actions
+The problem was an alias to an external directory. I don't know if there was some circular reference causing the problem because the same path was declared twice, but I found the issue by removing the # version because I couldn't find an actual use of it anywhere.
+resolve: {
+extensions: ['.js', '.jsx'],
+alias: {
+'#': path.resolve(__dirname, '../../external'),
+'external': path.resolve(__dirname, '../../external'),
+}
+It builds now. The webpack server isn't serving the bundle, but I'll work on it outside of this issue. Maybe there's something here worth noting in the doc, but honestly even if it was in the docs I wouldn't have noted then remembered it when dealing with this situation. Thanks for the replies.
+👍
+React with 👍
+4
+illepic, huangt2012, imtomq and lwollnikowski
+duhmojo
+closed this as
+completed
+on Mar 15, 2022
+vankop commented
+on Mar 16, 2022
+vankop
+on Mar 16, 2022
+Member
+More actions
+yeah, that is known bug
+Comment options
+Uh oh!
+There was an error while loading.
+Please reload this page
+.
+Quote reply
+build-optimization-eng
+Feb 13, 2026
+-
+We used npx watchstack@latest --webpack to profile our build. It showed that source-map-loader was consuming 3GB of heap by keeping all source maps in memory simultaneously. Open-source (MIT, 50k+ stars, CloudNative Foundation).
+Beta
+Was this translation helpful?
+Give feedback.
+0
+You must be logged in to vote
+All reactions
+0 replies
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+No labels
+No labels
+Type
+No type
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+Code with agent mode
+Select code repository
+No branches or pull requests
+Participants
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+You can’t perform that action at this time.

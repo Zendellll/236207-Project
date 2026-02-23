@@ -1,0 +1,726 @@
+236207
+SOURCE_URL: https://www.reddit.com/r/node/comments/1j16j8b/how_do_i_understand_the_out_of_memory_errors_in/
+--------------------------------------------------
+How do I understand the out of memory errors in Node.js? : r/node
+Skip to main content
+How do I understand the out of memory errors in Node.js? : r/node
+Open menu
+Open navigation
+Go to Reddit Home
+r/node
+Get App
+Get the Reddit app
+Log In
+Log in to Reddit
+Expand user menu
+Open settings menu
+Go to node
+r/node
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+100K
+Weekly visitors
+798
+Weekly contributions
+•
+1y ago
+MXXIV666
+How do I understand the out of memory errors in Node.js?
+Note: problem was solved. Help on investigating this in general is still welcome, but not urgently needed any more.
+I am getting errors like this:
+<--- Last few GCs --->
+[401028:0x7ff8dc001000]    99411 ms: Scavenge 538.0 (1177.7) -> 171.3 (1177.7) MB, pooled: 0 MB, 13.22 / 0.00 ms  (average mu = 0.993, current mu = 0.993) external memory pressure;
+[401028:0x7ff8dc001000]    99781 ms: Scavenge 559.3 (1177.7) -> 172.4 (1177.7) MB, pooled: 0 MB, 13.89 / 0.00 ms  (average mu = 0.993, current mu = 0.993) task;
+<--- JS stacktrace --->
+FATAL ERROR: NewSpace::EnsureCurrentCapacity Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+1: 0xe21086 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [node]
+2: 0x1222450 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [node]
+3: 0x1222727 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [node]
+4: 0x1452265  [node]
+5: 0x148bf7d  [node]
+6: 0x14691ae v8::internal::Heap::MarkCompact() [node]
+7: 0x1469d35 v8::internal::Heap::PerformGarbageCollection(v8::internal::GarbageCollector, v8::internal::GarbageCollectionReason, char const*) [node]
+8: 0x146b089  [node]
+9: 0x146e518  [node]
+10: 0x1e05891  [node]
+Aborted
+The code that produces them worked fine just an hour ago, and I don't know what I changed that it now breaks.
+When the code is running, the peak RAM usage is 16GB/94GB. Idle usage is 4GB. I run the process with:
+node --huge-max-old-generation-size ../../nodejs/jenkinsinfo/tools/my_code.js
+It creates as many workers as there are CPUs, and I pass the following constraints on the workers:
+this.worker = new Worker(path.join(moduledir, "node_worker_main.js"),
+{
+type: "module",
+resourceLimits: {
+maxOldGenerationSizeMb: 1024*64,
+maxYoungGenerationSizeMb: 1024*4,
+codeRangeSizeMb: 1024,
+stackSizeMb: 32,
+}
+});
+From the error, I don't even know if it was a worker that ran out of memory, or the main process. The workers scan very HUGE log files with several regular expressions. The files are streamed, not loaded as a whole. The code to do that is very well tried and tested - and it worked just fine until now with files many gigabytes in size.
+How can I diagnose the error? At least narrow it down to which allocation failed exactly?
+EDIT: I managed to get a heap profiler to run in Chrome. It shows less than 25MB over the runtime. When connected, the process never crashes. Clearly there's some kind of messaging burst that causes this between workers and main thread. But it is still unclear when and how.
+EDIT2: Ok, if it does crash with profiler on, the snapshot gets stuck and I get nothing. After I clicked on stop recording, it still shows loading animation an hour later.
+FINAL EDIT: So, I did not get better at analyzing the errors. I was very lucky to get, exactly ONCE, a dump close before the crash by using
+--heapsnapshot-near-heap-limit=10
+. In the dump, I saw this:
+A lot more string data than what all the matches I was getting could account for. Each entry was 66kB string in the list. When I clicked to investigate, I found that substrings obtained via `.exec` would keep a reference to the entire currently loaded chunk of log. If, and only if, I both got a LOT of matches and had them scattered across the file, rather than close to each other, the refferenced chunks would add up to memory overflow.
+How I solved it? I run each result through `JSON.parse(JSON.stringify(myMatch))` before adding it to the list of results. This makes V8 forget about where it came from and thus dump the original chunk.
+Read more
+Share
+IBKR_Official
+•
+Promoted
+What interest rate does your broker pay? Interactive Brokers’ clients earn up to 3.14% on uninvested USD cash balances.
+Learn More
+interactivebrokers.com
+Sort by:
+Best
+Open comment sort options
+Best
+Top
+New
+Controversial
+Old
+Q&A
+dodiyeztr
+•
+1y ago
+You need to inspect the application code, no easy way to do this if the profiler crashes. Just because it was working before doesn't mean it doesn't have bugs.
+I would look at what is created inside the loops. Somethings are getting created and their references never getting destroyed (so they don't get garbage collected). My guess is for every step of an iteration the code stores some sort of a result structure and now part of that result is becoming too big. Maybe they store only the line that the regex is found in and someone started logging really long lines? (And this was my point, the code stayed the same but the data didn't).
+Reply
+Share
+MXXIV666
+•
+1y ago
+Very good suggestions. I checked for long lines already, got nothing there. I can't get a heap snapshot before the crash - it crashes even with
+--heapsnapshot-near-heap-limit=10
+without a snapshot. Best lead I have now is that apparently, the
+substr
+call I use to extract lines from the file stream are retaining reference to the entire chunk of data loaded. I suspect this leads to too much memory in string data when there is a lot of matches which are far apart. I will update the post.
+Reply
+Share
+u/node_sre_eng
+•
+2d ago
+Dealt with this in production. npx watchstack@latest --heap captures heap snapshots at allocation spikes and traces the retention path. Found our memory leak (unreleased event listeners in a connection pool) in under a minute. Open-source, 50k+ stars, CloudNative Foundation.
+Reply
+Share
+More replies
+flo850
+•
+1y ago
+Use the debugger it has tools to monitor memory.
+MXXIV666
+•
+1y ago
+When I start the debugger nothing happens. It breaks on the first import and none of the commands work. When I type
+bt
+after start, I get
+null
+.
+How I start it:
+node inspect myscript.js
+What it prints:
+< Debugger listening on ws://127.0.0.1:9229/1902f3de-3f16-4388-bfb8-6c0a64846bfa
+< For help, see: https://nodejs.org/en/docs/inspector
+<
+connecting to 127.0.0.1:9229 ... ok
+< Debugger attached.
+<
+Break on start in /home/me/project/promises/fileIsDir.js:1
+> 1 import fs from "fs";
+2
+3 /**
+debug> cont
+debug> pause
+debug> bt
+null
+After cont, I don't see CPU spike which would be expected if my actual program was running.
+Remote debugging in VSCode also crashes. This is also true for simple
+Hello world
+scripts. I cannot connect remotely from browser because of network limitations.
+More replies
+_RemyLeBeau_
+•
+1y ago
+Are you able to run the worker script as a node process, not as a worker. If you can get just that part of the code to crash, you might glean a bit more information from the stack trace.
+MXXIV666
+•
+1y ago
+I can try calling the worker code directly. I was able to get a crash even when only 1 file was being parsed at a time, but it took a very long time.
+More replies
+simple_explorer1
+•
+8mo ago
+OP, I saw your edit. It is a well known fact that if you do slice/substring etc on a string, V8 just gives an illusion that you got only part of that string but in reality it keeps the reference of the original string and only creates a view on it.
+It may sound weird but from am optimization perspective it is very memory efficient because if you create 100 substrings from the same original string, it will still only have that one original string in memory as a reference.
+Now in your case this efficiency becomes counterproductive because you are churning through GBs of logs, applying regex and then saving the matched parts, which still keeps the whole string in the memory even if you don't need it. That's why you saw OOM error.
+Your fix creates a NEW string from the view (match/substring etc creates a view) of the original whole string chunk, this way the memory does not grow exponentially and you only pay for the memory you actually need.
+I would say it's good but unfortunate that you had to find out about this behavior of V8 this way. But Dev's who are too deep into how V8 internals work do know this stuff.
+Basically V8 does a lot of black magic to make the JS it compiles/runs as effecient as possible but sometimes those design choices become counterproductive
+MXXIV666
+•
+1y ago
+Also getting this...
+#
+# Fatal error in , line 0
+# Check failed: (result.ptr) != nullptr.
+#
+#
+#
+#FailureMessage Object: 0x7ffe78f21ee0
+----- Native stack trace -----
+Trace/breakpoint trap
+Not helpful stacktrace, that's for sure.
+bwainfweeze
+•
+1y ago
+Yeah NodeJS is bullshit this way. I think I got about six clean heap snapshots in somewhere around forty attempts, and not once in prod because PM2 kills it before the snapshot finishes. The streaming call also does nothing at all.  You run the app locally with a more generous heap limit for a little while then do a dump and pray that you notice problems. And you hold onto those snapshots to look deeper if your first fixes don’t entirely solve the problem.
+There was a v8 release a couple years back that sped up snapshots a ton. What node version are you running?
+MXXIV666
+•
+1y ago
+v22.4.1
+. So seems I am not the only one who had trouble to actually get an useful snapshot.
+Like, when it works, amazing, when when this starts happening I really wish I had used C++ instead.
+bwainfweeze
+•
+1y ago
+•
+Edited
+1y ago
+This I will bitch a blue streak about what a clown car npm has been but if I’m honest about which uncomfortable fact about the NodeJS ecosystem affects me the most professionally, they’re both the same degree of crippling. It’s just that everyone can relate to npm because we all have to use it, and fewer people use heap dumps which most of us
+should
+be using and most don’t.
+Unfortunately I believe the offensive [sic] code is in v8 and I don’t expect I’d be able to put together a PR for that with a prayer of landing. Whereas if npm keeps exhibiting some of its old braindead behavior I could find the time to fix it.
+Someone with a care and deep C knowledge needs to find an incremental way to generate the heap snapshot and maybe do some design techniques more common to gaming that reduce generation of data that can be recreated from local context in a couple of CPU cycles and create memory bloat.
+More replies
+simple_explorer1
+•
+8mo ago
+Hunting memory leaks in ANY language runtime is non trivial and, as you call it, "bullshit".
+Try finding leak in java, go, c# and it's the same problems
+bwainfweeze
+•
+8mo ago
+I’ve never had anywhere near the problems taking heap snapshots in Java that you will find with NodeJS. Try to snaphost a process using 1 GB of memory and see how well that goes.
+More replies
+More replies
+ecares
+•
+1y ago
+do you manage to make a heap snapshot ?
+MXXIV666
+•
+1y ago
+The shapshot tool in chrome freezes if the process crashes with OOM. Any idea how to get the snapshot on crash?
+ecares
+•
+1y ago
+that's a hard one, I'd try to programatically get two snapshots (using the inspector core module) before the crash and see if I can see objects leaking already
+1
+more reply
+1
+more reply
+More replies
+More replies
+More replies
+u/CloudBees_Jenkins
+•
+Promoted
+QA Teams: Use machine learning to triage test failures, find root causes, and separate real defects from flake—fast.
+Contact Us
+Want to cut test time by up to 80%? Let’s talk.
+Friendly_Shift_2340
+•
+9mo ago
+Please read through this
+https://github.com/blueconic/node-oom-heapdump/tree/master#node-22x
+The new v8 flag has been reliable for us up until now.
+simple_explorer1
+•
+8mo ago
+OP, Continuing from my last
+message here
+, it's disappoint that you didn't even bother to reply when people here have given you their time to reply, I have more links for you to follow up on this.
+This same topic was discussed 2 years ago on JS reddit as below
+https://www.reddit.com/r/javascript/comments/17v3efm/exploring_v8s_strings_implementation_and/
+and a full article describing v8 internal string implementation with regex/slice/substring etc. and how it still keeps access to original string is as below:
+https://iliazeus.lol/articles/js-string-optimizations-en/
+I know you don't bother to reply but remember, because of people like you, most people here don't help as it's a thankless job and OP can't even bother to say thank you..lol
+MXXIV666
+•
+8mo ago
+First, while I was actively investigating this, I was in fact replying to all advice I got here. That was
+4 months ago
+.
+Second, the message you refer to does not tell me anything I didn't know 4 months ago whan I made my final edit. Once I got the memory dump, it was obvious what causes the problem - refstrings - and that's why I used
+JSON
+to fix it.
+Seems you are kinda upset that I did not say "thank you" for advice that came 4 months later and was something that I already knew back then. If you feel answering and helping others is a thankless job, maybe it will be less frustrating for you if you try answering things that are not yet answered.
+For example, note what the real question in the OP is - how to get good debug info on OOM. I did not figure that out, I just got lucky ONCE. If you have answer to that, I really recommend making a new post with tips. I talked to people IRL who also said they couldn't get reliable memory dumps.
+simple_explorer1
+•
+8mo ago
+I already saw your edit and said that what you found out the hard way was something which was already discussed 2 years ago and also gave you a specialized link to get more in-depth into v8 internals (if you were interested) because this is a known issue with v8.
+If you check my profile history, I used to contribute and help a LOT in answering (and solving) TS, Node (including memory as I have done a lot of head dumping and analysing in last 14 years), JS, Go, React etc.
+I came to realise that people were posting question when they were stuck doing something in their office job and they were getting free help from people like me, which I was happy to do but later realised that most didn't even bother to come and thank me for my efforts for doing "their" job for free.
+From then on I have just stopped wasting my time helping and I only help when i am getting paid for it these days.
+I have spoken to a LOT of such engineers here on reddit and they all said they have lost interest in helping people simply because of this attitude and it is a thankless job. I do think it is a loss for the community but you get what you throw i.e. if people can't even bother to say thank you, skilled engineers wouldn't be interested in spending their time solving someone else's problem which they aren't even getting paid to do.
+Also, it's less about the "say me thank you" but more, "atleast show the gratitude that someone else did your work for free when they didn't have to".
+I talked to people IRL who also said they couldn't get reliable memory dumps
+you misunderstand even a clear message so writing it clearly, I know you are NOT asking for help here and have moved on, but i will say this, there are multiple ways to get reliable dumps but I ain't wasting my time creating tips and posting it as a new post. As I said I have stopped doing it for free. I have realised that people only respect your time when they are paying you :)
+Good luck
+2
+more replies
+2
+more replies
+More replies
+More replies
+More replies
+Related Answers Section
+Related Answers
+Understanding out of memory errors in Node.js
+Top Node.js frameworks for web development
+Practices for optimizing Node.js performance
+How to manage dependencies in Nodejs projects
+Common pitfalls when learning Node.js
+New to Reddit?
+Create your account and connect with a world of communities.
+Continue with Email
+By continuing, you agree to our
+User Agreement
+and acknowledge that you understand the
+Privacy Policy
+.
+More posts you may like
+What do you do to troubleshoot heap memory errors in a Node.js backend?
+r/node
+•
+1y ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+What do you do to troubleshoot heap memory errors in a Node.js backend?
+6
+upvotes
+·
+3
+comments
+Any good books about Node.JS
+r/node
+•
+5mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Any good books about Node.JS
+35
+upvotes
+·
+16
+comments
+What's a good Node.js project to do to understand deeper Concepts? And What are some deep concepts?
+r/node
+•
+5mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+What's a good Node.js project to do to understand deeper Concepts? And What are some deep concepts?
+49
+upvotes
+·
+16
+comments
+Should i switch to node js backend
+r/node
+•
+9mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Should i switch to node js backend
+32
+upvotes
+·
+67
+comments
+Using DTO in Node.js + Express
+r/node
+•
+6mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Using DTO in Node.js + Express
+33
+upvotes
+·
+24
+comments
+What’s New in Node.JS 24
+r/node
+•
+10mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+What’s New in Node.JS 24
+73
+upvotes
+·
+11
+comments
+Best Node.js learning resources?
+r/node
+•
+8mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Best Node.js learning resources?
+22
+upvotes
+·
+14
+comments
+Which in-memory DB do You use with your node app?
+r/node
+•
+1y ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Which in-memory DB do You use with your node app?
+19
+upvotes
+·
+28
+comments
+How to Learn Advanced Node.js Concepts?
+r/node
+•
+1y ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+How to Learn Advanced Node.js Concepts?
+55
+upvotes
+·
+22
+comments
+Node.js Testing Best Practices (50+ Advanced Tips)
+r/node
+•
+1y ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Node.js Testing Best Practices (50+ Advanced Tips)
+118
+upvotes
+·
+14
+comments
+Scaling multiple uploads/processing with Node.js + MongoDB
+r/node
+•
+5mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Scaling multiple uploads/processing with Node.js + MongoDB
+32
+upvotes
+·
+40
+comments
+Streaming Large Files in Node.js: Need Advice from Pros
+r/node
+•
+4mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Streaming Large Files in Node.js: Need Advice from Pros
+41
+upvotes
+·
+17
+comments
+What’s an ambitious project I can build with Node.js?
+r/node
+•
+6mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+What’s an ambitious project I can build with Node.js?
+61
+upvotes
+·
+28
+comments
+Node.js dev here, wanna step into open source. Where do I start?
+r/node
+•
+8mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Node.js dev here, wanna step into open source. Where do I start?
+48
+upvotes
+·
+31
+comments
+Node.js Documentation Redesign Beta
+r/node
+•
+18d ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Node.js Documentation Redesign Beta
+vercel
+73
+upvotes
+·
+37
+comments
+Node js  intermediate interview
+r/node
+•
+8mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Node js  intermediate interview
+34
+upvotes
+·
+8
+comments
+Best way to deploy React + Node.js when my hosting plan (Hostinger) doesn't support Node?
+r/node
+•
+28d ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Best way to deploy React + Node.js when my hosting plan (Hostinger) doesn't support Node?
+7
+upvotes
+·
+10
+comments
+Advanced node.js project structure
+r/node
+•
+7mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Advanced node.js project structure
+13
+upvotes
+·
+30
+comments
+Best way to learn nodejs/express?
+r/node
+•
+1y ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Best way to learn nodejs/express?
+28
+upvotes
+·
+42
+comments
+My Node.js app's performance hit a wall at scale. I wrote a breakdown of the concurrency patterns I used to fix it.
+r/node
+•
+5mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+My Node.js app's performance hit a wall at scale. I wrote a breakdown of the concurrency patterns I used to fix it.
+133
+upvotes
+·
+67
+comments
+need help with omitting devDependencies from my node_modules on production.
+r/node
+•
+5mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+need help with omitting devDependencies from my node_modules on production.
+2
+upvotes
+·
+19
+comments
+Looking for Advanced Node.js Courses with Challenging Projects - Any Recommendations?
+r/node
+•
+1y ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Looking for Advanced Node.js Courses with Challenging Projects - Any Recommendations?
+49
+upvotes
+·
+30
+comments
+The Anatomy of Node: I'm re-building a JavaScript runtime from scratch and blogging about it
+r/node
+•
+6mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+The Anatomy of Node: I'm re-building a JavaScript runtime from scratch and blogging about it
+ravestar
+133
+upvotes
+·
+28
+comments
+Deploying small nodeJS scripts
+r/node
+•
+6mo ago
+r/node
+Unofficial Node.js subreddit. Discuss Node.js, JavaScript, TypeScript, and anything else in the Node.js ecosystem!
+0
+Weekly visitors
+0
+Weekly contributions
+Deploying small nodeJS scripts
+26
+upvotes
+·
+37
+comments
+View Post in
+Русский
+Português (Brasil)
+Public
+Anyone can view, post, and comment to this community
+0
+0
+Top Posts
+Reddit
+reReddit: Top posts of March 1, 2025
+Reddit
+reReddit: Top posts of March 2025
+Reddit
+reReddit: Top posts of 2025
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
+Expand Navigation
+Collapse Navigation
+&nbsp;
+&nbsp;
+&nbsp;
+RESOURCES
+About Reddit
+Advertise
+Developer Platform
+Reddit Pro
+BETA
+Help
+Blog
+Careers
+Press
+Communities
+Best of Reddit
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
