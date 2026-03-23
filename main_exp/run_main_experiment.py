@@ -142,6 +142,7 @@ def discover_phases(
     include_clean: bool = True,
     domain_filter: Optional[str] = None,
     group_filter: Optional[str] = None,
+    upvote_filter: Optional[str] = None,
     tourism_only: bool = False,
     technical_only: bool = False,
     max_domains: Optional[int] = None,
@@ -155,6 +156,7 @@ def discover_phases(
         include_clean: Whether to include clean baseline phases.
         domain_filter: Only include this specific domain.
         group_filter: Only include this bot group ("single-bot" or "multiple-bots").
+        upvote_filter: Only include this specific upvote level.
         tourism_only: If True, only domains in TOURISM_SLUGS.
         technical_only: If True, only domains not in TOURISM_SLUGS (technical domains).
         max_domains: If set, only include the first N domains (for quick runs).
@@ -198,7 +200,8 @@ def discover_phases(
             if not os.path.isdir(bot_dir):
                 continue
 
-            for upvote_level in UPVOTE_LEVELS:
+            upvote_levels = [upvote_filter] if upvote_filter else UPVOTE_LEVELS
+            for upvote_level in upvote_levels:
                 upvote_dir = os.path.join(bot_dir, upvote_level)
                 if not os.path.isdir(upvote_dir):
                     continue
@@ -444,6 +447,8 @@ Examples:
     parser.add_argument("--domain", help="Run only a specific domain")
     parser.add_argument("--group", choices=["single-bot", "multiple-bots"],
                         help="Run only a specific bot group")
+    parser.add_argument("--upvote", choices=["no-upvotes", "low-fake-upvotes", "high-fake-upvotes"],
+                        help="Run only a specific upvote level")
     parser.add_argument("--tourism-only", action="store_true",
                         help="Run only the 10 tourism domains")
     parser.add_argument("--technical-only", action="store_true",
@@ -468,6 +473,7 @@ Examples:
             include_clean=not args.skip_clean,
             domain_filter=args.domain,
             group_filter=args.group,
+            upvote_filter=args.upvote,
             tourism_only=args.tourism_only,
             technical_only=args.technical_only,
             max_domains=args.max_domains,
@@ -492,6 +498,7 @@ Examples:
         include_clean=include_clean,
         domain_filter=args.domain,
         group_filter=args.group,
+        upvote_filter=args.upvote,
         tourism_only=args.tourism_only,
         technical_only=args.technical_only,
         max_domains=args.max_domains,
