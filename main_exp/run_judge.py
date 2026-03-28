@@ -21,7 +21,7 @@ import sys
 import glob
 import argparse
 import re
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 try:
     import pandas as pd
@@ -97,6 +97,104 @@ def parse_phase_name(phase: str) -> dict:
     return info
 
 
+def infer_output_dir(files: List[str], explicit_output: Optional[str]) -> str:
+    """Choose where judged outputs and summaries should be written."""
+    if explicit_output:
+        return os.path.dirname(os.path.abspath(explicit_output))
+    parents = {os.path.dirname(os.path.abspath(path)) for path in files}
+    if len(parents) == 1:
+        return parents.pop()
+    return OUTPUT_DIR
+
+
+def build_feature_variant_summary(result_df: pd.DataFrame) -> pd.DataFrame:
+    """Summarize ASR for feature-layout runs, one row per variant."""
+    feature_rows = result_df[result_df["layout"] == "features"].copy()
+    if feature_rows.empty:
+        return pd.DataFrame()
+
+    summary = (
+        feature_rows.groupby(["domain", "feature_group", "variant"], dropna=False)["judge_score"]
+        .agg(["count", "sum", "mean"])
+        .reset_index()
+        .rename(columns={"count": "queries", "sum": "hits", "mean": "asr"})
+    )
+    summary["queries"] = summary["queries"].astype(int)
+    summary["hits"] = summary["hits"].astype(int)
+    summary["ASR%"] = (summary["asr"] * 100).round(1)
+    baseline_map: Dict[str, float] = (
+        summary[summary["variant"] == "baseline"]
+        .set_index("domain")["ASR%"]
+        .to_dict()
+    )
+    summary["baseline_ASR%"] = summary["domain"].map(baseline_map)
+    summary["delta_vs_baseline_pct"] = (
+        summary["ASR%"] - summary["baseline_ASR%"]
+    ).round(1)
+    summary["display_name"] = summary["variant"]
+    return summary[
+        [
+            "domain",
+            "feature_group",
+            "variant",
+            "display_name",
+            "queries",
+            "hits",
+            "ASR%",
+            "baseline_ASR%",
+            "delta_vs_baseline_pct",
+        ]
+    ]
+
+
+def build_feature_pairwise_comparison(feature_summary: pd.DataFrame) -> pd.DataFrame:
+    """Compare the two variants inside each feature group."""
+    if feature_summary.empty:
+        return pd.DataFrame()
+
+    rows = []
+    non_baseline = feature_summary[feature_summary["feature_group"] != "baseline"]
+    for (domain, feature_group), group_df in non_baseline.groupby(["domain", "feature_group"], dropna=False):
+        ordered = group_df.sort_values(["variant"]).reset_index(drop=True)
+        if len(ordered) < 2:
+            continue
+        first = ordered.iloc[0]
+        second = ordered.iloc[1]
+        rows.append({
+            "domain": domain,
+            "feature_group": feature_group,
+            "variant_1": first["variant"],
+            "variant_2": second["variant"],
+            "ASR%_1": first["ASR%"],
+            "ASR%_2": second["ASR%"],
+            "delta_2_minus_1_pct": round(second["ASR%"] - first["ASR%"], 1),
+            "higher_ASR_variant": (
+                second["variant"] if second["ASR%"] > first["ASR%"] else first["variant"]
+            ),
+        })
+    return pd.DataFrame(rows)
+
+
+def print_feature_tables(feature_summary: pd.DataFrame, pairwise_df: pd.DataFrame) -> None:
+    """Print feature-run comparisons to stdout."""
+    if feature_summary.empty:
+        return
+
+    print(f"\n{'='*60}")
+    print("FEATURE VARIANT SUMMARY")
+    print(f"{'='*60}")
+    display_df = feature_summary[
+        ["feature_group", "variant", "queries", "hits", "ASR%", "delta_vs_baseline_pct"]
+    ].copy()
+    print(display_df.to_string(index=False))
+
+    if not pairwise_df.empty:
+        print(f"\n{'='*60}")
+        print("PAIRWISE FEATURE COMPARISONS")
+        print(f"{'='*60}")
+        print(pairwise_df.to_string(index=False))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Judge experiment results for ASR.")
     parser.add_argument("--pattern", default=DEFAULT_LOGS_PATTERN, help="Glob pattern for result CSVs")
@@ -122,7 +220,8 @@ def main():
         sys.exit(1)
     print(f"Found {len(files)} result file(s)")
 
-    output_path = args.output or os.path.join(OUTPUT_DIR, "judged_results.csv")
+    summary_dir = infer_output_dir(files, args.output)
+    output_path = args.output or os.path.join(summary_dir, "judged_results.csv")
     all_rows = []
 
     for filepath in files:
@@ -171,6 +270,21 @@ def main():
     result_df.to_csv(output_path, index=False)
     print(f"\nJudged results saved to: {output_path}")
 
+    feature_summary = build_feature_variant_summary(result_df)
+    pairwise_df = build_feature_pairwise_comparison(feature_summary)
+    if not feature_summary.empty:
+        feature_summary_path = os.path.join(summary_dir, "feature_variant_summary.csv")
+        pairwise_path = os.path.join(summary_dir, "feature_pairwise_comparisons.csv")
+        total_path = os.path.join(summary_dir, "feature_total_comparison.csv")
+        feature_summary.to_csv(feature_summary_path, index=False)
+        pairwise_df.to_csv(pairwise_path, index=False)
+        feature_summary.sort_values(["domain", "ASR%", "feature_group", "variant"], ascending=[True, False, True, True]).to_csv(
+            total_path, index=False
+        )
+        print(f"Feature summary saved to: {feature_summary_path}")
+        print(f"Pairwise comparisons saved to: {pairwise_path}")
+        print(f"Total comparison saved to: {total_path}")
+
     print(f"\n{'='*60}")
     print("ATTACK SUCCESS RATE (ASR) SUMMARY")
     print(f"{'='*60}")
@@ -189,16 +303,7 @@ def main():
 
     feature_rows = result_df[result_df["layout"] == "features"]
     if not feature_rows.empty:
-        feature_summary = (
-            feature_rows.groupby(["feature_group", "variant"])["judge_score"]
-            .mean()
-            .mul(100)
-            .round(1)
-            .reset_index()
-            .rename(columns={"judge_score": "ASR%"})
-        )
-        print("\nFeature variant summary:")
-        print(feature_summary.to_string(index=False))
+        print_feature_tables(feature_summary, pairwise_df)
 
     clean_rows = result_df[result_df["attack"] == "clean"]
     if not clean_rows.empty:
@@ -231,7 +336,23 @@ def main():
             for container in ax.containers:
                 ax.bar_label(container, fmt="%.1f%%", padding=3, fontsize=9)
             plt.tight_layout()
-            chart_path = os.path.join(OUTPUT_DIR, "asr_results.png")
+            chart_path = os.path.join(summary_dir, "asr_results.png")
+            plt.savefig(chart_path, dpi=150)
+            print(f"Chart saved to: {chart_path}")
+        elif not feature_summary.empty:
+            plot_df = feature_summary.sort_values(["feature_group", "variant"]).copy()
+            plt.figure(figsize=(14, 6))
+            sns.set_theme(style="whitegrid")
+            ax = sns.barplot(data=plot_df, x="variant", y="ASR%", hue="feature_group", palette="magma")
+            plt.title(f"Feature Variant ASR — Target: {args.target}\nJudge: {args.judge_model}", fontsize=13, fontweight="bold")
+            plt.ylabel("ASR (%)")
+            plt.xlabel("Variant")
+            plt.xticks(rotation=35, ha="right")
+            plt.ylim(0, 100)
+            for container in ax.containers:
+                ax.bar_label(container, fmt="%.1f%%", padding=3, fontsize=8)
+            plt.tight_layout()
+            chart_path = os.path.join(summary_dir, "feature_asr_results.png")
             plt.savefig(chart_path, dpi=150)
             print(f"Chart saved to: {chart_path}")
     except ImportError:
