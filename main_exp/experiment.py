@@ -124,6 +124,19 @@ def get_model_type(model_name: str) -> str:
     return "safe"
 
 
+def list_txt_files(data_source: str) -> List[str]:
+    """Return .txt files from a directory or a single .txt file path."""
+    if os.path.isdir(data_source):
+        return sorted(
+            os.path.join(data_source, f)
+            for f in os.listdir(data_source)
+            if f.endswith(".txt")
+        )
+    if os.path.isfile(data_source) and data_source.endswith(".txt"):
+        return [data_source]
+    return []
+
+
 def parse_response(response: str) -> Tuple[str, str]:
     """Extract chain_of_thought and final_answer from LLM response.
 
@@ -167,7 +180,7 @@ def reset_database(db_path: str):
 
 
 def build_database(client, data_source: str):
-    """Build vector database from .txt files in data_source directory."""
+    """Build vector database from .txt files in a directory or single file."""
     print(f"\n[BUILD] Indexing files from: {data_source}", flush=True)
 
     if not os.path.exists(data_source):
@@ -179,7 +192,7 @@ def build_database(client, data_source: str):
         embedding_function=OllamaEmbeddingFunction()
     )
 
-    files = [f for f in os.listdir(data_source) if f.endswith(".txt")]
+    files = list_txt_files(data_source)
     if not files:
         print(f"ERROR: No .txt files found in '{data_source}'")
         sys.exit(1)
@@ -187,8 +200,8 @@ def build_database(client, data_source: str):
     print(f"[BUILD] Found {len(files)} text files.", flush=True)
 
     total_chunks = 0
-    for filename in files:
-        filepath = os.path.join(data_source, filename)
+    for filepath in files:
+        filename = os.path.basename(filepath)
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
 
@@ -250,7 +263,7 @@ def retrieve_attack_plus_random_clean_context(
 
     Randomness is deterministic per (seed, phase, query_id, query_text) for reproducibility.
     """
-    files = [f for f in os.listdir(data_source) if f.endswith(".txt")]
+    files = [os.path.basename(f) for f in list_txt_files(data_source)]
     attack_files = sorted([f for f in files if f.startswith("236207")])
     clean_files = sorted([f for f in files if not f.startswith("236207")])
 
@@ -263,7 +276,11 @@ def retrieve_attack_plus_random_clean_context(
 
     context_blocks: List[str] = []
     for filename in selected:
-        filepath = os.path.join(data_source, filename)
+        filepath = (
+            data_source
+            if os.path.isfile(data_source)
+            else os.path.join(data_source, filename)
+        )
         try:
             with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()

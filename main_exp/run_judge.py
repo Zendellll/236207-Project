@@ -63,15 +63,37 @@ def parse_phase_name(phase: str) -> dict:
     Phase names look like:
         boutique-winery/single-bot/low-fake-upvotes/attribute-attack
         boutique-winery/clean
+        boutique-winery/features/baseline
+        boutique-winery/features/tone/polite
     """
     parts = phase.strip().split("/")
-    info = {"domain": parts[0] if parts else phase, "bot_group": "", "upvote": "", "attack": "", "is_clean": False}
+    info = {
+        "domain": parts[0] if parts else phase,
+        "bot_group": "",
+        "upvote": "",
+        "attack": "",
+        "is_clean": False,
+        "layout": "standard",
+        "feature_group": "",
+        "variant": "",
+    }
     if len(parts) == 2 and parts[1] == "clean":
         info["is_clean"] = True
     elif len(parts) == 4:
-        info["bot_group"] = parts[1]
-        info["upvote"] = parts[2]
-        info["attack"] = parts[3].replace("-attack", "")
+        if parts[1] == "features":
+            info["layout"] = "features"
+            info["feature_group"] = parts[2]
+            info["variant"] = parts[3]
+            info["attack"] = "feature-variant"
+        else:
+            info["bot_group"] = parts[1]
+            info["upvote"] = parts[2]
+            info["attack"] = parts[3].replace("-attack", "")
+    elif len(parts) == 3 and parts[1] == "features" and parts[2] == "baseline":
+        info["layout"] = "features"
+        info["feature_group"] = "baseline"
+        info["variant"] = "baseline"
+        info["attack"] = "feature-baseline"
     return info
 
 
@@ -129,9 +151,12 @@ def main():
                 score = get_verdict(answer, args.target, args.judge_model)
                 all_rows.append({
                     "domain": info["domain"],
+                    "layout": info["layout"],
                     "bot_group": info["bot_group"],
                     "upvote": info["upvote"],
                     "attack": info["attack"] or "clean",
+                    "feature_group": info["feature_group"],
+                    "variant": info["variant"],
                     "model": row.get("model", ""),
                     "query_id": row.get("query_id", ""),
                     "judge_score": score,
@@ -161,6 +186,19 @@ def main():
             .rename(columns={"judge_score": "ASR%"})
         )
         print(summary.to_string(index=False))
+
+    feature_rows = result_df[result_df["layout"] == "features"]
+    if not feature_rows.empty:
+        feature_summary = (
+            feature_rows.groupby(["feature_group", "variant"])["judge_score"]
+            .mean()
+            .mul(100)
+            .round(1)
+            .reset_index()
+            .rename(columns={"judge_score": "ASR%"})
+        )
+        print("\nFeature variant summary:")
+        print(feature_summary.to_string(index=False))
 
     clean_rows = result_df[result_df["attack"] == "clean"]
     if not clean_rows.empty:

@@ -130,11 +130,106 @@ def load_domain_queries() -> Dict[str, List[Tuple[int, str]]]:
 
 def discover_domains() -> List[str]:
     """Return sorted list of domain directories in mock_internet/."""
+    if is_features_layout_root(MOCK_INTERNET_DIR):
+        domain = infer_features_layout_domain(MOCK_INTERNET_DIR)
+        return [domain] if domain else []
     return sorted([
         d for d in os.listdir(MOCK_INTERNET_DIR)
         if os.path.isdir(os.path.join(MOCK_INTERNET_DIR, d))
         and not d.startswith(".")
     ])
+
+
+def is_features_layout_root(root_dir: str) -> bool:
+    """Return True if root_dir looks like the feature-variant layout."""
+    if not os.path.isdir(root_dir):
+        return False
+    baseline_dir = os.path.join(root_dir, "baseline")
+    if not os.path.isdir(baseline_dir):
+        return False
+    visible_dirs = [
+        d for d in os.listdir(root_dir)
+        if os.path.isdir(os.path.join(root_dir, d)) and not d.startswith(".")
+    ]
+    feature_dirs = [d for d in visible_dirs if d != "baseline"]
+    return bool(feature_dirs)
+
+
+def infer_features_layout_domain(root_dir: str) -> Optional[str]:
+    """Infer the single domain slug from a features root path."""
+    env_domain = os.environ.get("EXPERIMENT_FEATURES_DOMAIN")
+    if env_domain:
+        return env_domain.strip()
+    parent = os.path.basename(os.path.dirname(root_dir))
+    return parent or None
+
+
+def _strip_feature_variant_prefix(filename: str, domain: str) -> str:
+    """Convert a feature filename into a short variant label."""
+    stem, _ = os.path.splitext(filename)
+    prefixes = [
+        f"{domain}-features-baseline-",
+        f"{domain}-features-",
+    ]
+    for prefix in prefixes:
+        if stem.startswith(prefix):
+            return stem[len(prefix):]
+    return stem
+
+
+def discover_feature_phases(
+    include_clean: bool = True,
+    domain_filter: Optional[str] = None,
+    tourism_only: bool = False,
+    technical_only: bool = False,
+) -> List[dict]:
+    """Discover phases from a single-domain features layout."""
+    phases = []
+    domain = infer_features_layout_domain(MOCK_INTERNET_DIR)
+    if not domain:
+        return phases
+    if domain_filter and domain != domain_filter:
+        return phases
+    if tourism_only and domain not in TOURISM_SLUGS:
+        return phases
+    if technical_only and domain in TOURISM_SLUGS:
+        return phases
+
+    baseline_dir = os.path.join(MOCK_INTERNET_DIR, "baseline")
+    if include_clean and os.path.isdir(baseline_dir):
+        baseline_files = sorted(
+            f for f in os.listdir(baseline_dir)
+            if f.endswith(".txt")
+        )
+        for filename in baseline_files:
+            phases.append({
+                "name": f"{domain}/features/baseline",
+                "path": os.path.join(baseline_dir, filename),
+                "domain": domain,
+                "category": "baseline",
+            })
+
+    feature_dirs = sorted(
+        d for d in os.listdir(MOCK_INTERNET_DIR)
+        if os.path.isdir(os.path.join(MOCK_INTERNET_DIR, d))
+        and not d.startswith(".")
+        and d != "baseline"
+    )
+    for feature_dir in feature_dirs:
+        feature_path = os.path.join(MOCK_INTERNET_DIR, feature_dir)
+        variant_files = sorted(
+            f for f in os.listdir(feature_path)
+            if f.endswith(".txt")
+        )
+        for filename in variant_files:
+            variant_name = _strip_feature_variant_prefix(filename, domain)
+            phases.append({
+                "name": f"{domain}/features/{feature_dir}/{variant_name}",
+                "path": os.path.join(feature_path, filename),
+                "domain": domain,
+                "category": feature_dir,
+            })
+    return phases
 
 
 def discover_phases(
@@ -168,6 +263,14 @@ def discover_phases(
             - domain: Domain slug
             - category: "clean", "single-bot", or "multiple-bots"
     """
+    if is_features_layout_root(MOCK_INTERNET_DIR):
+        return discover_feature_phases(
+            include_clean=include_clean,
+            domain_filter=domain_filter,
+            tourism_only=tourism_only,
+            technical_only=technical_only,
+        )
+
     phases = []
     domains = discover_domains()
 
@@ -232,7 +335,9 @@ def discover_phases(
 
 
 def count_txt_files(path: str) -> int:
-    """Count .txt files in a directory."""
+    """Count .txt files in a directory or treat a single file as one item."""
+    if os.path.isfile(path):
+        return 1 if path.endswith(".txt") else 0
     if not os.path.isdir(path):
         return 0
     return len([f for f in os.listdir(path) if f.endswith(".txt")])
@@ -462,6 +567,14 @@ Examples:
     if args.tourism_only and args.technical_only:
         print("ERROR: Use only one of --tourism-only or --technical-only.")
         sys.exit(1)
+
+    if is_features_layout_root(MOCK_INTERNET_DIR):
+        if args.attack and args.attack != "all":
+            print("ERROR: Feature-layout runs do not support attack filters. Use 'all'.")
+            sys.exit(1)
+        if args.group or args.upvote:
+            print("ERROR: Feature-layout runs do not support --group or --upvote filters.")
+            sys.exit(1)
 
     # --list: show phases and exit (respects all filters)
     if args.list:
