@@ -46,6 +46,7 @@ MOCK_INTERNET_DIR: str = os.environ.get(
     "EXPERIMENT_MOCK_INTERNET_DIR",
     os.path.join(SCRIPT_DIR, "mock_internet"),
 )
+POV_REVIEWS_DIR: str = os.path.join(SCRIPT_DIR, "mock_int_pov_on_reviews")
 LOGS_DIR: str = os.environ.get("EXPERIMENT_LOGS_DIR", os.path.join(SCRIPT_DIR, "logs"))
 DB_PATH: str = os.environ.get("EXPERIMENT_DB_PATH", os.path.join(SCRIPT_DIR, "vector_db_active"))
 QUERIES_FILE: str = os.path.join(SCRIPT_DIR, "source-gather", "20_domains_50_queries.csv")
@@ -101,6 +102,11 @@ TOURISM_SLUGS: set = {
     "jeep-tours", "vacation-photographer",
 }
 
+DATASET_ROOTS: Dict[str, str] = {
+    "default": MOCK_INTERNET_DIR,
+    "pov-reviews": POV_REVIEWS_DIR,
+}
+
 
 # --- QUERIES ---
 
@@ -128,16 +134,17 @@ def load_domain_queries() -> Dict[str, List[Tuple[int, str]]]:
 
 # --- PHASE DISCOVERY ---
 
-def discover_domains() -> List[str]:
-    """Return sorted list of domain directories in mock_internet/."""
+def discover_domains(dataset_root: str) -> List[str]:
+    """Return sorted list of domain directories in selected dataset root."""
     return sorted([
-        d for d in os.listdir(MOCK_INTERNET_DIR)
-        if os.path.isdir(os.path.join(MOCK_INTERNET_DIR, d))
+        d for d in os.listdir(dataset_root)
+        if os.path.isdir(os.path.join(dataset_root, d))
         and not d.startswith(".")
     ])
 
 
 def discover_phases(
+    dataset_root: str,
     attack_filter: Optional[str] = None,
     include_clean: bool = True,
     domain_filter: Optional[str] = None,
@@ -169,7 +176,7 @@ def discover_phases(
             - category: "clean", "single-bot", or "multiple-bots"
     """
     phases = []
-    domains = discover_domains()
+    domains = discover_domains(dataset_root)
 
     if domain_filter:
         domains = [d for d in domains if d == domain_filter]
@@ -181,7 +188,7 @@ def discover_phases(
         domains = domains[:max_domains]
 
     for domain in domains:
-        domain_path = os.path.join(MOCK_INTERNET_DIR, domain)
+        domain_path = os.path.join(dataset_root, domain)
 
         if include_clean:
             clean_path = os.path.join(domain_path, "clean")
@@ -377,6 +384,7 @@ def run_pipeline(
     phases: List[dict],
     domain_queries: Dict[str, List[Tuple[int, str]]],
     attack_arg: str,
+    dataset_root: str,
     max_queries_per_domain: Optional[int] = None,
 ) -> None:
     """Run experiments on the given list of phases."""
@@ -386,6 +394,7 @@ def run_pipeline(
 
     print(f"\n[INFO] Running {len(phases)} phases")
     print(f"[INFO] Model:   {', '.join(MODELS_TO_TEST) if MODELS_TO_TEST else '(loaded on first run)'}")
+    print(f"[INFO] Dataset: {dataset_root}")
     print(f"[INFO] Results -> {LOGS_DIR}/")
 
     for i, p in enumerate(phases):
@@ -457,10 +466,21 @@ Examples:
                         help="Quick run: only first N domains (e.g. 4)")
     parser.add_argument("--max-queries", type=int, metavar="N",
                         help="Quick run: only first N queries per domain (e.g. 2)")
+    parser.add_argument(
+        "--dataset",
+        choices=["default", "pov-reviews"],
+        default="default",
+        help="Dataset root: 'default' (mock_internet) or 'pov-reviews' (mock_int_pov_on_reviews).",
+    )
 
     args = parser.parse_args()
     if args.tourism_only and args.technical_only:
         print("ERROR: Use only one of --tourism-only or --technical-only.")
+        sys.exit(1)
+
+    dataset_root = DATASET_ROOTS[args.dataset]
+    if not os.path.isdir(dataset_root):
+        print(f"ERROR: Dataset directory not found: {dataset_root}")
         sys.exit(1)
 
     # --list: show phases and exit (respects all filters)
@@ -469,6 +489,7 @@ Examples:
         if args.attack and args.attack != "all":
             attack_dir = ATTACK_NAME_MAP[args.attack]
         all_phases = discover_phases(
+            dataset_root=dataset_root,
             attack_filter=attack_dir,
             include_clean=not args.skip_clean,
             domain_filter=args.domain,
@@ -494,6 +515,7 @@ Examples:
     include_clean = not args.skip_clean
 
     phases_to_run = discover_phases(
+        dataset_root=dataset_root,
         attack_filter=attack_dir,
         include_clean=include_clean,
         domain_filter=args.domain,
@@ -521,5 +543,6 @@ Examples:
         phases_to_run,
         domain_queries,
         args.attack,
+        dataset_root=dataset_root,
         max_queries_per_domain=args.max_queries,
     )

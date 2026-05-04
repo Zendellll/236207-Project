@@ -29,6 +29,8 @@ import random
 import hashlib
 from typing import Tuple, List, Optional, Union
 from dataclasses import dataclass, asdict
+from concurrent.futures import ThreadPoolExecutor
+
 
 try:
     import ollama  # type: ignore
@@ -39,12 +41,21 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     chromadb = None
 
+from openai import OpenAI
+import time
+
+client = OpenAI(
+    base_url=os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
+    api_key=os.environ.get("OPENROUTER_API_KEY", ""),
+)
 # --- CONFIGURATION ---
 
-MODELS_TO_TEST: List[str] = [
-    "deepseek-r1:8b",
-]
-
+env_model = os.environ.get("TARGET_MODEL")
+if env_model:
+    MODELS_TO_TEST = [env_model]
+else:
+    MODELS_TO_TEST = ["meta-llama/llama-3.3-70b-instruct"]
+    
 EMBEDDING_MODEL: str = "nomic-embed-text"
 
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
@@ -58,7 +69,7 @@ CHUNK_OVERLAP: int = 200
 RAG_RESULTS: int = 10
 
 MODEL_KEEP_ALIVE: str = "10m"
-NUM_CTX: int = 16384  # Long prompts; start Ollama with OLLAMA_KV_CACHE_TYPE=q8_0 to save RAM (see main_exp/run_ollama_with_kv_quantization.sh)
+NUM_CTX: int = 131072  # Long prompts; start Ollama with OLLAMA_KV_CACHE_TYPE=q8_0 to save RAM (see main_exp/run_ollama_with_kv_quantization.sh)
 
 os.environ.setdefault("PYTHONUNBUFFERED", "1")
 
@@ -315,60 +326,33 @@ def check_context_window(prompt: str, phase_name: str) -> None:
 # --- MODEL MANAGEMENT ---
 
 def warm_up_model(model_name: str) -> None:
-    """Load a model into VRAM by sending a tiny request."""
-    if ollama is None:
-        raise RuntimeError("Ollama is not installed (required to run models).")
-    print(f"[LOAD] Warming up {model_name}...", end="", flush=True)
-    start = time.time()
-    ollama.chat(
-        model=model_name,
-        messages=[{"role": "user", "content": "hi"}],
-        options={"num_predict": 1, "num_ctx": NUM_CTX},
-        keep_alive=MODEL_KEEP_ALIVE,
-    )
-    print(f" ready in {time.time() - start:.1f}s", flush=True)
-
+    print(f"[API] Using Groq Cloud - no warm-up needed for {model_name}", flush=True)
+    pass
 
 def unload_model(model_name: str) -> None:
-    """Explicitly unload a model from VRAM."""
-    if ollama is None:
-        return
-    print(f"[UNLOAD] Releasing {model_name} from VRAM...", flush=True)
-    try:
-        ollama.chat(
-            model=model_name,
-            messages=[{"role": "user", "content": ""}],
-            options={"num_predict": 1},
-            keep_alive="0",
-        )
-    except Exception:
-        pass
+    pass
 
-
-def run_model(model_name: str, prompt: str) -> Tuple[str, float]:
-    """Run a model using the ollama Python library."""
-    if ollama is None:
-        raise RuntimeError("Ollama is not installed (required to run models).")
+def run_model(model_name: str, prompt: str):
     start_time = time.time()
-
     try:
-        response = ollama.chat(
+        response = client.chat.completions.create(
             model=model_name,
             messages=[{"role": "user", "content": prompt}],
-            options={"num_ctx": NUM_CTX},
-            keep_alive=MODEL_KEEP_ALIVE,
+            extra_headers={
+                "HTTP-Referer": "https://github.com/Zendellll/236207-Project", 
+                "X-Title": "Reasoning Poisoning Project", 
+            },
+            temperature=0.0
         )
+        
         duration = time.time() - start_time
-
-        response_text = response["message"]["content"]
+        response_text = response.choices[0].message.content
         print(f"      [DONE] in {duration:.2f}s", flush=True)
         return response_text, duration
 
     except Exception as e:
-        duration = time.time() - start_time
-        print(f"      [EXCEPTION] {e}", flush=True)
-        return f"ERROR: {e}", duration
-
+        print(f"      [OPENROUTER ERROR] {str(e)}", flush=True)
+        return f"ERROR: {str(e)}", time.time() - start_time
 
 def save_results_csv(results: List[ExperimentResult], output_file: str) -> None:
     """Save results to CSV file."""
@@ -389,7 +373,6 @@ def save_results_csv(results: List[ExperimentResult], output_file: str) -> None:
 
 
 # --- MAIN ---
-
 def run_experiment(
     data_source: str = DEFAULT_DATA_SOURCE,
     queries: Optional[List[Tuple[int, str]]] = None,
@@ -399,24 +382,7 @@ def run_experiment(
     phase_name: str = "default",
     reset_db: bool = True,
 ) -> List[ExperimentResult]:
-    """Run complete experiment on a data source folder.
-
-    Loop order: MODEL (outer) -> QUERY (inner).
-
-    Args:
-        data_source: Path to folder with .txt files.
-        queries: List of (query_id, query_text) tuples. Takes priority over
-                 queries_file. query_id is preserved in the output CSV.
-        queries_file: Path to queries file (used if queries is None;
-                      auto-assigns sequential IDs starting at 1).
-        output_file: Path for output CSV.
-        db_path: Path for ChromaDB database.
-        phase_name: Name for this phase (used in CSV).
-        reset_db: Whether to reset DB before building.
-
-    Returns:
-        List of ExperimentResult objects.
-    """
+    """Run complete experiment on a data source folder."""
     print("\n" + "=" * 70, flush=True)
     print(f"EXPERIMENT RUNNER - Phase: {phase_name}", flush=True)
     print(f"Data source: {data_source}", flush=True)
@@ -436,7 +402,7 @@ def run_experiment(
     query_contexts: List[Tuple[str, List[str]]] = []
 
     if CONTEXT_MODE == "attack_plus_random_clean":
-        print(f"\n[CONTEXT] Pre-loading sources for {len(queries)} queries (mode=attack_plus_random_clean)...", flush=True)
+        print(f"\n[CONTEXT] Pre-loading sources (mode=attack_plus_random_clean)...", flush=True)
         for q_idx, (query_id, query_text) in enumerate(queries):
             context_str, unique_sources = retrieve_attack_plus_random_clean_context(
                 data_source=data_source,
@@ -445,20 +411,16 @@ def run_experiment(
                 phase_name=phase_name,
             )
             query_contexts.append((context_str, unique_sources))
-            print(f"   -> Query {q_idx + 1}/{len(queries)} context ready", flush=True)
         print("[CONTEXT] All contexts ready.", flush=True)
     else:
         client = reset_database(db_path)
         collection = build_database(client, data_source)
-
-        print(f"\n[RAG] Pre-retrieving context for {len(queries)} queries...", flush=True)
+        print(f"\n[RAG] Pre-retrieving context...", flush=True)
         for q_idx, (_, query_text) in enumerate(queries):
             context_str, unique_sources = retrieve_context(collection, query_text)
             query_contexts.append((context_str, unique_sources))
-            print(f"   -> Query {q_idx + 1}/{len(queries)} context retrieved", flush=True)
         print("[RAG] All contexts ready.", flush=True)
 
-    # Check if prompt fits in context window (truncation = model may miss content)
     if query_contexts:
         first_prompt = build_prompt(queries[0][1], query_contexts[0][0])
         check_context_window(first_prompt, phase_name)
@@ -467,25 +429,24 @@ def run_experiment(
 
     for m_idx, model_name in enumerate(MODELS_TO_TEST):
         model_type = get_model_type(model_name)
-
         print(f"\n{'=' * 70}", flush=True)
-        print(f"MODEL [{m_idx + 1}/{len(MODELS_TO_TEST)}]: {model_name} ({model_type})", flush=True)
+        print(f"MODEL [{m_idx + 1}/{len(MODELS_TO_TEST)}]: {model_name}", flush=True)
         print(f"{'=' * 70}", flush=True)
 
         warm_up_model(model_name)
-
         model_start = time.time()
 
-        for q_idx, (query_id, query_text) in enumerate(queries):
+        # Parallel Worker Function
+        def process_query(q_idx):
+            query_id, query_text = queries[q_idx]
             context_str, unique_sources = query_contexts[q_idx]
             prompt = build_prompt(query_text, context_str)
 
-            print(f"\n   Query [{q_idx + 1}/{len(queries)}] (id={query_id}): {query_text[:50]}...", flush=True)
-
+            print(f"   [START] Query {q_idx + 1} (id={query_id})", flush=True)
             response, duration = run_model(model_name, prompt)
             chain_of_thought, final_answer = parse_response(response)
 
-            result = ExperimentResult(
+            return ExperimentResult(
                 phase=phase_name,
                 query_id=query_id,
                 query=query_text,
@@ -498,18 +459,22 @@ def run_experiment(
                 sources_used=", ".join(unique_sources),
                 timestamp=time.strftime("%Y-%m-%d %H:%M:%S")
             )
-            results.append(result)
+
+        # Using 5 workers to stay within Groq TPM limits
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            model_results = list(executor.map(process_query, range(len(queries))))
+            results.extend(model_results)
 
         model_duration = time.time() - model_start
-        print(f"\n[MODEL DONE] {model_name}: {len(queries)} queries in {model_duration:.1f}s "
-              f"(avg {model_duration/len(queries):.1f}s/query)", flush=True)
-
+        print(f"\n[MODEL DONE] {model_name}: {len(queries)} queries in {model_duration:.1f}s", flush=True)
         unload_model(model_name)
 
-    save_results_csv(results, output_file)
-    print(f"\n[COMPLETE] Phase '{phase_name}' finished with {len(results)} results.", flush=True)
-    return results
+    safe_model_name = MODELS_TO_TEST[0].replace("/", "_").replace("-", "_")
+    base_name, ext = os.path.splitext(output_file)
+    model_specific_output = f"{base_name}_{safe_model_name}{ext}"
 
+    save_results_csv(results, model_specific_output)
+    return results
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run reasoning poisoning experiment (main).")
